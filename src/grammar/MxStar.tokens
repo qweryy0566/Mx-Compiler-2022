@@ -1,4 +1,17 @@
 T__0=1
-NewLine=2
-DecimalInt=3
-'+'=1
+LeftBrace=2
+RightBrace=3
+Plus=4
+Minus=5
+Equal=6
+Semi=7
+DecimalInt=8
+Identifier=9
+WhiteSpace=10
+'int main()'=1
+'{'=2
+'}'=3
+'+'=4
+'-'=5
+'='=6
+';'=7

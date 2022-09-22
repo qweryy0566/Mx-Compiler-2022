@@ -1,4 +1,4 @@
-// Generated from MxStar.g4 by ANTLR 4.9.3
+// Generated from /home/qweryy/Mx-Compiler/src/grammar/MxStar.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -17,13 +17,43 @@ public interface MxStarListener extends ParseTreeListener {
 	 */
 	void exitProgram(MxStarParser.ProgramContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxStarParser#expr}.
+	 * Enter a parse tree produced by {@link MxStarParser#suite}.
 	 * @param ctx the parse tree
 	 */
-	void enterExpr(MxStarParser.ExprContext ctx);
+	void enterSuite(MxStarParser.SuiteContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MxStarParser#expr}.
+	 * Exit a parse tree produced by {@link MxStarParser#suite}.
 	 * @param ctx the parse tree
 	 */
-	void exitExpr(MxStarParser.ExprContext ctx);
+	void exitSuite(MxStarParser.SuiteContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MxStarParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatement(MxStarParser.StatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxStarParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatement(MxStarParser.StatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MxStarParser#plus_minus_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterPlus_minus_expr(MxStarParser.Plus_minus_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxStarParser#plus_minus_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitPlus_minus_expr(MxStarParser.Plus_minus_exprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MxStarParser#plus_minus_op}.
+	 * @param ctx the parse tree
+	 */
+	void enterPlus_minus_op(MxStarParser.Plus_minus_opContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxStarParser#plus_minus_op}.
+	 * @param ctx the parse tree
+	 */
+	void exitPlus_minus_op(MxStarParser.Plus_minus_opContext ctx);
 }

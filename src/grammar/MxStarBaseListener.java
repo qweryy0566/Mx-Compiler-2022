@@ -1,4 +1,4 @@
-// Generated from MxStar.g4 by ANTLR 4.9.3
+// Generated from /home/qweryy/Mx-Compiler/src/grammar/MxStar.g4 by ANTLR 4.9.2
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -27,13 +27,49 @@ public class MxStarBaseListener implements MxStarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExpr(MxStarParser.ExprContext ctx) { }
+	@Override public void enterSuite(MxStarParser.SuiteContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExpr(MxStarParser.ExprContext ctx) { }
+	@Override public void exitSuite(MxStarParser.SuiteContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStatement(MxStarParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatement(MxStarParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPlus_minus_expr(MxStarParser.Plus_minus_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPlus_minus_expr(MxStarParser.Plus_minus_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPlus_minus_op(MxStarParser.Plus_minus_opContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPlus_minus_op(MxStarParser.Plus_minus_opContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
