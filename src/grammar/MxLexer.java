@@ -1,4 +1,4 @@
-// Generated from /home/qweryy/Mx-Compiler/src/grammar/MxStar.g4 by ANTLR 4.9.2
+// Generated from /home/qweryy/Mx-Compiler/src/grammar/MxLexer.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class MxStarLexer extends Lexer {
+public class MxLexer extends Lexer {
 	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
@@ -105,13 +105,13 @@ public class MxStarLexer extends Lexer {
 	}
 
 
-	public MxStarLexer(CharStream input) {
+	public MxLexer(CharStream input) {
 		super(input);
 		_interp = new LexerATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 
 	@Override
-	public String getGrammarFileName() { return "MxStar.g4"; }
+	public String getGrammarFileName() { return "MxLexer.g4"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }

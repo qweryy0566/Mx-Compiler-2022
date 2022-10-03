@@ -1,22 +1,78 @@
 grammar MxStar;
+import MxLexer;
 
-program: 'int main()' suite EOF;
-suite: '{' statement* '}';
+program: (funcDef | classDef | varDef)* EOF;
 
-statement: Identifier '=' plus_minus_expr ';';
-plus_minus_expr
-  : DecimalInt
-  | plus_minus_expr plus_minus_op DecimalInt;
-plus_minus_op: '+' | '-';
+funcDef
+  : returnType Identifier '(' parameterList? ')' '{' suite '}';
+returnType
+  : type | Void;
+parameterList
+  : (type Identifier) (Comma type Identifier)*;
 
-LeftBrace: '{';
-RightBrace: '}';
+suite
+  : (varDef | statement)*;
 
-Plus: '+';
-Minus: '-';
-Equal: '=';
-Semi: ';';
+classDef
+  : Class Identifier '{' (varDef | classBuild | funcDef)* '}' Semi;
+classBuild
+  : Identifier '(' ')' '{' suite '}';
 
-DecimalInt: [1-9][0-9]* | '0';
-Identifier: [A-Za-z][0-9A-Za-z_]*;
-WhiteSpace: [ \t\r\n]+ -> skip;
+varDef
+  : type varDefUnit (Comma varDefUnit)* Semi;
+varDefUnit
+  : Identifier (Assign expr)?;
+type: type '[' ']' | typeName;
+typeName: baseType | Identifier;
+baseType: Int | Bool | String;
+
+statement
+  : '{' suite '}'
+  | ifStmt | whileStmt | forStmt
+  | breakStmt | continueStmt | returnStmt
+  | exprStmt;
+
+ifStmt
+  : If '(' expr ')' statement (Else statement)?;
+whileStmt
+  : While '(' expr ')' statement;
+forStmt
+  : For '(' forInit? expr? Semi expr? ')' statement;
+forInit
+  : varDef | exprStmt;
+
+breakStmt: Break Semi;
+continueStmt: Continue Semi;
+returnStmt: Return expr? Semi;
+
+exprStmt: expr? Semi;
+expr
+  : '(' expr ')'
+  | expr '[' expr ']' 
+  | expr Member Identifier
+  | expr '(' exprList? ')'
+  | preAddSub expr
+  | <assoc=right> expr postAddSub
+  | <assoc=right> opLevel2 expr
+  | expr opLevel3 expr
+  | expr opLevel4 expr
+  | expr opLevel5 expr
+  | expr opLevel6 expr
+  | expr opLevel7 expr
+  | expr BAnd expr
+  | expr BXor expr
+  | expr BOr expr
+  | expr LAnd expr
+  | expr LOr expr
+  | <assoc=right> expr Assign expr
+  ;
+
+exprList: expr (Comma expr)*;
+preAddSub: SelfAdd | SelfSub;
+postAddSub: SelfAdd | SelfSub;
+opLevel2: LNot | BNot | Add | Sub;
+opLevel3: Mul | Div | Mod;
+opLevel4: Add | Sub;
+opLevel5: LShift | RShift;
+opLevel6: LThan | GThan | LEqual | GEqual;
+opLevel7: EEqual | NEqual;
