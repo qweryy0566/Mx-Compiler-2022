@@ -9,6 +9,7 @@ public class Compiler {
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     MxParser parser = new MxParser(tokens);
     ParseTree tree = parser.program();
-    System.out.println(tree.toStringTree(parser));
+    EvalVisitor visitor = new EvalVisitor();
+    visitor.visit(tree);
   }
 }
