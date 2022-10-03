@@ -1,5 +1,7 @@
-grammar MxStar;
-import MxLexer;
+parser grammar MxParser;
+options {
+	tokenVocab = MxLexer;
+}
 
 program: (funcDef | classDef | varDef)* EOF;
 
@@ -22,7 +24,7 @@ varDef
   : type varDefUnit (Comma varDefUnit)* Semi;
 varDefUnit
   : Identifier (Assign expr)?;
-type: type '[' ']' | typeName;
+type: typeName ('[' ']')*;
 typeName: baseType | Identifier;
 baseType: Int | Bool | String;
 
@@ -52,6 +54,9 @@ expr
   | expr Member Identifier
   | expr '(' exprList? ')'
   | preAddSub expr
+  | lambdaExpr
+  // Lambda Expression
+  | New typeName ('[' expr? ']')* 
   | <assoc=right> expr postAddSub
   | <assoc=right> opLevel2 expr
   | expr opLevel3 expr
@@ -65,6 +70,15 @@ expr
   | expr LAnd expr
   | expr LOr expr
   | <assoc=right> expr Assign expr
+  | atomExpr
+  ;
+
+lambdaExpr
+  : '[' BAnd ']' '(' parameterList? ')' Arrow '{' suite '}' '(' exprList? ')';
+atomExpr
+  : IntConst | StringConst | True | False | Null | This
+  | Identifier
+  | This
   ;
 
 exprList: expr (Comma expr)*;

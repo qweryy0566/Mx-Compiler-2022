@@ -43,13 +43,7 @@ LBrace: '{';
 RBrace: '}';
 
 Quote: '"';
-
-IntConst: [1-9][0-9]* | '0';
-
-PChar: [ -~] | '\\n' | '\\\\' | '\\"';
-StringConst: Quote (PChar)* Quote;
-
-Comment: '//' ~[\r\n]* -> skip;
+Arrow: '->';
 
 Void: 'void';
 Bool: 'bool';
@@ -58,7 +52,7 @@ String: 'string';
 New: 'new';
 Class: 'class';
 Null: 'null';
-Ture: 'true';
+True: 'true';
 False: 'false';
 This: 'this';
 If: 'if';
@@ -71,4 +65,12 @@ Return: 'return';
 
 Identifier: [A-Za-z][0-9A-Za-z_]*;
 
+IntConst: [1-9][0-9]* | '0';
+StringConst: Quote (PChar)* Quote;
+
 WhiteSpace: [ \t\r\n]+ -> skip;
+
+CommentLine: '//' ~[\r\n]* -> skip;
+CommentPara: '/*' .*? '*/' -> skip;
+
+PChar: [ -~] | '\\n' | '\\\\' | '\\"';
