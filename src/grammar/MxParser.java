@@ -1,4 +1,5 @@
-// Generated from /home/qweryy/Mx-Compiler/src/grammar/MxParser.g4 by ANTLR 4.9.2
+// Generated from /home/qweryy/Mx-Compiler/src/grammar/MxParser.g4 by ANTLR 4.9.3
+ package grammar; 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class MxParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.9.3", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -23,7 +24,7 @@ public class MxParser extends Parser {
 		LBrace=31, RBrace=32, Quote=33, Arrow=34, Void=35, Bool=36, Int=37, String=38, 
 		New=39, Class=40, Null=41, True=42, False=43, This=44, If=45, Else=46, 
 		For=47, While=48, Break=49, Continue=50, Return=51, Identifier=52, IntConst=53, 
-		StringConst=54, WhiteSpace=55, CommentLine=56, CommentPara=57, PChar=58;
+		StringConst=54, WhiteSpace=55, CommentLine=56, CommentPara=57;
 	public static final int
 		RULE_program = 0, RULE_funcDef = 1, RULE_returnType = 2, RULE_parameterList = 3, 
 		RULE_suite = 4, RULE_classDef = 5, RULE_classBuild = 6, RULE_varDef = 7, 
@@ -66,7 +67,7 @@ public class MxParser extends Parser {
 			"RBrace", "Quote", "Arrow", "Void", "Bool", "Int", "String", "New", "Class", 
 			"Null", "True", "False", "This", "If", "Else", "For", "While", "Break", 
 			"Continue", "Return", "Identifier", "IntConst", "StringConst", "WhiteSpace", 
-			"CommentLine", "CommentPara", "PChar"
+			"CommentLine", "CommentPara"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -2470,7 +2471,7 @@ public class MxParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3<\u0166\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3;\u0166\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+

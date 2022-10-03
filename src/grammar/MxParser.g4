@@ -3,6 +3,8 @@ options {
 	tokenVocab = MxLexer;
 }
 
+@header { package grammar; }
+
 program: (funcDef | classDef | varDef)* EOF;
 
 funcDef
@@ -55,7 +57,6 @@ expr
   | expr '(' exprList? ')'
   | preAddSub expr
   | lambdaExpr
-  // Lambda Expression
   | New typeName ('[' expr? ']')* 
   | <assoc=right> expr postAddSub
   | <assoc=right> opLevel2 expr

@@ -1,18 +1,14 @@
-import java.util.Scanner;
+import grammar.*;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
 
 public class Compiler {
-  public static int add(int a, int b) {
-    int c = 1;
-    int d = c = 3;
-    return a + b;
-  }
-  public static int main(String[] args) {
-    // int n, e;
-    // Scanner scan = new Scanner(System.in);
-    // n = scan.nextInt();
-    // e = scan.nextInt();
-    // scan.close();
-    // System.out.println(n + e);
-    return 1;
+  public static void main(String[] args) throws Exception {
+    CharStream input = CharStreams.fromStream(System.in);
+    MxLexer lexer = new MxLexer(input);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    MxParser parser = new MxParser(tokens);
+    ParseTree tree = parser.program();
+    System.out.println(tree.toStringTree(parser));
   }
 }

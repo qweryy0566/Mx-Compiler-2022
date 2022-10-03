@@ -1,5 +1,7 @@
 lexer grammar MxLexer;
 
+@header { package grammar; }
+
 Add: '+';
 Sub: '-';
 Mul: '*';
@@ -67,10 +69,9 @@ Identifier: [A-Za-z][0-9A-Za-z_]*;
 
 IntConst: [1-9][0-9]* | '0';
 StringConst: Quote (PChar)* Quote;
+fragment PChar: [ -~] | '\\n' | '\\\\' | '\\"';
 
 WhiteSpace: [ \t\r\n]+ -> skip;
 
 CommentLine: '//' ~[\r\n]* -> skip;
 CommentPara: '/*' .*? '*/' -> skip;
-
-PChar: [ -~] | '\\n' | '\\\\' | '\\"';

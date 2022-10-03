@@ -55,7 +55,6 @@ StringConst=54
 WhiteSpace=55
 CommentLine=56
 CommentPara=57
-PChar=58
 '+'=1
 '-'=2
 '*'=3
