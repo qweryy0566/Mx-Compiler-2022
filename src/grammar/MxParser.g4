@@ -75,7 +75,7 @@ expr
   ;
 
 lambdaExpr
-  : '[' BAnd ']' '(' parameterList? ')' Arrow '{' suite '}' '(' exprList? ')';
+  : '[' BAnd? ']' '(' parameterList? ')' Arrow '{' suite '}' '(' exprList? ')';
 atomExpr
   : IntConst | StringConst | True | False | Null | This
   | Identifier
