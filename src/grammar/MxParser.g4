@@ -41,7 +41,7 @@ ifStmt
 whileStmt
   : While '(' expr ')' statement;
 forStmt
-  : For '(' forInit? expr? Semi expr? ')' statement;
+  : For '(' forInit expr? Semi expr? ')' statement;
 forInit
   : varDef | exprStmt;
 
@@ -57,7 +57,7 @@ expr
   | expr '(' exprList? ')'
   | preAddSub expr
   | lambdaExpr
-  | New typeName ('[' expr? ']')* 
+  | New typeName ('[' expr? ']')* ('(' expr ')')?
   | <assoc=right> expr postAddSub
   | <assoc=right> opLevel2 expr
   | expr opLevel3 expr
@@ -76,6 +76,7 @@ expr
 
 lambdaExpr
   : '[' BAnd? ']' '(' parameterList? ')' Arrow '{' suite '}' '(' exprList? ')';
+// may have problem 
 atomExpr
   : IntConst | StringConst | True | False | Null | This
   | Identifier
