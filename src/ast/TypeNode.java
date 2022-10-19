@@ -1,15 +1,21 @@
 package ast;
 
-public class TypeNode extends Node {
-  String type;
-  int dim;
+import utils.*;
 
-  TypeNode() {}
-  TypeNode(String type) {
-    this.type = type;
+public class TypeNode extends Node {
+  public String typename;
+  public int dim = 0;
+
+  public TypeNode(Position pos) {
+    super(pos);
   }
-  TypeNode(String type, int dim) {
-    this.type = type;
+  public TypeNode(Position pos, String name) {
+    super(pos);
+    this.typename = name;
+  }
+  public TypeNode(Position pos, String name, int dim) {
+    super(pos);
+    this.typename = name;
     this.dim = dim;
   }
 

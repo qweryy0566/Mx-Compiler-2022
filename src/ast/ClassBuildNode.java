@@ -1,20 +1,19 @@
 package ast;
 
 import ast.stmt.*;
+import ast.expr.*;
 import utils.*;
-import java.util.ArrayList;
 
-public class FuncDefNode extends Node {
-  public TypeNode returnType;
+public class ClassBuildNode extends Node {
   public String name;
-  public ParameterListNode params;
   public SuiteNode suite;
 
-  public FuncDefNode(Position pos, String name) {
+  public ClassBuildNode(Position pos, String name, SuiteNode suite) {
     super(pos);
     this.name = name;
+    this.suite = suite;
   }
-  
+
   @Override
   public void accept(ASTVisitor visitor) {
     visitor.visit(this);

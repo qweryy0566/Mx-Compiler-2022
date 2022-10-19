@@ -1,9 +1,11 @@
 package ast.stmt;
 
 import ast.*;
+import utils.*;
 
 public class ContinueNode extends StmtNode {
-  public ContinueNode() {
+  public ContinueNode(Position pos) {
+    super(pos);
   }
 
   @Override

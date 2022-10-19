@@ -1,17 +1,17 @@
 package ast;
 
-import ast.expr.*;
-import ast.stmt.*;
-import java.util.ArrayList;
 import utils.*;
+import ast.stmt.*;
+import ast.expr.*;
+import java.util.ArrayList;
 
-public class VarDefNode extends StmtNode {
+public class ParameterListNode extends Node {
   public ArrayList<VarDefUnitNode> units;
 
-  public VarDefNode(Position pos) {
+  public ParameterListNode(Position pos) {
     super(pos);
   }
-  
+
   @Override
   public void accept(ASTVisitor visitor) {
     visitor.visit(this);

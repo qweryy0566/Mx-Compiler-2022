@@ -2,12 +2,14 @@ package ast.stmt;
 
 import ast.*;
 import ast.expr.*;
+import utils.*;
 
 public class IfStmtNode extends StmtNode {
   ExprNode cond;
   StmtNode thenStmt, elseStmt;
 
-  public IfStmtNode(ExprNode cond, StmtNode thenStmt, StmtNode elseStmt) {
+  public IfStmtNode(Position pos, ExprNode cond, StmtNode thenStmt, StmtNode elseStmt) {
+    super(pos);
     this.cond = cond;
     this.thenStmt = thenStmt;
     this.elseStmt = elseStmt;

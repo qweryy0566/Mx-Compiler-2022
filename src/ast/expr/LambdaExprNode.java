@@ -1,20 +1,19 @@
-package ast;
+package ast.expr;
 
+import ast.*;
 import ast.stmt.*;
 import utils.*;
 import java.util.ArrayList;
 
-public class FuncDefNode extends Node {
-  public TypeNode returnType;
-  public String name;
+public class LambdaExprNode extends ExprNode {
+  public boolean isCapture;
   public ParameterListNode params;
   public SuiteNode suite;
+  public ExprListNode args;
 
-  public FuncDefNode(Position pos, String name) {
+  public LambdaExprNode(Position pos) {
     super(pos);
-    this.name = name;
   }
-  
   @Override
   public void accept(ASTVisitor visitor) {
     visitor.visit(this);

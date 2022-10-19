@@ -14,8 +14,7 @@ returnType
 parameterList
   : (type Identifier) (Comma type Identifier)*;
 
-suite
-  : (varDef | statement)*;
+suite: statement*;
 
 classDef
   : Class Identifier '{' (varDef | classBuild | funcDef)* '}' Semi;
@@ -32,6 +31,7 @@ baseType: Int | Bool | String;
 
 statement
   : '{' suite '}'
+  | varDef
   | ifStmt | whileStmt | forStmt
   | breakStmt | continueStmt | returnStmt
   | exprStmt;
@@ -51,44 +51,36 @@ returnStmt: Return expr? Semi;
 
 exprStmt: expr? Semi;
 expr
-  : '(' expr ')'
-  | expr '[' expr ']' 
-  | expr Member Identifier
-  | expr '(' exprList? ')'
-  | preAddSub expr
-  | lambdaExpr
-  | New typeName ('[' expr? ']')* ('(' expr ')')?
-  | <assoc=right> expr postAddSub
-  | <assoc=right> opLevel2 expr
-  | expr opLevel3 expr
-  | expr opLevel4 expr
-  | expr opLevel5 expr
-  | expr opLevel6 expr
-  | expr opLevel7 expr
-  | expr BAnd expr
-  | expr BXor expr
-  | expr BOr expr
-  | expr LAnd expr
-  | expr LOr expr
-  | <assoc=right> expr Assign expr
-  | atomExpr
-  ;
+  : '(' expr ')'                                      #parenExpr
+  | '[' BAnd? ']' '(' parameterList? ')' Arrow '{' suite '}' '(' exprList? ')'
+                                                      #lambdaExpr
+  | New typeName ('[' expr ']')+ ('[' ']')*           #newArrayExpr
+  | New typeName ('(' ')')?                           #newClassExpr
+  | expr op=Member Identifier                         #memberExpr
+  | expr '[' expr ']'                                 #arrayExpr 
+  | expr '(' exprList? ')'                            #funcExpr
+  | op=(SelfAdd | SelfSub) expr                       #preAddExpr
+  | <assoc=right> expr op=(SelfAdd | SelfSub)         #unaryExpr
+  | <assoc=right> op=(LNot | BNot | Add | Sub) expr   #unaryExpr
+  | expr op=(Mul | Div | Mod) expr                    #binaryExpr 
+  | expr op=(Add | Sub) expr                          #binaryExpr                                              
+  | expr op=(LShift | RShift) expr                    #binaryExpr 
+  | expr op=(LThan | GThan | LEqual | GEqual) expr    #binaryExpr
+  | expr op=(EEqual | NEqual) expr                    #binaryExpr
+  | expr op=BAnd expr                                 #binaryExpr
+  | expr op=BXor expr                                 #binaryExpr
+  | expr op=BOr expr                                  #binaryExpr
+  | expr op=LAnd expr                                 #binaryExpr
+  | expr op=LOr expr                                  #binaryExpr
+  | <assoc=right> expr op=Assign expr                 #assignExpr  
+  | primary                                           #atomExpr
+  ;  
 
-lambdaExpr
-  : '[' BAnd? ']' '(' parameterList? ')' Arrow '{' suite '}' '(' exprList? ')';
 // may have problem 
-atomExpr
-  : IntConst | StringConst | True | False | Null | This
+primary
+  : IntConst | StringConst | True | False | Null
   | Identifier
   | This
   ;
 
 exprList: expr (Comma expr)*;
-preAddSub: SelfAdd | SelfSub;
-postAddSub: SelfAdd | SelfSub;
-opLevel2: LNot | BNot | Add | Sub;
-opLevel3: Mul | Div | Mod;
-opLevel4: Add | Sub;
-opLevel5: LShift | RShift;
-opLevel6: LThan | GThan | LEqual | GEqual;
-opLevel7: EEqual | NEqual;

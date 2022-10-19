@@ -1,9 +1,11 @@
 package ast.stmt;
 
 import ast.*;
+import utils.*;
 
 public class BreakNode extends StmtNode {
-  public BreakNode() {
+  public BreakNode(Position pos) {
+    super(pos);
   }
 
   @Override

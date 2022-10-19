@@ -2,13 +2,15 @@ package ast.stmt;
 
 import ast.*;
 import ast.expr.*;
+import utils.*;
 
 public class ForStmtNode extends StmtNode {
-  ExprNode init, cond, step;
-  StmtNode loop;
+  public VarDefNode varDef;
+  public ExprNode init, cond, step;
+  public StmtNode loop;
 
-  public ForStmtNode(ExprNode init, ExprNode cond, ExprNode step, StmtNode loop) {
-    this.init = init;
+  public ForStmtNode(Position pos, ExprNode cond, ExprNode step, StmtNode loop) {
+    super(pos);
     this.cond = cond;
     this.step = step;
     this.loop = loop;
