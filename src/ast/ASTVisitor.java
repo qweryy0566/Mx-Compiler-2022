@@ -4,36 +4,34 @@ import ast.expr.*;
 import ast.stmt.*;
 
 public interface ASTVisitor {
-  void visit(Node node);
-  void visit(ProgramNode node);
+  public void visit(ProgramNode node);
 
-  void visit(FuncDefNode node);
-  void visit(ClassDefNode node);
-  void visit(VarDefNode node);
-  void visit(VarDefUnitNode node);
-  void visit(ParameterListNode node);
-  void visit(TypeNode node);
-  void visit(ClassBuildNode node);
+  public void visit(FuncDefNode node);
+  public void visit(ClassDefNode node);
+  public void visit(VarDefNode node);
+  public void visit(VarDefUnitNode node);
+  public void visit(ParameterListNode node);
+  public void visit(TypeNode node);
+  public void visit(ClassBuildNode node);
 
+  public void visit(StmtNode node);
+  public void visit(SuiteNode node);
+  public void visit(IfStmtNode node);
+  public void visit(WhileStmtNode node);
+  public void visit(ForStmtNode node);
+  public void visit(ContinueNode node);
+  public void visit(BreakNode node);
+  public void visit(ReturnStmtNode node);
+  public void visit(ExprStmtNode node);
 
-  void visit(StmtNode node);
-  void visit(SuiteNode node);
-  void visit(IfStmtNode node);
-  void visit(WhileStmtNode node);
-  void visit(ForStmtNode node);
-  void visit(ContinueNode node);
-  void visit(BreakNode node);
-  void visit(ReturnStmtNode node);
-  void visit(ExprStmtNode node);
-
-  void visit(ExprNode node);
-  void visit(BinaryExprNode node);
-  void visit(UnaryExprNode node);
-  void visit(AssignExprNode node);
-  void visit(FuncExprNode node);
-  void visit(ArrayExprNode node);
-  void visit(MemberExprNode node);  
-  void visit(NewExprNode node);
-  void visit(LambdaExprNode node);
-  void visit(ExprListNode node);
+  public void visit(ExprNode node);
+  public void visit(BinaryExprNode node);
+  public void visit(UnaryExprNode node);
+  public void visit(AssignExprNode node);
+  public void visit(FuncExprNode node);
+  public void visit(ArrayExprNode node);
+  public void visit(MemberExprNode node);  
+  public void visit(NewExprNode node);
+  public void visit(LambdaExprNode node);
+  public void visit(ExprListNode node);
 }

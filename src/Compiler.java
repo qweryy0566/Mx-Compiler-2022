@@ -1,4 +1,5 @@
 import grammar.*;
+import ast.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -11,7 +12,9 @@ public class Compiler {
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     MxParser parser = new MxParser(tokens);
     ParseTree tree = parser.program();
+    ASTBuilder astBuilder = new ASTBuilder();
+    ProgramNode ast = (ProgramNode) astBuilder.visit(tree);
     SemanticChecker checker = new SemanticChecker();
-    checker.visit(tree);
+    checker.visit(ast);
   }
 }

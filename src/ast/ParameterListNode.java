@@ -6,7 +6,7 @@ import ast.expr.*;
 import java.util.ArrayList;
 
 public class ParameterListNode extends Node {
-  public ArrayList<VarDefUnitNode> units;
+  public ArrayList<VarDefUnitNode> units = new ArrayList<VarDefUnitNode>();
 
   public ParameterListNode(Position pos) {
     super(pos);

@@ -54,8 +54,8 @@ expr
   : '(' expr ')'                                      #parenExpr
   | '[' BAnd? ']' '(' parameterList? ')' Arrow '{' suite '}' '(' exprList? ')'
                                                       #lambdaExpr
-  | New typeName ('[' expr ']')+ ('[' ']')*           #newArrayExpr
-  | New typeName ('(' ')')?                           #newClassExpr
+  | New typeName (newArrayUnit)*                      #newExpr
+  // | New typeName ('(' ')')?                           #newClassExpr
   | expr op=Member Identifier                         #memberExpr
   | expr '[' expr ']'                                 #arrayExpr 
   | expr '(' exprList? ')'                            #funcExpr
@@ -76,6 +76,7 @@ expr
   | primary                                           #atomExpr
   ;  
 
+newArrayUnit: '[' expr? ']';
 // may have problem 
 primary
   : IntConst | StringConst | True | False | Null

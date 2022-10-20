@@ -29,7 +29,7 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReturnType(MxParser.ReturnTypeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#params}.
+	 * Visit a parse tree produced by {@link MxParser#parameterList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
@@ -137,6 +137,13 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExprStmt(MxParser.ExprStmtContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code newExpr}
+	 * labeled alternative in {@link MxParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNewExpr(MxParser.NewExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code unaryExpr}
 	 * labeled alternative in {@link MxParser#expr}.
 	 * @param ctx the parse tree
@@ -164,13 +171,6 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLambdaExpr(MxParser.LambdaExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code newClassExpr}
-	 * labeled alternative in {@link MxParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNewClassExpr(MxParser.NewClassExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code memberExpr}
 	 * labeled alternative in {@link MxParser#expr}.
@@ -207,13 +207,6 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParenExpr(MxParser.ParenExprContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code newArrayExpr}
-	 * labeled alternative in {@link MxParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNewArrayExpr(MxParser.NewArrayExprContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code preAddExpr}
 	 * labeled alternative in {@link MxParser#expr}.
 	 * @param ctx the parse tree
@@ -221,13 +214,19 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPreAddExpr(MxParser.PreAddExprContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MxParser#newArrayUnit}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNewArrayUnit(MxParser.NewArrayUnitContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MxParser#primary}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitPrimary(MxParser.PrimaryContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#args}.
+	 * Visit a parse tree produced by {@link MxParser#exprList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */

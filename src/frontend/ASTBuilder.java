@@ -180,16 +180,25 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
   }
 
   @Override
-  public Node visitNewArrayExpr(MxParser.NewArrayExprContext ctx) {
+  public Node visitNewExpr(MxParser.NewExprContext ctx) {
     NewExprNode newExpr = new NewExprNode(new Position(ctx), ctx.typeName().getText());
-    newExpr.dim = ctx.LBracket().size();
-    ctx.expr().forEach(expr -> newExpr.sizeList.add((ExprNode) visit(expr)));
+    newExpr.dim = ctx.newArrayUnit().size();
+    boolean isEmpty = false;
+    for (var unit : ctx.newArrayUnit()) {
+      if (unit.expr() == null)
+        isEmpty = true;
+      else if (isEmpty)
+        throw new BaseError(new Position(ctx), "Array dimension cannot be empty");
+      else
+        newExpr.sizeList.add((ExprNode) visit(unit.expr()));
+      
+    }
     return newExpr;
   }
 
   @Override
-  public Node visitNewClassExpr(MxParser.NewClassExprContext ctx) {
-    return new NewExprNode(new Position(ctx), ctx.typeName().getText());
+  public Node visitNewArrayUnit(MxParser.NewArrayUnitContext ctx) {
+    return visitChildren(ctx); // no need to change
   }
 
   @Override

@@ -3,7 +3,8 @@ package ast;
 import utils.*;
 
 public class TypeNode extends Node {
-  public String typename;
+  
+  public String typeName;
   public int dim = 0;
 
   public TypeNode(Position pos) {
@@ -11,11 +12,11 @@ public class TypeNode extends Node {
   }
   public TypeNode(Position pos, String name) {
     super(pos);
-    this.typename = name;
+    this.typeName = name;
   }
   public TypeNode(Position pos, String name, int dim) {
     super(pos);
-    this.typename = name;
+    this.typeName = name;
     this.dim = dim;
   }
 

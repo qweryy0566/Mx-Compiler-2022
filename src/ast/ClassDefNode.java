@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 public class ClassDefNode extends Node {
   public String name;
-  public ArrayList<VarDefNode> varDefList;
-  public ArrayList<FuncDefNode> funcDefList;
+  public ArrayList<VarDefNode> varDefList = new ArrayList<VarDefNode>();
+  public ArrayList<FuncDefNode> funcDefList = new ArrayList<FuncDefNode>();
   public ClassBuildNode classBuild;
 
   public ClassDefNode(Position pos, String name) {
