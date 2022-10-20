@@ -15,6 +15,11 @@ public class MemberExprNode extends ExprNode {
   }
 
   @Override
+  public boolean isLeftValue() {
+    return object.isLeftValue();
+  }
+
+  @Override
   public void accept(ASTVisitor visitor) {
     visitor.visit(this);
   }

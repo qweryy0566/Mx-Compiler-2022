@@ -176,7 +176,7 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
 
   @Override
   public Node visitExprStmt(MxParser.ExprStmtContext ctx) {
-    return visitChildren(ctx); // no need to change
+    return new ExprStmtNode(new Position(ctx), ctx.expr() == null ? null : (ExprNode) visit(ctx.expr()));
   }
 
   @Override
@@ -191,7 +191,7 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
         throw new BaseError(new Position(ctx), "Array dimension cannot be empty");
       else
         newExpr.sizeList.add((ExprNode) visit(unit.expr()));
-      
+
     }
     return newExpr;
   }

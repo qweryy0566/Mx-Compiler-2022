@@ -15,6 +15,11 @@ public class ArrayExprNode extends ExprNode {
   }
 
   @Override
+  public boolean isLeftValue() {
+    return varName.isLeftValue();
+  }
+
+  @Override
   public void accept(ASTVisitor visitor) {
     visitor.visit(this);
   }

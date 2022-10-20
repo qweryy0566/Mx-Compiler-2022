@@ -14,6 +14,12 @@ public class LambdaExprNode extends ExprNode {
   public LambdaExprNode(Position pos) {
     super(pos);
   }
+
+  @Override
+  public boolean isLeftValue() {
+    return false;
+  }
+
   @Override
   public void accept(ASTVisitor visitor) {
     visitor.visit(this);

@@ -3,21 +3,17 @@ package ast;
 import utils.*;
 
 public class TypeNode extends Node {
-  
-  public String typeName;
-  public int dim = 0;
-
+  public Type type;
   public TypeNode(Position pos) {
     super(pos);
   }
   public TypeNode(Position pos, String name) {
     super(pos);
-    this.typeName = name;
+    this.type = new Type(name);
   }
   public TypeNode(Position pos, String name, int dim) {
     super(pos);
-    this.typeName = name;
-    this.dim = dim;
+    this.type = new Type(name, dim);
   }
 
   @Override

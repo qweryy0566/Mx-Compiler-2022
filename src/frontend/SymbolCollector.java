@@ -62,12 +62,20 @@ public class SymbolCollector implements ASTVisitor {
   public void visit(ExprNode node) {
 
   }
+  public void visit(AtomExprNode node) {
 
+  }
+  public void visit(VarExprNode node) {
+    
+  }
   public void visit(BinaryExprNode node) {
 
   }
   public void visit(UnaryExprNode node) {
 
+  }
+  public void visit(PreAddExprNode node) {
+    
   }
   public void visit(AssignExprNode node) {
 

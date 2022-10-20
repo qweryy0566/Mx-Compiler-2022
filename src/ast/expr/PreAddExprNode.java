@@ -10,6 +10,11 @@ public class PreAddExprNode extends UnaryExprNode {
   }
 
   @Override
+  public boolean isLeftValue() {
+    return true;
+  }
+
+  @Override
   public void accept(ASTVisitor visitor) {
     visitor.visit(this);
   }
