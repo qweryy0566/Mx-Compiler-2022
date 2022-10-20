@@ -5,7 +5,7 @@ import ast.stmt.*;
 import utils.*;
 
 public class VarExprNode extends AtomExprNode {
-  public VarExprNode (Position pos, String str) {
+  public VarExprNode(Position pos, String str) {
     super(pos, str);
   }
 

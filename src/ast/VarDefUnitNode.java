@@ -9,11 +9,11 @@ public class VarDefUnitNode extends Node {
   public String varName;
   public ExprNode initVal;
 
-  // public VarDefUnitNode(Position pos, TypeNode type, String name) {
-  //   super(pos);
-  //   this.type = type;
-  //   this.varName = name;
-  // }
+  public VarDefUnitNode(Position pos, TypeNode type, String name) {
+    super(pos);
+    this.type = type;
+    this.varName = name;
+  }
   public VarDefUnitNode(Position pos, TypeNode type, String name, ExprNode initVal) {
     super(pos);
     this.type = type;

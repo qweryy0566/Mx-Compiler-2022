@@ -14,6 +14,13 @@ public class FuncDefNode extends Node {
     super(pos);
     this.name = name;
   }
+  public FuncDefNode(Position pos, Type type, String name, Type paramType) {
+    super(pos);
+    this.returnType = new TypeNode(pos, type.typeName, type.dim);
+    this.name = name;
+    if (paramType != null)
+      this.params = new ParameterListNode(pos, paramType);
+  }
   
   @Override
   public void accept(ASTVisitor visitor) {

@@ -1,4 +1,5 @@
 import grammar.*;
+import utils.GlobalScope;
 import ast.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
@@ -14,7 +15,8 @@ public class Compiler {
     ParseTree tree = parser.program();
     ASTBuilder astBuilder = new ASTBuilder();
     ProgramNode ast = (ProgramNode) astBuilder.visit(tree);
-    SemanticChecker checker = new SemanticChecker();
-    checker.visit(ast);
+    GlobalScope globalScope = new GlobalScope();
+    new SymbolCollector(globalScope).visit(ast);
+    new SemanticChecker(globalScope).visit(ast);
   }
 }

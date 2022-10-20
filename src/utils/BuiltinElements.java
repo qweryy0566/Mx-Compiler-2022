@@ -1,10 +1,20 @@
 package utils;
 
+import ast.FuncDefNode;
+
 public interface BuiltinElements {
-  Type VoidType = new Type(TypeCategory.VOID, "void");
-  Type IntType = new Type(TypeCategory.INT, "int");
-  Type BoolType = new Type(TypeCategory.BOOL, "bool");
-  Type StringType = new Type(TypeCategory.STRING, "string");  
-  Type NullType = new Type(TypeCategory.NULL, "null");
-  Type ThisType = new Type(TypeCategory.THIS, "this");
+  Type VoidType = new Type("void");
+  Type IntType = new Type("int");
+  Type BoolType = new Type("bool");
+  Type StringType = new Type("string");  
+  Type NullType = new Type("null");
+  Type ThisType = new Type("this");
+
+  FuncDefNode PrintFunc = new FuncDefNode(null, VoidType, "print", StringType);
+  FuncDefNode PrintlnFunc = new FuncDefNode(null, VoidType, "println", StringType);
+  FuncDefNode PrintIntFunc = new FuncDefNode(null, VoidType, "printInt", IntType);
+  FuncDefNode PrintlnIntFunc = new FuncDefNode(null, VoidType, "printlnInt", IntType);
+  FuncDefNode GetStringFunc = new FuncDefNode(null, StringType, "getString", null);
+  FuncDefNode GetIntFunc = new FuncDefNode(null, IntType, "getInt", null);
+  FuncDefNode ToStringFunc = new FuncDefNode(null, StringType, "toString", IntType);
 }

@@ -3,14 +3,21 @@ package frontend;
 import ast.*;
 import ast.expr.*;
 import ast.stmt.*;
+import utils.*;
 
 public class SymbolCollector implements ASTVisitor {
+  private GlobalScope globalScope;
+  public SymbolCollector(GlobalScope globalScope) {
+    this.globalScope = globalScope;
+  }
   public void visit(ProgramNode node) {
-
+    node.defList.forEach(def -> def.accept(this));
   }
 
   public void visit(FuncDefNode node) {
-
+    if (globalScope.getFuncDef(node.name) != null)
+      throw new BaseError(node.pos, "Function " + node.name + " is already defined");
+    globalScope.addFunc(node.name, node);
   }
   public void visit(ClassDefNode node) {
 

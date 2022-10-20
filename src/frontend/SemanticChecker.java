@@ -12,8 +12,8 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   private GlobalScope globalScope;
   private Scope currentScope;
 
-  public SemanticChecker() {
-    globalScope = new GlobalScope();
+  public SemanticChecker(GlobalScope globalScope) {
+    this.globalScope = globalScope;
     currentScope = globalScope;
   }
 
@@ -24,7 +24,8 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   }
 
   public void visit(FuncDefNode node) {
-    // TODO
+    // Already add the funcName to globalScope in SymbolCollector
+    // TODO : check returnType is valid
     node.suite.accept(this);
   }
 
@@ -41,7 +42,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     // TODO : check type is valid
     if (node.initVal != null)
       node.initVal.accept(this);
-    if (currentScope.hasVar(node.varName))
+    if (currentScope.hasVarInThisScope(node.varName))
       throw new BaseError(node.pos, "redefinition of variable " + node.varName);
     currentScope.addVar(node.varName, node.type.type);
   }
@@ -97,29 +98,30 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
 
   public void visit(AtomExprNode node) {
     if (node.str.equals("null")) {
-      node.type = new Type(NullType);
+      node.type = NullType;
     } else if (node.str.equals("true") || node.str.equals("false")) {
-      node.type = new Type(BoolType);
+      node.type = BoolType;
     } else if (node.str.matches("\".*\"")) {
-      node.type = new Type(StringType);
+      node.type = StringType;
     } else if (node.str.equals("this")) {
-      node.type = new Type(ThisType);
+      node.type = ThisType;
     } else {
-      node.type = new Type(IntType);
+      node.type = IntType;
     }
     // System.out.println(node.type.typeName);
   }
 
   public void visit(VarExprNode node) {
     node.type = currentScope.getVarType(node.str);
-    if (node.type == null)
-      throw new BaseError(node.pos, "Undefined variable " + node.str);
+    node.funcDef = globalScope.getFuncDef(node.str);
     // System.out.println(node.type.typeName);
   }
 
   public void visit(BinaryExprNode node) {
     node.lhs.accept(this);
     node.rhs.accept(this);
+    if (node.lhs.type == null || node.rhs.type == null)
+      throw new BaseError(node.pos, "invalid expression");
     if (!node.lhs.type.equals(node.rhs.type))
       throw new BaseError(node.pos, "Type mismatch");
     node.type = new Type(node.lhs.type);
@@ -154,6 +156,8 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
 
   public void visit(UnaryExprNode node) {
     node.expr.accept(this);
+    if (node.expr.type == null)
+      throw new BaseError(node.pos, "invalid expression");
     if (node.op.equals("++") || node.op.equals("--")) {
       if (!node.expr.isLeftValue() || !node.expr.type.equals(IntType))
         throw new BaseError(node.pos, "Left value required");
@@ -171,6 +175,8 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
 
   public void visit(PreAddExprNode node) {
     node.expr.accept(this);
+    if (node.expr.type == null)
+      throw new BaseError(node.pos, "invalid expression");
     if (!node.expr.isLeftValue() || !node.expr.type.equals(IntType))
       throw new BaseError(node.pos, "Left value required");
     node.type = new Type(IntType);
@@ -179,6 +185,8 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   public void visit(AssignExprNode node) {
     node.lhs.accept(this);
     node.rhs.accept(this);
+    if (node.lhs.type == null || node.rhs.type == null)
+      throw new BaseError(node.pos, "invalid expression");
     if (!node.lhs.type.equals(node.rhs.type))
       throw new BaseError(node.pos, "Type mismatch");
     node.type = new Type(node.lhs.type);
@@ -187,7 +195,25 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   }
 
   public void visit(FuncExprNode node) {
-
+    node.funcName.accept(this);
+    if (node.funcName.funcDef == null)
+      throw new BaseError(node.pos, "Function " + node.funcName.str + " is not defined");
+    var funcDef = node.funcName.funcDef;
+    if (node.args != null) {
+      node.args.accept(this);
+      if (funcDef.params == null || funcDef.params.units.size() != node.args.exprs.size())
+        throw new BaseError(node.pos, "Parameter number mismatch");
+      for (int i = 0; i < funcDef.params.units.size(); i++) {
+        var param = funcDef.params.units.get(i);
+        var arg = node.args.exprs.get(i);
+        if (!param.type.type.equals(arg.type))
+          throw new BaseError(node.pos, "Parameter type mismatch");
+      }
+    } else {
+      if (funcDef.params != null)
+        throw new BaseError(node.pos, "Parameter number mismatch");
+    }
+    node.type = new Type(funcDef.returnType.type);
   }
 
   public void visit(ArrayExprNode node) {

@@ -14,8 +14,8 @@ public class Scope {
   public void addVar(String name, Type type) {
     varMember.put(name, type);
   }
-  public boolean hasVar(String name) {
-    return varMember.containsKey(name) || (parentScope != null && parentScope.hasVar(name));
+  public boolean hasVarInThisScope(String name) {
+    return varMember.containsKey(name) || (parentScope != null && parentScope.hasVarInThisScope(name));
   }
   public Type getVarType(String name) {
     if (varMember.containsKey(name))

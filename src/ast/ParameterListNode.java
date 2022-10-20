@@ -11,6 +11,10 @@ public class ParameterListNode extends Node {
   public ParameterListNode(Position pos) {
     super(pos);
   }
+  public ParameterListNode(Position pos, Type type) {
+    super(pos);
+    units.add(new VarDefUnitNode(pos, new TypeNode(pos, type.typeName, type.dim), "in"));
+  }
 
   @Override
   public void accept(ASTVisitor visitor) {
