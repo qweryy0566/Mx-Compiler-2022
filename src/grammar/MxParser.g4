@@ -41,7 +41,7 @@ ifStmt
 whileStmt
   : While '(' expr ')' statement;
 forStmt
-  : For '(' forInit expr? Semi expr? ')' statement;
+  : For '(' forInit exprStmt expr? ')' statement;
 forInit
   : varDef | exprStmt;
 

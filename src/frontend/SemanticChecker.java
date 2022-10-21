@@ -11,6 +11,7 @@ import ast.expr.*;
 public class SemanticChecker implements ASTVisitor, BuiltinElements {
   private GlobalScope globalScope;
   private Scope currentScope;
+  private int level = 0;
 
   public SemanticChecker(GlobalScope globalScope) {
     this.globalScope = globalScope;
@@ -19,7 +20,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
 
   public void visit(ProgramNode node) {
     FuncDefNode mainFunc = globalScope.getFuncDef("main");
-    if (mainFunc == null || !mainFunc.returnType.type.equals(IntType))
+    if (mainFunc == null || !mainFunc.returnType.type.equals(IntType) || mainFunc.params != null)
       throw new BaseError(node.pos, "do not have correct main function");
     for (var def : node.defList) {
       def.accept(this);
@@ -32,7 +33,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     currentScope = new Scope(currentScope, node.returnType.type);
     if (node.params != null)
       node.params.accept(this);
-    node.suite.accept(this);
+    node.stmts.forEach(stmt -> stmt.accept(this));
     if ((!VoidType.equals(node.returnType.type) && !node.name.equals("main")) && !currentScope.isReturned)
       throw new BaseError(node.pos, "Function " + node.name + " should have return statement");
     currentScope = currentScope.parentScope;
@@ -42,10 +43,12 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     // Already add the className to globalScope in SymbolCollector
     currentScope = new Scope(currentScope, node);
     node.varDefList.forEach(varDef -> varDef.accept(this)); // add varName to currentScope
-    if (node.name.equals(node.classBuild.name))
-      node.classBuild.accept(this);
-    else
-      throw new BaseError(node.classBuild.pos, "class name not match");
+    if (node.classBuild != null) {
+      if (node.name.equals(node.classBuild.name))
+        node.classBuild.accept(this);
+      else
+        throw new BaseError(node.classBuild.pos, "class name not match");
+    }
     node.funcDefList.forEach(funcDef -> funcDef.accept(this)); // add funcName to currentScope
     currentScope = currentScope.parentScope;
   }
@@ -90,7 +93,9 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   }
 
   public void visit(SuiteNode node) {
+    currentScope = new Scope(currentScope);
     node.stmts.forEach(stmt -> stmt.accept(this));
+    currentScope = currentScope.parentScope;
   }
 
   public void visit(IfStmtNode node) {
@@ -98,11 +103,11 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     if (!BoolType.equals(node.cond.type))
       throw new BaseError(node.pos, "invalid condition expression");
     currentScope = new Scope(currentScope);
-    node.thenStmt.accept(this);
+    node.thenStmts.forEach(stmt -> stmt.accept(this));
     currentScope = currentScope.parentScope;
-    if (node.elseStmt != null) {
+    if (node.elseStmts != null) {
       currentScope = new Scope(currentScope);
-      node.elseStmt.accept(this);
+      node.elseStmts.forEach(stmt -> stmt.accept(this));
       currentScope = currentScope.parentScope;
     }
   }
@@ -112,7 +117,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     if (!BoolType.equals(node.cond.type))
       throw new BaseError(node.pos, "invalid condition expression");
     currentScope = new Scope(currentScope, true);
-    node.loop.accept(this);
+    node.stmts.forEach(stmt -> stmt.accept(this));
     currentScope = currentScope.parentScope;
   }
 
@@ -129,7 +134,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     }
     if (node.step != null)
       node.step.accept(this);
-    node.loop.accept(this);
+    node.stmts.forEach(stmt -> stmt.accept(this));
     currentScope = currentScope.parentScope;
   }
 
@@ -192,13 +197,18 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   public void visit(BinaryExprNode node) {
     node.lhs.accept(this);
     node.rhs.accept(this);
-    if (node.lhs.type == null || node.rhs.type == null) {
+    if (node.lhs.type == null || node.rhs.type == null)
+      throw new BaseError(node.pos, "invalid expression");
+    // 两个 null 不一样
+    if (NullType.equals(node.lhs.type) || NullType.equals(node.rhs.type)) {
       // maybe an object compare with null
-      if ((node.op.equals("==") || node.op.equals("!=")) && (node.lhs.type.isClass || node.rhs.type.isClass)) {
+      if ((node.op.equals("==") || node.op.equals("!="))
+          && (node.lhs.type.isReferenceType() || node.rhs.type.isReferenceType())) {
         node.type = BoolType;
         return;
-      } else
+      } else if (!node.lhs.type.equals(node.rhs.type)) {
         throw new BaseError(node.pos, "invalid expression");
+      }
     }
     if (VoidType.equals(node.lhs.type) || VoidType.equals(node.rhs.type))
       throw new BaseError(node.pos, "invalid expression");
@@ -233,6 +243,8 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
           throw new BaseError(node.pos, "Type mismatch");
         node.type = BoolType;
         break;
+      default:
+        node.type = BoolType;
     }
   }
 
@@ -267,17 +279,11 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   public void visit(AssignExprNode node) {
     node.lhs.accept(this);
     node.rhs.accept(this);
-    if (node.lhs.type == null || node.rhs.type == null) {
-      // maybe object = null
-      if (node.rhs.type == null && node.lhs.type.isClass) {
-        node.type = new Type(node.lhs.type);
-        return;
-      } else
-        throw new BaseError(node.pos, "invalid expression");
-    }
+    if (node.lhs.type == null || node.rhs.type == null)
+      throw new BaseError(node.pos, "invalid expression");
     if (VoidType.equals(node.lhs.type) || VoidType.equals(node.rhs.type))
       throw new BaseError(node.pos, "invalid expression");
-    if (!node.lhs.type.equals(node.rhs.type))
+    if (!node.lhs.type.equals(node.rhs.type) && (!node.lhs.type.isReferenceType() || !NullType.equals(node.rhs.type)))
       throw new BaseError(node.pos, "Type mismatch");
     node.type = new Type(node.lhs.type);
     if (!node.lhs.isLeftValue())
@@ -321,15 +327,22 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     node.obj.accept(this);
     if (node.obj.type == null)
       throw new BaseError(node.pos, "invalid expression");
-    if (!node.obj.type.isClass && !ThisType.equals(node.obj.type))
+    if (!node.obj.type.isReferenceType() && !ThisType.equals(node.obj.type) && !StringType.equals(node.obj.type))
       throw new BaseError(node.pos, "Type mismatch");
     var classDef = ThisType.equals(node.obj.type)
         ? currentScope.inWhichClass
         : globalScope.getClassDef(node.obj.type.typeName);
-    if (classDef == null)
-      throw new BaseError(node.pos, "Class " + node.obj.type.typeName + " is not defined");
-    node.type = classDef.getVarType(node.member);
-    node.funcDef = classDef.getFuncDef(node.member);
+    if (node.obj.type.dim > 0) {
+      if (classDef == null)
+        throw new BaseError(node.pos, "Type mismatch");
+      if (node.member.equals("size"))
+        node.funcDef = ArraySizeFunc;
+    } else {
+      if (classDef == null)
+        throw new BaseError(node.pos, "Class " + node.obj.type.typeName + " is not defined");
+      node.type = classDef.getVarType(node.member);
+      node.funcDef = classDef.getFuncDef(node.member);
+    }
   }
 
   public void visit(NewExprNode node) {
@@ -372,5 +385,4 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   public void visit(ExprListNode node) {
     node.exprs.forEach(expr -> expr.accept(this));
   }
-
 }

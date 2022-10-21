@@ -29,6 +29,10 @@ public class Type {
     this.isClass = type.isClass;
   }
 
+  public boolean isReferenceType() {
+    return dim > 0 || isClass;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == null)

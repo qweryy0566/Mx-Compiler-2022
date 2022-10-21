@@ -16,7 +16,7 @@ public class ArrayExprNode extends ExprNode {
 
   @Override
   public boolean isLeftValue() {
-    return array.isLeftValue();
+    return true;
   }
 
   @Override

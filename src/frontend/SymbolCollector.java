@@ -12,16 +12,21 @@ public class SymbolCollector implements ASTVisitor {
   }
   public void visit(ProgramNode node) {
     node.defList.forEach(def -> def.accept(this));
+
   }
 
   public void visit(FuncDefNode node) {
     if (globalScope.getFuncDef(node.name) != null)
       throw new BaseError(node.pos, "Function " + node.name + " is already defined");
+    if (globalScope.getClassDef(node.name) != null)
+      throw new BaseError(node.pos, "Function " + node.name + " is already defined as a class");
     globalScope.addFunc(node.name, node);
   }
   public void visit(ClassDefNode node) {
     if (globalScope.getClassDef(node.name) != null)
       throw new BaseError(node.pos, "Class " + node.name + " is already defined");
+    if (globalScope.getFuncDef(node.name) != null)
+      throw new BaseError(node.pos, "Class " + node.name + " is already defined as a function");
     globalScope.addClass(node.name, node);
     for (var func : node.funcDefList) {
       if (node.funcMember.containsKey(func.name))

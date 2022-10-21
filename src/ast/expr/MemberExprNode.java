@@ -16,7 +16,7 @@ public class MemberExprNode extends ExprNode implements BuiltinElements {
 
   @Override
   public boolean isLeftValue() {
-    return obj.isLeftValue() || obj.type == ThisType;
+    return true;
   }
 
   @Override

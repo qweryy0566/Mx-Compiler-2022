@@ -18,6 +18,15 @@ public class GlobalScope extends Scope implements BuiltinElements {
     funcMember.put("getString", GetStringFunc);
     funcMember.put("getInt", GetIntFunc);
     funcMember.put("toString", ToStringFunc);
+
+    ClassDefNode stringDef = new ClassDefNode(null, "string");
+    stringDef.funcMember.put("length", StringLengthFunc);
+    stringDef.funcMember.put("substring", StringSubStringFunc);
+    stringDef.funcMember.put("parseInt", StringParseIntFunc);
+    stringDef.funcMember.put("ord", StringOrdFunc);
+    classMember.put("string", stringDef);
+    classMember.put("int", new ClassDefNode(null, "int"));
+    classMember.put("bool", new ClassDefNode(null, "bool"));
   }
 
   public void addFunc(String name, FuncDefNode funcDef) {

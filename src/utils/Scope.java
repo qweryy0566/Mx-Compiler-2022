@@ -17,13 +17,14 @@ public class Scope {
     this.inLoop = parentScope.inLoop;
     this.inWhichClass = parentScope.inWhichClass;
   }
+  public Scope(Scope parentScope, boolean isLoopScope) {
+    this(parentScope);
+    this.inLoop = isLoopScope;
+  }
   public Scope(Scope parentScope, Type returnType) {
     this.parentScope = parentScope;
     this.returnType = returnType;
-  }
-  public Scope(Scope parentScope, boolean isLoopScope) {
-    this.parentScope = parentScope;
-    this.inLoop = isLoopScope;
+    this.inWhichClass = parentScope.inWhichClass;
   }
   public Scope(Scope parentScope, ClassDefNode inWhichClass) {
     this.parentScope = parentScope;

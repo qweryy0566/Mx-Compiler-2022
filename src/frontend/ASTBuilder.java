@@ -47,7 +47,7 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
     funcDef.returnType = (TypeNode) visit(ctx.returnType());
     if (ctx.parameterList() != null)
       funcDef.params = (ParameterListNode) visit(ctx.parameterList());
-    funcDef.suite = (SuiteNode) visit(ctx.suite());
+    funcDef.stmts = ((SuiteNode) visit(ctx.suite())).stmts;
     return funcDef;
   }
 
@@ -101,23 +101,8 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
   }
 
   @Override
-  public Node visitVarDefUnit(MxParser.VarDefUnitContext ctx) {
-    return visitChildren(ctx); // no need to change
-  }
-
-  @Override
   public Node visitType(MxParser.TypeContext ctx) {
     return new TypeNode(new Position(ctx), ctx.typeName().getText(), ctx.LBracket().size());
-  }
-
-  @Override
-  public Node visitTypeName(MxParser.TypeNameContext ctx) {
-    return visitChildren(ctx); // no need to change
-  }
-
-  @Override
-  public Node visitBaseType(MxParser.BaseTypeContext ctx) {
-    return visitChildren(ctx); // no need to change
   }
 
   @Override
@@ -146,40 +131,45 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
 
   @Override
   public Node visitIfStmt(MxParser.IfStmtContext ctx) {
-    IfStmtNode ifStmt = new IfStmtNode(
-        new Position(ctx),
-        (ExprNode) visit(ctx.expr()),
-        (StmtNode) visit(ctx.statement(0)),
-        ctx.Else() != null ? (StmtNode) visit(ctx.statement(1)) : null);
+    IfStmtNode ifStmt = new IfStmtNode(new Position(ctx), (ExprNode) visit(ctx.expr()));
+    if (ctx.statement(0).suite() != null)
+      ifStmt.thenStmts = ((SuiteNode) visit(ctx.statement(0).suite())).stmts;
+    else
+      ifStmt.thenStmts.add((StmtNode) visit(ctx.statement(0)));
+    if (ctx.Else() != null) {
+      if (ctx.statement(1).suite() != null)
+        ifStmt.elseStmts = ((SuiteNode) visit(ctx.statement(1).suite())).stmts;
+      else
+        ifStmt.elseStmts.add((StmtNode) visit(ctx.statement(1)));
+    }
     return ifStmt;
   }
 
   @Override
   public Node visitWhileStmt(MxParser.WhileStmtContext ctx) {
-    return new WhileStmtNode(
-        new Position(ctx),
-        (ExprNode) visit(ctx.expr()),
-        (StmtNode) visit(ctx.statement()));
-
+    WhileStmtNode whileStmt = new WhileStmtNode(new Position(ctx), (ExprNode) visit(ctx.expr()));
+    if (ctx.statement().suite() != null)
+      whileStmt.stmts = ((SuiteNode) visit(ctx.statement().suite())).stmts;
+    else
+      whileStmt.stmts.add((StmtNode) visit(ctx.statement()));
+    return whileStmt;
   }
 
   @Override
   public Node visitForStmt(MxParser.ForStmtContext ctx) {
-    ForStmtNode forStmt = new ForStmtNode(
-        new Position(ctx),
-        (ExprNode) visit(ctx.expr(0)),
-        (ExprNode) visit(ctx.expr(1)),
-        (StmtNode) visit(ctx.statement()));
+    ForStmtNode forStmt = new ForStmtNode(new Position(ctx));
+    if (ctx.statement().suite() != null)
+      forStmt.stmts = ((SuiteNode) visit(ctx.statement().suite())).stmts;
+    else
+      forStmt.stmts.add((StmtNode) visit(ctx.statement()));
     if (ctx.forInit().varDef() != null)
       forStmt.varDef = (VarDefNode) visit(ctx.forInit().varDef());
     else
       forStmt.init = ((ExprStmtNode) visit(ctx.forInit().exprStmt())).expr;
+    forStmt.cond = ((ExprStmtNode) visit(ctx.exprStmt())).expr;
+    if (ctx.expr() != null)
+      forStmt.step = (ExprNode) visit(ctx.expr());
     return forStmt;
-  }
-
-  @Override
-  public Node visitForInit(MxParser.ForInitContext ctx) {
-    return visitChildren(ctx); // no need to change
   }
 
   @Override
@@ -218,11 +208,6 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
 
     }
     return newExpr;
-  }
-
-  @Override
-  public Node visitNewArrayUnit(MxParser.NewArrayUnitContext ctx) {
-    return visitChildren(ctx); // no need to change
   }
 
   @Override
@@ -289,7 +274,7 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
 
   @Override
   public Node visitParenExpr(MxParser.ParenExprContext ctx) {
-    return visitChildren(ctx); // no need to change
+    return (ExprNode) visit(ctx.expr());
   }
 
   @Override
