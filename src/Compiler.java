@@ -12,8 +12,8 @@ import frontend.*;
 
 public class Compiler {
   public static void main(String[] args) throws Exception {
-    CharStream input = CharStreams.fromStream(new FileInputStream("data/sema/basic-package/basic-69.mx"));
-    // CharStream input = CharStreams.fromStream(System.in);
+    // CharStream input = CharStreams.fromStream(new FileInputStream("data/sema/basic-package/basic-11.mx"));
+    CharStream input = CharStreams.fromStream(System.in);
     MxLexer lexer = new MxLexer(input);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     MxParser parser = new MxParser(tokens);
