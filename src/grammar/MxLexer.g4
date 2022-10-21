@@ -68,7 +68,7 @@ Return: 'return';
 Identifier: [A-Za-z][0-9A-Za-z_]*;
 
 IntConst: [1-9][0-9]* | '0';
-StringConst: Quote (PChar)* Quote;
+StringConst: Quote (PChar)*? Quote;
 fragment PChar: '\\n' | '\\\\' | '\\"' | [ -~];
 
 WhiteSpace: [ \t\r\n]+ -> skip;

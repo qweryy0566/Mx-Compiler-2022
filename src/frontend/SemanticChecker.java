@@ -87,7 +87,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   }
 
   public void visit(ClassBuildNode node) {
-    currentScope = new Scope(currentScope);
+    currentScope = new Scope(currentScope, VoidType);
     node.suite.accept(this);
     currentScope = currentScope.parentScope;
   }
@@ -149,25 +149,30 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   }
 
   public void visit(ReturnStmtNode node) {
-    if (currentScope.returnType == null)
-      throw new BaseError(node.pos, "return statement outside function");
-    if (node.expr == null) {
-      if (!currentScope.returnType.equals(VoidType))
-        throw new BaseError(node.pos, "return type mismatch");
-    } else {
-      node.expr.accept(this);
-      // AutoType : for LambdaExprNode
-      if (AutoType.equals(currentScope.returnType)) {
-        currentScope.returnType = node.expr.type;
-      } else if (!currentScope.returnType.equals(node.expr.type)) {
-        throw new BaseError(node.pos, "return type mismatch");
+    for (var theScope = currentScope; theScope != null; theScope = theScope.parentScope)
+      if (theScope.returnType != null) {
+        if (node.expr == null) {
+          if (!theScope.returnType.equals(VoidType))
+            throw new BaseError(node.pos, "return type mismatch");
+        } else {
+          node.expr.accept(this);
+          // AutoType : for LambdaExprNode
+          if (AutoType.equals(theScope.returnType)) {
+            theScope.returnType = node.expr.type;
+          } else if (!theScope.returnType.equals(node.expr.type)
+              && (!theScope.returnType.isReferenceType() || !NullType.equals(node.expr.type))) {
+            throw new BaseError(node.pos, "return type mismatch");
+          }
+        }
+        theScope.isReturned = true;
+        return;
       }
-    }
-    currentScope.isReturned = true;
+    throw new BaseError(node.pos, "return statement outside function");
   }
 
   public void visit(ExprStmtNode node) {
-    node.expr.accept(this);
+    if (node.expr != null)
+      node.expr.accept(this);
   }
 
   public void visit(AtomExprNode node) {
@@ -178,7 +183,9 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     } else if (node.str.matches("\".*\"")) {
       node.type = StringType;
     } else if (node.str.equals("this")) {
-      node.type = ThisType;
+      if (currentScope.inWhichClass == null)
+        throw new BaseError(node.pos, "this not in class");
+      node.type = new Type(currentScope.inWhichClass.name);
     } else {
       node.type = IntType;
     }
@@ -302,7 +309,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
       for (int i = 0; i < funcDef.params.units.size(); i++) {
         var param = funcDef.params.units.get(i);
         var arg = node.args.exprs.get(i);
-        if (!param.type.type.equals(arg.type))
+        if (!param.type.type.equals(arg.type) && (!param.type.type.isReferenceType() || !NullType.equals(arg.type)))
           throw new BaseError(node.pos, "Parameter type mismatch");
       }
     } else {
@@ -315,7 +322,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
   public void visit(ArrayExprNode node) {
     node.array.accept(this);
     node.index.accept(this);
-    if (node.array.type == null || node.index.type == null)
+    if (node.array.type == null || node.index.type == null || !node.index.type.equals(IntType))
       throw new BaseError(node.pos, "invalid expression");
     node.type = new Type(node.array.type);
     --node.type.dim;
@@ -360,7 +367,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     currentScope = new Scope(node.isCapture ? currentScope : globalScope, AutoType);
     if (node.params != null)
       node.params.accept(this);
-    node.suite.accept(this);
+    node.stmts.forEach(stmt -> stmt.accept(this));
     if (!currentScope.isReturned)
       throw new BaseError(node.pos, "LambdaExpr must return a value");
     node.type = new Type(currentScope.returnType);

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class LambdaExprNode extends ExprNode {
   public boolean isCapture;
   public ParameterListNode params;
-  public SuiteNode suite;
+  public ArrayList<StmtNode> stmts = new ArrayList<StmtNode>();
   public ExprListNode args;
 
   public LambdaExprNode(Position pos) {

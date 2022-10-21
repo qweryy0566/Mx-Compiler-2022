@@ -13,7 +13,6 @@ public class Scope {
   public Scope() {}
   public Scope(Scope parentScope) {
     this.parentScope = parentScope;
-    this.returnType = parentScope.returnType;
     this.inLoop = parentScope.inLoop;
     this.inWhichClass = parentScope.inWhichClass;
   }

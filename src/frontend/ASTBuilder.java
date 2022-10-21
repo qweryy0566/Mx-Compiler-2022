@@ -239,7 +239,7 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
     lambdaExpr.isCapture = ctx.BAnd() != null;
     if (ctx.parameterList() != null)
       lambdaExpr.params = (ParameterListNode) visit(ctx.parameterList());
-    lambdaExpr.suite = (SuiteNode) visit(ctx.suite());
+    lambdaExpr.stmts = ((SuiteNode) visit(ctx.suite())).stmts;
     if (ctx.exprList() != null)
       lambdaExpr.args = (ExprListNode) visit(ctx.exprList());
     return lambdaExpr;

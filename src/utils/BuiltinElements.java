@@ -20,8 +20,8 @@ public interface BuiltinElements {
   FuncDefNode ToStringFunc = new FuncDefNode(null, StringType, "toString", IntType, 1);
 
   FuncDefNode StringLengthFunc = new FuncDefNode(null, IntType, "length", null, 0);
-  FuncDefNode StringSubStringFunc = new FuncDefNode(null, StringType, "substring", StringType, 2);
+  FuncDefNode StringSubStringFunc = new FuncDefNode(null, StringType, "substring", IntType, 2);
   FuncDefNode StringParseIntFunc = new FuncDefNode(null, IntType, "parseInt", null, 0);
-  FuncDefNode StringOrdFunc = new FuncDefNode(null, IntType, "ord", StringType, 1);
+  FuncDefNode StringOrdFunc = new FuncDefNode(null, IntType, "ord", IntType, 1);
   FuncDefNode ArraySizeFunc = new FuncDefNode(null, IntType, "size", null, 0);
 }
