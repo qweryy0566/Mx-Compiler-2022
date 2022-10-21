@@ -1,5 +1,5 @@
 import grammar.*;
-import utils.GlobalScope;
+import utils.*;
 import ast.*;
 
 import java.io.InputStream;
@@ -12,11 +12,15 @@ import frontend.*;
 
 public class Compiler {
   public static void main(String[] args) throws Exception {
-    // CharStream input = CharStreams.fromStream(new FileInputStream("data/sema/misc-package/misc-4.mx"));
+    // CharStream input = CharStreams.fromStream(new FileInputStream("data/sema/basic-package/basic-68.mx"));
     CharStream input = CharStreams.fromStream(System.in);
     MxLexer lexer = new MxLexer(input);
+    lexer.removeErrorListeners();
+    lexer.addErrorListener(new MxErrorListener());
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     MxParser parser = new MxParser(tokens);
+    parser.removeErrorListeners();
+    parser.addErrorListener(new MxErrorListener());
     ParseTree tree = parser.program();
     ASTBuilder astBuilder = new ASTBuilder();
     ProgramNode ast = (ProgramNode) astBuilder.visit(tree);
