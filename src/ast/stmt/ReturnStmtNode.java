@@ -5,7 +5,7 @@ import ast.expr.*;
 import utils.*;
 
 public class ReturnStmtNode extends StmtNode {
-  ExprNode expr;
+  public ExprNode expr;
 
   public ReturnStmtNode(Position pos, ExprNode expr) {
     super(pos);

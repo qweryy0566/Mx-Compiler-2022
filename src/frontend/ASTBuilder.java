@@ -26,12 +26,16 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
   @Override
   public Node visitClassDef(MxParser.ClassDefContext ctx) {
     ClassDefNode classDef = new ClassDefNode(new Position(ctx), ctx.Identifier().getText());
+    boolean hasConstructor = false;
     for (var def : ctx.children)
       if (def instanceof FuncDefContext) {
         classDef.funcDefList.add((FuncDefNode) visit(def));
       } else if (def instanceof VarDefContext) {
         classDef.varDefList.add((VarDefNode) visit(def));
       } else if (def instanceof ClassBuildContext) {
+        if (hasConstructor)
+          throw new BaseError(new Position(ctx), "Multiple constructors");
+        hasConstructor = true;
         classDef.classBuild = (ClassBuildNode) visit(def);
       }
     return classDef;
@@ -118,16 +122,36 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
 
   @Override
   public Node visitStatement(MxParser.StatementContext ctx) {
-    return visitChildren(ctx); // no need to change
+    if (ctx.suite() != null)
+      return visit(ctx.suite());
+    else if (ctx.varDef() != null)
+      return visit(ctx.varDef());
+    else if (ctx.exprStmt() != null)
+      return visit(ctx.exprStmt());
+    else if (ctx.ifStmt() != null)
+      return visit(ctx.ifStmt());
+    else if (ctx.forStmt() != null)
+      return visit(ctx.forStmt());
+    else if (ctx.whileStmt() != null)
+      return visit(ctx.whileStmt());
+    else if (ctx.returnStmt() != null)
+      return visit(ctx.returnStmt());
+    else if (ctx.breakStmt() != null)
+      return visit(ctx.breakStmt());
+    else if (ctx.continueStmt() != null)
+      return visit(ctx.continueStmt());
+    else
+      return visitChildren(ctx); // no need to change
   }
 
   @Override
   public Node visitIfStmt(MxParser.IfStmtContext ctx) {
-    return new IfStmtNode(
+    IfStmtNode ifStmt = new IfStmtNode(
         new Position(ctx),
         (ExprNode) visit(ctx.expr()),
         (StmtNode) visit(ctx.statement(0)),
         ctx.Else() != null ? (StmtNode) visit(ctx.statement(1)) : null);
+    return ifStmt;
   }
 
   @Override

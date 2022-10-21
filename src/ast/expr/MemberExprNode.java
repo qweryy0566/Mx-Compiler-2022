@@ -4,19 +4,19 @@ import ast.*;
 import ast.stmt.*;
 import utils.*;
 
-public class MemberExprNode extends ExprNode {
-  public ExprNode object;
+public class MemberExprNode extends ExprNode implements BuiltinElements {
+  public ExprNode obj;
   public String member;
 
-  public MemberExprNode(Position pos, ExprNode object, String member) {
+  public MemberExprNode(Position pos, ExprNode obj, String member) {
     super(pos);
-    this.object = object;
+    this.obj = obj;
     this.member = member;
   }
 
   @Override
   public boolean isLeftValue() {
-    return object.isLeftValue();
+    return obj.isLeftValue() || obj.type == ThisType;
   }
 
   @Override

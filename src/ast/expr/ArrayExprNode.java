@@ -5,18 +5,18 @@ import ast.stmt.*;
 import utils.*;
 
 public class ArrayExprNode extends ExprNode {
-  public ExprNode varName;
+  public ExprNode array;
   public ExprNode index;
 
-  public ArrayExprNode(Position pos, ExprNode varName, ExprNode index) {
+  public ArrayExprNode(Position pos, ExprNode array, ExprNode index) {
     super(pos);
-    this.varName = varName;
+    this.array = array;
     this.index = index;
   }
 
   @Override
   public boolean isLeftValue() {
-    return varName.isLeftValue();
+    return array.isLeftValue();
   }
 
   @Override

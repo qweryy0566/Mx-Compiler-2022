@@ -20,7 +20,20 @@ public class SymbolCollector implements ASTVisitor {
     globalScope.addFunc(node.name, node);
   }
   public void visit(ClassDefNode node) {
-
+    if (globalScope.getClassDef(node.name) != null)
+      throw new BaseError(node.pos, "Class " + node.name + " is already defined");
+    globalScope.addClass(node.name, node);
+    for (var func : node.funcDefList) {
+      if (node.funcMember.containsKey(func.name))
+        throw new BaseError(func.pos, "Function " + func.name + " is already defined");
+      node.funcMember.put(func.name, func);
+    }
+    for (var var : node.varDefList)
+      for (var unit : var.units) {
+        if (node.varMember.containsKey(unit.varName))
+          throw new BaseError(unit.pos, "Variable " + unit.varName + " is already defined");
+        node.varMember.put(unit.varName, unit);
+      }
   }
   public void visit(VarDefNode node) {
 

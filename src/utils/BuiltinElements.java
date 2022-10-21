@@ -9,6 +9,7 @@ public interface BuiltinElements {
   Type StringType = new Type("string");  
   Type NullType = new Type("null");
   Type ThisType = new Type("this");
+  Type AutoType = new Type("auto");
 
   FuncDefNode PrintFunc = new FuncDefNode(null, VoidType, "print", StringType);
   FuncDefNode PrintlnFunc = new FuncDefNode(null, VoidType, "println", StringType);

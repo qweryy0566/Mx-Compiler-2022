@@ -54,7 +54,7 @@ expr
   : '(' expr ')'                                      #parenExpr
   | '[' BAnd? ']' '(' parameterList? ')' Arrow '{' suite '}' '(' exprList? ')'
                                                       #lambdaExpr
-  | New typeName (newArrayUnit)*                      #newExpr
+  | New typeName (newArrayUnit)* ('(' ')')?           #newExpr
   // | New typeName ('(' ')')?                           #newClassExpr
   | expr op=Member Identifier                         #memberExpr
   | expr '[' expr ']'                                 #arrayExpr 

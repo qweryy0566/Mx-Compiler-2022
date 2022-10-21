@@ -10,7 +10,7 @@ public class GlobalScope extends Scope implements BuiltinElements {
   public HashMap<String, ClassDefNode> classMember = new HashMap<>();
 
   public GlobalScope() {
-    super(null);
+    // super(null);
     funcMember.put("print", PrintFunc);
     funcMember.put("println", PrintlnFunc);
     funcMember.put("printInt", PrintIntFunc);
@@ -25,5 +25,12 @@ public class GlobalScope extends Scope implements BuiltinElements {
   }
   public FuncDefNode getFuncDef(String name) {
     return funcMember.get(name);
+  }
+
+  public void addClass(String name, ClassDefNode classDef) {
+    classMember.put(name, classDef);
+  }
+  public ClassDefNode getClassDef(String name) {
+    return classMember.get(name);
   }
 }
