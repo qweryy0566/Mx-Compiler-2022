@@ -28,8 +28,4 @@ public class Compiler {
     new SymbolCollector(globalScope).visit(ast);
     new SemanticChecker(globalScope).visit(ast);
   }
-
-  private static InputStream FileInputStream(String string) {
-    return null;
-  }
 }
