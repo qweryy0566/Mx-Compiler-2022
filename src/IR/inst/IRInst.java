@@ -7,7 +7,7 @@ import ast.expr.*;
 import IR.*;
 
 public abstract class IRInst {
-  public String name;
-
+  
+  public abstract String toString();
 }
 

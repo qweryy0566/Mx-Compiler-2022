@@ -5,12 +5,13 @@ import ast.*;
 import ast.stmt.*;
 import ast.expr.*;
 import IR.*;
+import IR.type.IRType;
 
-public class IRStoreInst extends IRInst {
-  public IREntity val, destAddr;
-
+public class IRBitcastInst extends IRInst {
+  public IREntity val;
+  public IRType type;
+  public IRRegister dest;
   public String toString() {
     return "";
   }
 }
-

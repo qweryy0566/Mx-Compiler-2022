@@ -7,14 +7,14 @@ import ast.expr.*;
 import IR.*;
 import IR.type.IRType;
 
-// add, sub, nul, udiv, sdiv, urem, srem, shl, lshr, ashr, and, or, xor
+// eq, ne, sgt, sge, slt, sle, ugt, uge, ult, ule
 
-public class IRCalcInst extends IRInst {
-  public IRType resultType;
-  public String op;
-  public IRRegister res;
+public class IRIcmpInst extends IRInst {
+  public IRType type;
+  public IRRegister cmpReg;
   public IREntity lhs, rhs;
-  
+  public String op;
+
   public String toString() {
     return "";
   }

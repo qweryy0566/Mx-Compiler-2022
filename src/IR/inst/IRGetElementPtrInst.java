@@ -9,11 +9,10 @@ import IR.type.IRType;
 
 import java.util.ArrayList;
 
-public class IRCallInst extends IRInst {
-  public IRType returnType;
-  public ArrayList<IREntity> args = new ArrayList<IREntity>();
-  public IRRegister callReg;
-  public IRFunction callfunc;
+public class IRGetElementPtrInst extends IRInst {
+  public IRRegister res;
+  public IRType ptrType;
+  public ArrayList<IREntity> indexList = new ArrayList<IREntity>();
 
   public String toString() {
     return "";

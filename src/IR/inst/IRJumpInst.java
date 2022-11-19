@@ -12,4 +12,8 @@ public class IRJumpInst extends IRTerminalInst {
   public IRJumpInst() {
     super();
   }
+
+  public String toString() {
+    return "";
+  }
 }

@@ -4,9 +4,10 @@ import utils.*;
 import ast.*;
 import ast.stmt.*;
 import ast.expr.*;
+import IR.*;
 
 public class IRBuilder implements ASTVisitor {
-
+  private IRFunction currentFunction;
   @Override
   public void visit(ProgramNode node) {
 

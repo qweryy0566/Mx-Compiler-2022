@@ -7,8 +7,10 @@ import ast.expr.*;
 import IR.*;
 
 public class IRLoadInst extends IRInst {
-  public IRLoadInst() {
-    super();
-  }
+  public IRRegister destReg;
+  public IREntity srcAddr;
 
+  public String toString() {
+    return "";
+  }
 }

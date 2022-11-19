@@ -7,7 +7,9 @@ import ast.expr.*;
 import IR.*;
 
 public class IRRetInst extends IRInst {
-  public IRRetInst() {
-    super();
+  public IREntity val;
+
+  public String toString() {
+    return "";
   }
 }

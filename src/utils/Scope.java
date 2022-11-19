@@ -1,6 +1,8 @@
 package utils;
 
 import java.util.HashMap;
+
+import IR.IRRegister;
 import ast.*;
 
 public class Scope {
@@ -9,6 +11,8 @@ public class Scope {
   public Type returnType = null;
   public ClassDefNode inWhichClass = null;
   public boolean inLoop = false, isReturned = false;
+
+  public HashMap<String, IRRegister> IRVarMember = new HashMap<>();
 
   public Scope() {}
   public Scope(Scope parentScope) {
