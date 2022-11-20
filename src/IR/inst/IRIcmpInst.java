@@ -5,6 +5,8 @@ import ast.*;
 import ast.stmt.*;
 import ast.expr.*;
 import IR.*;
+import IR.entity.IREntity;
+import IR.entity.IRRegister;
 import IR.type.IRType;
 
 // eq, ne, sgt, sge, slt, sle, ugt, uge, ult, ule

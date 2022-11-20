@@ -4,6 +4,7 @@ import utils.*;
 import ast.*;
 import ast.stmt.*;
 import ast.expr.*;
+import IR.entity.IRRegister;
 import IR.inst.*;
 import IR.type.IRType;
 

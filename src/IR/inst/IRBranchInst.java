@@ -5,6 +5,7 @@ import ast.*;
 import ast.stmt.*;
 import ast.expr.*;
 import IR.*;
+import IR.entity.IREntity;
 
 public class IRBranchInst extends IRTerminalInst {
   public IREntity cond;

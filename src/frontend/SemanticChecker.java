@@ -11,7 +11,6 @@ import ast.expr.*;
 public class SemanticChecker implements ASTVisitor, BuiltinElements {
   private GlobalScope globalScope;
   private Scope currentScope;
-  private int level = 0;
 
   public SemanticChecker(GlobalScope globalScope) {
     this.globalScope = globalScope;
@@ -229,7 +228,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
       case ">":
         if (!node.lhs.type.equals(IntType) && !node.lhs.type.equals(StringType))
           throw new BaseError(node.pos, "Type mismatch");
-        node.type = node.op.equals("+") ? new Type(node.lhs.type) : BoolType;
+        node.type = node.op.equals("+") ? node.lhs.type : BoolType;
         break;
       case "*":
       case "/":
@@ -262,15 +261,15 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     if (node.op.equals("++") || node.op.equals("--")) {
       if (!node.expr.isLeftValue() || !node.expr.type.equals(IntType))
         throw new BaseError(node.pos, "Left value required");
-      node.type = new Type(IntType);
+      node.type = IntType;
     } else if (node.op.equals("!")) {
       if (!node.expr.type.equals(BoolType))
         throw new BaseError(node.pos, "Type is not bool");
-      node.type = new Type(BoolType);
+      node.type = BoolType;
     } else {
       if (!node.expr.type.equals(IntType))
         throw new BaseError(node.pos, "Type is not int");
-      node.type = new Type(IntType);
+      node.type = IntType;
     }
   }
 
@@ -280,7 +279,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
       throw new BaseError(node.pos, "invalid expression");
     if (!node.expr.isLeftValue() || !node.expr.type.equals(IntType))
       throw new BaseError(node.pos, "Left value required");
-    node.type = new Type(IntType);
+    node.type = IntType;
   }
 
   public void visit(AssignExprNode node) {
@@ -292,7 +291,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
       throw new BaseError(node.pos, "invalid expression");
     if (!node.lhs.type.equals(node.rhs.type) && (!node.lhs.type.isReferenceType() || !NullType.equals(node.rhs.type)))
       throw new BaseError(node.pos, "Type mismatch");
-    node.type = new Type(node.lhs.type);
+    node.type = node.lhs.type;
     if (!node.lhs.isLeftValue())
       throw new BaseError(node.pos, "Left value required");
   }
@@ -316,7 +315,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
       if (funcDef.params != null)
         throw new BaseError(node.pos, "Parameter number mismatch");
     }
-    node.type = new Type(funcDef.returnType.type);
+    node.type = funcDef.returnType.type;
   }
 
   public void visit(ArrayExprNode node) {
@@ -324,7 +323,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     node.index.accept(this);
     if (node.array.type == null || node.index.type == null || !node.index.type.equals(IntType))
       throw new BaseError(node.pos, "invalid expression");
-    node.type = new Type(node.array.type);
+    node.type = node.array.type;
     --node.type.dim;
     if (node.type.dim < 0)
       throw new BaseError(node.pos, "Type mismatch");
@@ -370,7 +369,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     node.stmts.forEach(stmt -> stmt.accept(this));
     if (!currentScope.isReturned)
       throw new BaseError(node.pos, "LambdaExpr must return a value");
-    node.type = new Type(currentScope.returnType);
+    node.type = currentScope.returnType;
     currentScope = tempScope;
 
     if (node.args != null) {

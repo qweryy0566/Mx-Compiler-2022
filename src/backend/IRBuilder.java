@@ -5,9 +5,21 @@ import ast.*;
 import ast.stmt.*;
 import ast.expr.*;
 import IR.*;
+import IR.entity.IRRegister;
 
-public class IRBuilder implements ASTVisitor {
+public class IRBuilder implements ASTVisitor, BuiltinElements {
   private IRFunction currentFunction;
+  private IRBasicBlock currentBlock;
+  private GlobalScope globalScope;
+  private Scope currentScope;
+  private IRProgram root;
+
+  public IRBuilder(IRProgram root, GlobalScope globalScope) {
+    this.root = root;
+    this.globalScope = globalScope;
+    currentScope = globalScope;
+  }
+
   @Override
   public void visit(ProgramNode node) {
 
@@ -95,12 +107,15 @@ public class IRBuilder implements ASTVisitor {
   
   @Override
   public void visit(VarExprNode node) {
+    if (node.type != null && !node.type.isArrayType()) {
+      IRRegister ptr = currentScope.getIRVar(node.str);
 
+    }
   }
   
   @Override
   public void visit(BinaryExprNode node) {
-
+    
   }
   
   @Override

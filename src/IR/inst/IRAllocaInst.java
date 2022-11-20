@@ -5,6 +5,7 @@ import ast.*;
 import ast.stmt.*;
 import ast.expr.*;
 import IR.*;
+import IR.entity.IRRegister;
 import IR.type.IRType;
 
 public class IRAllocaInst extends IRInst {

@@ -2,7 +2,7 @@ package utils;
 
 import java.util.HashMap;
 
-import IR.IRRegister;
+import IR.entity.IRRegister;
 import ast.*;
 
 public class Scope {
@@ -43,9 +43,20 @@ public class Scope {
   public Type getVarType(String name) {
     if (varMember.containsKey(name))
       return varMember.get(name);
-    else {
-      // TODO : may have problem   
+    else
       return parentScope != null ? parentScope.getVarType(name) : null;
+  }
+
+  public void addIRVar(String name, IRRegister reg) {
+    IRVarMember.put(name, reg);
+  }
+
+  public IRRegister getIRVar(String name) {
+    if (IRVarMember.containsKey(name))
+      return IRVarMember.get(name);
+    else {
+      // TODO : may have problem
+      return parentScope != null ? parentScope.getIRVar(name) : null;
     }
   }
 }

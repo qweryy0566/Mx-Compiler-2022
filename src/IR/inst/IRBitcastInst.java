@@ -5,6 +5,8 @@ import ast.*;
 import ast.stmt.*;
 import ast.expr.*;
 import IR.*;
+import IR.entity.IREntity;
+import IR.entity.IRRegister;
 import IR.type.IRType;
 
 public class IRBitcastInst extends IRInst {

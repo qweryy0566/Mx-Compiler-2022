@@ -1,4 +1,4 @@
-package IR;
+package IR.entity;
 
 import utils.*;
 import ast.*;
