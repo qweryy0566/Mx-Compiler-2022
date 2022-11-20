@@ -3,6 +3,7 @@ package ast.expr;
 import ast.*;
 import utils.*;
 import IR.entity.*;
+import IR.type.*;
 
 public abstract class ExprNode extends Node {
   public String str;
@@ -15,4 +16,7 @@ public abstract class ExprNode extends Node {
   }
 
   public abstract boolean isLeftValue();
+  public IRType getIRType() {
+    return value.type;
+  }
 };

@@ -12,6 +12,13 @@ public class IRCallInst extends IRInst {
   public IRRegister callReg;
   public IRFunction callfunc;
 
+  public IRCallInst(IRBasicBlock block, IRType returnType, IRFunction callfunc, IRRegister callReg) {
+    super(block);
+    this.returnType = returnType;
+    this.callfunc = callfunc;
+    this.callReg = callReg;
+  }
+
   public String toString() {
     return "";
   }

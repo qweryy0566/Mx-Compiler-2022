@@ -12,7 +12,12 @@ public class IRBasicBlock {
   public ArrayList<IRBasicBlock> pres = new ArrayList<IRBasicBlock>(), succs = new ArrayList<IRBasicBlock>();
   
   public void addInst(IRInst inst) {
-    insts.add(inst);
+    if (inst instanceof IRAllocaInst)
+      parentFunction.allocaInsts.add((IRAllocaInst) inst);
+    else if (inst instanceof IRTerminalInst)
+      terminalInst = (IRTerminalInst) inst;
+    else
+      insts.add(inst);
   }
   public String toString() {
     return "";

@@ -5,8 +5,7 @@ public class IRPtrType extends IRType {
   public int dim = 1;
 
   public IRPtrType(IRType baseType) {
-    super(baseType.name + "*");
+    super(baseType.name + "*", 32);
     this.baseType = baseType;
-    this.size = 4;
   }
 }

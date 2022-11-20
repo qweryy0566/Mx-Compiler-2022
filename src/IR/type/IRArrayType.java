@@ -5,9 +5,8 @@ public class IRArrayType extends IRType {
   public int cnt;
 
   public IRArrayType(IRType baseType, int cnt) {
-    super("[" + String.valueOf(cnt) + " x " + baseType.name + "]");
+    super("[" + String.valueOf(cnt) + " x " + baseType.name + "]", baseType.size * cnt);
     this.baseType = baseType;
     this.cnt = cnt;
-    this.size = baseType.size * cnt;
   }
 }

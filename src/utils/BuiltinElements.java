@@ -1,6 +1,7 @@
 package utils;
 
-import ast.FuncDefNode;
+import ast.*;
+import IR.type.*;
 
 public interface BuiltinElements {
   Type VoidType = new Type("void");
@@ -24,4 +25,12 @@ public interface BuiltinElements {
   FuncDefNode StringParseIntFunc = new FuncDefNode(null, IntType, "parseInt", null, 0);
   FuncDefNode StringOrdFunc = new FuncDefNode(null, IntType, "ord", IntType, 1);
   FuncDefNode ArraySizeFunc = new FuncDefNode(null, IntType, "size", null, 0);
+
+  // ------------------ IR Builtin Types ------------------
+
+  IRType irVoidType = new IRVoidType();
+  IRType irIntType = new IRIntType(32);
+  IRType irNullType = new IRPtrType(irVoidType);
+  IRType irBoolType = new IRIntType(8);
+  IRType irCondTyoe = new IRIntType(1);
 }

@@ -1,5 +1,15 @@
 package IR.entity;
 
-public class IRRegister extends IREntity {
+import IR.type.*;
 
+public class IRRegister extends IREntity {
+  public String name;
+  public int index;
+  public static int regCnt = 0;
+
+  public IRRegister(String name, IRType type) {
+    super(type);
+    this.name = name;
+    index = regCnt++;
+  }
 }

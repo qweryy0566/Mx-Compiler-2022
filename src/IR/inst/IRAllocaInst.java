@@ -1,13 +1,14 @@
 package IR.inst;
 
-import IR.entity.IRRegister;
-import IR.type.IRType;
+import IR.entity.*;
+import IR.type.*;
+import IR.*;
 
 public class IRAllocaInst extends IRInst {
   public IRType type;
   public IRRegister allocaReg;
-  public IRAllocaInst(IRType type, IRRegister allocaReg) {
-    super();
+  public IRAllocaInst(IRBasicBlock block, IRType type, IRRegister allocaReg) {
+    super(block);
     this.type = type;
     this.allocaReg = allocaReg;
   }

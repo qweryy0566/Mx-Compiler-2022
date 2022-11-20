@@ -5,8 +5,9 @@ import IR.*;
 public class IRJumpInst extends IRTerminalInst {
   public IRBasicBlock toBlock;
 
-  public IRJumpInst() {
-    super();
+  public IRJumpInst(IRBasicBlock block, IRBasicBlock toBlock) {
+    super(block);
+    this.toBlock = toBlock;
   }
 
   public String toString() {
