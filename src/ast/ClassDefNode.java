@@ -1,8 +1,6 @@
 package ast;
 
 import utils.*;
-import ast.expr.*;
-import ast.stmt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 

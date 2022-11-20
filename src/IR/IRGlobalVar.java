@@ -1,12 +1,7 @@
 package IR;
 
-import utils.*;
-import ast.*;
-import ast.stmt.*;
-import ast.expr.*;
-import IR.entity.IREntity;
-import IR.inst.*;
-import IR.type.IRType;
+import IR.entity.*;
+import IR.type.*;
 
 public class IRGlobalVar {
   public String name;

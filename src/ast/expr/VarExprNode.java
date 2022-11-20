@@ -1,7 +1,6 @@
 package ast.expr;
 
 import ast.*;
-import ast.stmt.*;
 import utils.*;
 
 public class VarExprNode extends AtomExprNode {

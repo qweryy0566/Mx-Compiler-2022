@@ -1,9 +1,5 @@
 package IR.inst;
 
-import utils.*;
-import ast.*;
-import ast.stmt.*;
-import ast.expr.*;
 import IR.*;
 import IR.entity.IREntity;
 

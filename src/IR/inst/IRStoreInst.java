@@ -1,11 +1,6 @@
 package IR.inst;
 
-import utils.*;
-import ast.*;
-import ast.stmt.*;
-import ast.expr.*;
-import IR.*;
-import IR.entity.IREntity;
+import IR.entity.*;
 
 public class IRStoreInst extends IRInst {
   public IREntity val, destAddr;

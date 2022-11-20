@@ -51,12 +51,12 @@ public class Scope {
     IRVarMember.put(name, reg);
   }
 
-  public IRRegister getIRVar(String name) {
+  public IRRegister getIRVarPtr(String name) {
     if (IRVarMember.containsKey(name))
       return IRVarMember.get(name);
     else {
       // TODO : may have problem
-      return parentScope != null ? parentScope.getIRVar(name) : null;
+      return parentScope != null ? parentScope.getIRVarPtr(name) : null;
     }
   }
 }

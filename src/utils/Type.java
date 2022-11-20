@@ -1,7 +1,5 @@
 package utils;
 
-import ast.*;
-
 public class Type {
   public String typeName;
   public int dim = 0;

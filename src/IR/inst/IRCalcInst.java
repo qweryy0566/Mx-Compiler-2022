@@ -1,13 +1,7 @@
 package IR.inst;
 
-import utils.*;
-import ast.*;
-import ast.stmt.*;
-import ast.expr.*;
-import IR.*;
-import IR.entity.IREntity;
-import IR.entity.IRRegister;
-import IR.type.IRType;
+import IR.entity.*;
+import IR.type.*;
 
 // add, sub, nul, udiv, sdiv, urem, srem, shl, lshr, ashr, and, or, xor
 

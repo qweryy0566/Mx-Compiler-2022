@@ -108,7 +108,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   @Override
   public void visit(VarExprNode node) {
     if (node.type != null && !node.type.isArrayType()) {
-      IRRegister ptr = currentScope.getIRVar(node.str);
+      IRRegister ptr = currentScope.getIRVarPtr(node.str);
 
     }
   }

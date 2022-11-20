@@ -1,8 +1,6 @@
 package ast;
 
 import utils.*;
-import ast.stmt.*;
-import ast.expr.*;
 import java.util.ArrayList;
 
 public class ParameterListNode extends Node {

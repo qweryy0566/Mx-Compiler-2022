@@ -1,12 +1,8 @@
 package IR;
 
-import utils.*;
-import ast.*;
-import ast.stmt.*;
-import ast.expr.*;
-import IR.entity.IRRegister;
+import IR.entity.*;
+import IR.type.*;
 import IR.inst.*;
-import IR.type.IRType;
 
 import java.util.LinkedList;
 import java.util.ArrayList;

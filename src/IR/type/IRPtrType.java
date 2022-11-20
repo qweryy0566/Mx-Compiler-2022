@@ -1,10 +1,5 @@
 package IR.type;
 
-import utils.*;
-import ast.*;
-import ast.stmt.*;
-import ast.expr.*;
-
 public class IRPtrType extends IRType {
   public IRType baseType;
   public int dim = 1;
