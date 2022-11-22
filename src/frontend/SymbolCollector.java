@@ -5,6 +5,7 @@ import ast.expr.*;
 import ast.stmt.*;
 import utils.*;
 
+
 public class SymbolCollector implements ASTVisitor {
   private GlobalScope globalScope;
   public SymbolCollector(GlobalScope globalScope) {
@@ -12,7 +13,6 @@ public class SymbolCollector implements ASTVisitor {
   }
   public void visit(ProgramNode node) {
     node.defList.forEach(def -> def.accept(this));
-
   }
 
   public void visit(FuncDefNode node) {

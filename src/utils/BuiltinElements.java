@@ -32,5 +32,5 @@ public interface BuiltinElements {
   IRType irIntType = new IRIntType(32);
   IRType irNullType = new IRPtrType(irVoidType);
   IRType irBoolType = new IRIntType(8);
-  IRType irCondTyoe = new IRIntType(1);
+  IRType irCondType = new IRIntType(1);
 }

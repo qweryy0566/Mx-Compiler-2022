@@ -22,6 +22,17 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     currentScope = globalScope;
   }
 
+  private IREntity getVal(ExprNode node) {
+    if (node.value != null)
+      return node.value;
+    else {
+      assert node.storePtr != null;
+      IRRegister val = new IRRegister(node.str, ((IRPtrType) node.storePtr.type).baseType);
+      currentBlock.addInst(new IRLoadInst(currentBlock, val, node.storePtr));
+      return node.value = val;
+    }
+  }
+
   @Override
   public void visit(ProgramNode node) {
 
@@ -69,7 +80,8 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(IfStmtNode node) {
-
+    node.cond.accept(this);
+    IRBasicBlock thenBlock = new IRBasicBlock(currentFunction, "then");
   }
 
   @Override
@@ -107,13 +119,12 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     if (node.type == IntType) {
       node.value = new IRIntConst(Integer.parseInt(node.str));
     } else if (node.type == BoolType) {
-      
+      node.value = new IRBoolConst(node.str.equals("true"));
     } else if (node.type == StringType) {
-      
+      root.addStringConst(node.str);  // contain quotes
+      // TODO: add string constant
     } else if (node.type == NullType) {
-      
-    } else if (node.type == VoidType) {
-      
+      node.value = new IRNullConst();
     } else {
       
     }
@@ -121,12 +132,13 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(VarExprNode node) {
-    if (node.type != null && !node.type.isArrayType()) {
-      IRRegister ptr = currentScope.getIRVarPtr(node.str);
-      IRRegister val = new IRRegister(node.str, ((IRPtrType) ptr.type).baseType);
-      currentBlock.addInst(new IRLoadInst(currentBlock, val, ptr));
-      node.value = val;
-    }
+    node.storePtr = currentScope.getIRVarPtr(node.str);
+    // if (node.type != null && !node.type.isArrayType()) {
+    //   IRRegister ptr = currentScope.getIRVarPtr(node.str);
+    //   IRRegister val = new IRRegister(node.str, ((IRPtrType) ptr.type).baseType);
+    //   currentBlock.addInst(new IRLoadInst(currentBlock, val, ptr));
+    //   node.value = val;
+    // }
   }
 
   @Override
@@ -175,21 +187,21 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
         case "^": 
           operandType = irIntType;
           dest = new IRRegister("tmp", irIntType);
-          currentBlock.addInst(new IRCalcInst(currentBlock, operandType, dest, node.lhs.value, node.rhs.value, op));
+          currentBlock.addInst(new IRCalcInst(currentBlock, operandType, dest, getVal(node.lhs), getVal(node.rhs), op));
           break;
         case "<": 
         case "<=":
         case ">": 
         case ">=":
           operandType = irIntType;
-          dest = new IRRegister("tmp", irCondTyoe);
-          currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, node.lhs.value, node.rhs.value, op));
+          dest = new IRRegister("tmp", irCondType);
+          currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, getVal(node.lhs), getVal(node.rhs), op));
           break;
         case "==":
         case "!=":
           operandType = node.lhs.type == NullType ? node.rhs.getIRType() : node.lhs.getIRType();
-          dest = new IRRegister("tmp", irCondTyoe);
-          currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, node.lhs.value, node.rhs.value, op));
+          dest = new IRRegister("tmp", irCondType);
+          currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, getVal(node.lhs), getVal(node.rhs), op));
           break;
       }
       node.value = dest;
@@ -198,7 +210,20 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(UnaryExprNode node) {
+    node.expr.accept(this);
+    IRRegister dest = null;
+    IRType operandType = null;
+    String op = null;
+    switch (node.op) {
+      case "++":
+        operandType = irIntType;
 
+      case "--":
+      case "+":
+      case "-":
+      case "~":
+      case "!":
+    }
   }
 
   @Override
@@ -208,7 +233,11 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(AssignExprNode node) {
-
+    node.rhs.accept(this);
+    node.lhs.accept(this);
+    node.storePtr = node.lhs.storePtr;
+    node.value = getVal(node.rhs);
+    currentBlock.addInst(new IRStoreInst(currentBlock, node.value, node.storePtr));
   }
 
   @Override

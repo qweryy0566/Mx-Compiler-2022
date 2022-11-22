@@ -9,13 +9,15 @@ public abstract class ExprNode extends Node {
   public String str;
   public Type type;
   public FuncDefNode funcDef = null;
-  public IREntity value = null; // for IR
+  public IRRegister storePtr = null; // for left value in IR
+  public IREntity value = null;      // for IR
 
   public ExprNode(Position pos) {
     super(pos);
   }
 
   public abstract boolean isLeftValue();
+
   public IRType getIRType() {
     return value.type;
   }
