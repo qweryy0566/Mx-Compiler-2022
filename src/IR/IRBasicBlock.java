@@ -10,6 +10,7 @@ public class IRBasicBlock {
   public IRTerminalInst terminalInst = null;
   public IRFunction parentFunction = null;
   public ArrayList<IRBasicBlock> pres = new ArrayList<IRBasicBlock>(), succs = new ArrayList<IRBasicBlock>();
+  public boolean isFinished = false;
 
   public static int blockCnt = 0;
 
@@ -24,6 +25,7 @@ public class IRBasicBlock {
   }
   
   public void addInst(IRInst inst) {
+    if (isFinished) return;
     if (inst instanceof IRAllocaInst)
       parentFunction.allocaInsts.add((IRAllocaInst) inst);
     else if (inst instanceof IRTerminalInst)

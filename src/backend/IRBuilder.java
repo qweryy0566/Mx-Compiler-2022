@@ -57,7 +57,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(VarDefUnitNode node) {
-
+    
   }
 
   @Override
@@ -89,12 +89,14 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     nextBlock.terminalInst = currentBlock.terminalInst;
     IRBasicBlock thenBlock = new IRBasicBlock(currentFunction, "if_then_", nextBlock);
     currentScope = new Scope(currentScope);
+    currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(thenBlock);
     node.thenStmts.forEach(stmt -> stmt.accept(this));
     currentScope = currentScope.parentScope;
     if (node.elseStmts.size() > 0) {
       IRBasicBlock elseBlock = new IRBasicBlock(currentFunction, "if_else_", nextBlock);
       currentScope = new Scope(currentScope);
+      currentBlock.isFinished = true;
       currentBlock = currentFunction.appendBlock(elseBlock);
       node.elseStmts.forEach(stmt -> stmt.accept(this));
       currentScope = currentScope.parentScope;
@@ -102,6 +104,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     } else {
       lastBlock.terminalInst = new IRBranchInst(lastBlock, cond, thenBlock, nextBlock);
     }
+    currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(nextBlock);
   }
 
@@ -112,6 +115,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.nextBlock = new IRBasicBlock(currentFunction, "");
     node.nextBlock.terminalInst = currentBlock.terminalInst;
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
+    currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(node.condBlock);
     node.cond.accept(this);
     currentBlock.terminalInst = new IRBranchInst(currentBlock, getVal(node.cond), node.loopBlock, node.nextBlock);
@@ -120,6 +124,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.stmts.forEach(stmt -> stmt.accept(this));
     currentScope = currentScope.parentScope;
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
+    currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(node.nextBlock);
   }
 
@@ -134,6 +139,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.nextBlock = new IRBasicBlock(currentFunction, "");
     node.nextBlock.terminalInst = currentBlock.terminalInst;
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
+    currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(node.condBlock);
     if (node.cond != null) {
       node.cond.accept(this);
@@ -141,29 +147,43 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     } else {
       currentBlock.terminalInst = new IRJumpInst(currentBlock, node.loopBlock);
     }
+    currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(node.loopBlock);
     node.stmts.forEach(stmt -> stmt.accept(this));
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.stepBlock);
+    currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(node.stepBlock);
     if (node.step != null) node.step.accept(this);
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
     currentScope = currentScope.parentScope;
+    currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(node.nextBlock);
   }
 
   @Override
   public void visit(ContinueNode node) {
-
+    if (currentScope.inWhichLoop instanceof WhileStmtNode)
+      currentBlock.terminalInst = new IRJumpInst(currentBlock, currentScope.inWhichLoop.condBlock);
+    else
+      currentBlock.terminalInst = new IRJumpInst(currentBlock, ((ForStmtNode) currentScope.inWhichLoop).stepBlock);
+    currentBlock.isFinished = true;
   }
 
   @Override
   public void visit(BreakNode node) {
-
+    currentBlock.terminalInst = new IRJumpInst(currentBlock, currentScope.inWhichLoop.nextBlock);
+    currentBlock.isFinished = true;
   }
 
   @Override
   public void visit(ReturnStmtNode node) {
-
+    if (node.expr == null) {
+      currentBlock.terminalInst = new IRRetInst(currentBlock, irVoidConst);
+    } else {
+      node.expr.accept(this);
+      currentBlock.terminalInst = new IRRetInst(currentBlock, getVal(node.expr));
+    }
+    currentBlock.isFinished = true;
   }
 
   @Override

@@ -1,6 +1,7 @@
 package utils;
 
 import ast.*;
+import IR.entity.IRVoidConst;
 import IR.type.*;
 
 public interface BuiltinElements {
@@ -33,4 +34,8 @@ public interface BuiltinElements {
   IRType irNullType = new IRPtrType(irVoidType);
   IRType irBoolType = new IRIntType(8);
   IRType irCondType = new IRIntType(1);
+
+  // ------------------ IR Builtin Constants ------------------
+
+  IRVoidConst irVoidConst = new IRVoidConst();
 }

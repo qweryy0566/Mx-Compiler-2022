@@ -8,7 +8,7 @@ import IR.*;
 public class ForStmtNode extends LoopStmtNode {
   public VarDefNode varDef;
   public ExprNode init, step;
-  public IRBasicBlock condBlock, loopBlock, stepBlock, nextBlock;
+  public IRBasicBlock stepBlock;
 
   public ForStmtNode(Position pos) {
     super(pos);
