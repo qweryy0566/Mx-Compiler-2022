@@ -22,6 +22,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     currentScope = globalScope;
   }
 
+  // to get the value and add the instruction to the current block
   private IREntity getVal(ExprNode node) {
     if (node.value != null)
       return node.value;
@@ -33,9 +34,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     }
   }
 
+
   @Override
   public void visit(ProgramNode node) {
-
+    node.defList.forEach(def -> def.accept(this));
   }
 
   @Override
@@ -81,17 +83,72 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   @Override
   public void visit(IfStmtNode node) {
     node.cond.accept(this);
-    IRBasicBlock thenBlock = new IRBasicBlock(currentFunction, "then");
+    IREntity cond = getVal(node.cond);
+    IRBasicBlock lastBlock = currentBlock;
+    IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "");
+    nextBlock.terminalInst = currentBlock.terminalInst;
+    IRBasicBlock thenBlock = new IRBasicBlock(currentFunction, "if_then_", nextBlock);
+    currentScope = new Scope(currentScope);
+    currentBlock = currentFunction.appendBlock(thenBlock);
+    node.thenStmts.forEach(stmt -> stmt.accept(this));
+    currentScope = currentScope.parentScope;
+    if (node.elseStmts.size() > 0) {
+      IRBasicBlock elseBlock = new IRBasicBlock(currentFunction, "if_else_", nextBlock);
+      currentScope = new Scope(currentScope);
+      currentBlock = currentFunction.appendBlock(elseBlock);
+      node.elseStmts.forEach(stmt -> stmt.accept(this));
+      currentScope = currentScope.parentScope;
+      lastBlock.terminalInst = new IRBranchInst(lastBlock, cond, thenBlock, elseBlock);
+    } else {
+      lastBlock.terminalInst = new IRBranchInst(lastBlock, cond, thenBlock, nextBlock);
+    }
+    currentBlock = currentFunction.appendBlock(nextBlock);
   }
 
   @Override
   public void visit(WhileStmtNode node) {
-
+    node.condBlock = new IRBasicBlock(currentFunction, "while_cond_");
+    node.loopBlock = new IRBasicBlock(currentFunction, "while_loop_");
+    node.nextBlock = new IRBasicBlock(currentFunction, "");
+    node.nextBlock.terminalInst = currentBlock.terminalInst;
+    currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
+    currentBlock = currentFunction.appendBlock(node.condBlock);
+    node.cond.accept(this);
+    currentBlock.terminalInst = new IRBranchInst(currentBlock, getVal(node.cond), node.loopBlock, node.nextBlock);
+    currentBlock = currentFunction.appendBlock(node.loopBlock);
+    currentScope = new Scope(currentScope, node);
+    node.stmts.forEach(stmt -> stmt.accept(this));
+    currentScope = currentScope.parentScope;
+    currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
+    currentBlock = currentFunction.appendBlock(node.nextBlock);
   }
 
   @Override
   public void visit(ForStmtNode node) {
-
+    currentScope = new Scope(currentScope, node);
+    if (node.varDef != null) node.varDef.accept(this);
+    if (node.init != null) node.init.accept(this);
+    node.condBlock = new IRBasicBlock(currentFunction, "for_cond_");
+    node.loopBlock = new IRBasicBlock(currentFunction, "for_loop_");
+    node.stepBlock = new IRBasicBlock(currentFunction, "for_step_");
+    node.nextBlock = new IRBasicBlock(currentFunction, "");
+    node.nextBlock.terminalInst = currentBlock.terminalInst;
+    currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
+    currentBlock = currentFunction.appendBlock(node.condBlock);
+    if (node.cond != null) {
+      node.cond.accept(this);
+      currentBlock.terminalInst = new IRBranchInst(currentBlock, getVal(node.cond), node.loopBlock, node.nextBlock);
+    } else {
+      currentBlock.terminalInst = new IRJumpInst(currentBlock, node.loopBlock);
+    }
+    currentBlock = currentFunction.appendBlock(node.loopBlock);
+    node.stmts.forEach(stmt -> stmt.accept(this));
+    currentBlock.terminalInst = new IRJumpInst(currentBlock, node.stepBlock);
+    currentBlock = currentFunction.appendBlock(node.stepBlock);
+    if (node.step != null) node.step.accept(this);
+    currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
+    currentScope = currentScope.parentScope;
+    currentBlock = currentFunction.appendBlock(node.nextBlock);
   }
 
   @Override

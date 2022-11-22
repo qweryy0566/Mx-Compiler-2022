@@ -15,4 +15,8 @@ public class IRFunction {
   public LinkedList<IRBasicBlock> blocks = new LinkedList<IRBasicBlock>();
   public ArrayList<IRAllocaInst> allocaInsts = new ArrayList<IRAllocaInst>();
 
+  public IRBasicBlock appendBlock(IRBasicBlock block) {
+    blocks.add(block);
+    return block;
+  }
 }

@@ -3,12 +3,12 @@ package ast.stmt;
 import ast.*;
 import ast.expr.*;
 import utils.*;
-import java.util.ArrayList;
+import IR.*;
 
-public class ForStmtNode extends StmtNode {
+public class ForStmtNode extends LoopStmtNode {
   public VarDefNode varDef;
-  public ExprNode init, cond, step;
-  public ArrayList<StmtNode> stmts = new ArrayList<StmtNode>();
+  public ExprNode init, step;
+  public IRBasicBlock condBlock, loopBlock, stepBlock, nextBlock;
 
   public ForStmtNode(Position pos) {
     super(pos);

@@ -3,11 +3,10 @@ package ast.stmt;
 import ast.*;
 import ast.expr.*;
 import utils.*;
-import java.util.ArrayList;
+import IR.*;
 
-public class WhileStmtNode extends StmtNode {
-  public ExprNode cond;
-  public ArrayList<StmtNode> stmts = new ArrayList<StmtNode>();
+public class WhileStmtNode extends LoopStmtNode {
+  public IRBasicBlock condBlock, loopBlock, nextBlock;
 
   public WhileStmtNode(Position pos, ExprNode cond) {
     super(pos);

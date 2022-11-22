@@ -11,9 +11,16 @@ public class IRBasicBlock {
   public IRFunction parentFunction = null;
   public ArrayList<IRBasicBlock> pres = new ArrayList<IRBasicBlock>(), succs = new ArrayList<IRBasicBlock>();
 
+  public static int blockCnt = 0;
+
   public IRBasicBlock(IRFunction function, String name) {
     this.parentFunction = function;
-    this.name = name;
+    this.name = name + String.valueOf(blockCnt++);
+  }
+  public IRBasicBlock(IRFunction function, String name, IRBasicBlock toBlock) {
+    this.parentFunction = function;
+    this.name = name + String.valueOf(blockCnt++);
+    this.terminalInst = new IRJumpInst(this, toBlock);
   }
   
   public void addInst(IRInst inst) {

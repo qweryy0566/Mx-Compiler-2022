@@ -5,6 +5,7 @@ import java.util.HashMap;
 import IR.IRFunction;
 import IR.entity.IRRegister;
 import ast.*;
+import ast.stmt.LoopStmtNode;
 
 public class Scope {
   public HashMap<String, Type> varMember = new HashMap<>();
@@ -13,6 +14,7 @@ public class Scope {
   public ClassDefNode inWhichClass = null;
   public boolean inLoop = false, isReturned = false;
 
+  public LoopStmtNode inWhichLoop = null;
   public HashMap<String, IRRegister> IRVarMember = new HashMap<>();
   public HashMap<String, IRFunction> IRFuncMember = new HashMap<>();
 
@@ -25,6 +27,11 @@ public class Scope {
   public Scope(Scope parentScope, boolean isLoopScope) {
     this(parentScope);
     this.inLoop = isLoopScope;
+  }
+  public Scope(Scope parentScope, LoopStmtNode inWhichLoop) {
+    this(parentScope);
+    this.inLoop = true;
+    this.inWhichLoop = inWhichLoop;
   }
   public Scope(Scope parentScope, Type returnType) {
     this.parentScope = parentScope;
