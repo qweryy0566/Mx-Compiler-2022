@@ -17,6 +17,7 @@ public class Scope {
   public LoopStmtNode inWhichLoop = null;
   public HashMap<String, IRRegister> IRVarMember = new HashMap<>();
   public HashMap<String, IRFunction> IRFuncMember = new HashMap<>();
+  // public HashMap<String, IRRegister> IRStringConst = new HashMap<>();
 
   public Scope() {}
   public Scope(Scope parentScope) {

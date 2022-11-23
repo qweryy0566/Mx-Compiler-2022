@@ -57,7 +57,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(VarDefUnitNode node) {
-    
+
   }
 
   @Override
@@ -198,8 +198,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     } else if (node.type == BoolType) {
       node.value = new IRBoolConst(node.str.equals("true"));
     } else if (node.type == StringType) {
-      root.addStringConst(node.str);  // contain quotes
-      // TODO: add string constant
+      node.value = root.addStringConst(node.str.substring(1, node.str.length() - 1));  // not contain quotes
     } else if (node.type == NullType) {
       node.value = new IRNullConst();
     } else {
@@ -209,6 +208,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(VarExprNode node) {
+    // maybe get a null pointer
     node.storePtr = currentScope.getIRVarPtr(node.str);
     // if (node.type != null && !node.type.isArrayType()) {
     //   IRRegister ptr = currentScope.getIRVarPtr(node.str);
@@ -225,6 +225,24 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       node.rhs.accept(this);
     else {
       // TODO: short circuit
+      IRRegister temp = new IRRegister(".shortCirTemp", new IRPtrType(irBoolType));
+      currentScope.addIRVar(".shortCirTemp" + String.valueOf(IRRegister.regCnt - 1), temp);
+      IRBasicBlock rhsBlock = new IRBasicBlock(currentFunction, "rhsBlock_");
+      IRBasicBlock trueBlock = new IRBasicBlock(currentFunction, "trueBlock_");
+      IRBasicBlock falseBlock = new IRBasicBlock(currentFunction, "falseBlock_");
+      IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "");
+      nextBlock.terminalInst = currentBlock.terminalInst;
+      currentBlock.terminalInst = node.op.equals("&&")
+          ? new IRBranchInst(currentBlock, getVal(node.lhs), rhsBlock, falseBlock)
+          : new IRBranchInst(currentBlock, getVal(node.lhs), trueBlock, rhsBlock);
+      currentBlock.isFinished = true;
+      currentBlock = currentFunction.appendBlock(rhsBlock);
+      node.rhs.accept(this);
+      currentBlock.terminalInst = new IRBranchInst(currentBlock, getVal(node.rhs), trueBlock, falseBlock);
+      currentBlock.isFinished = true;
+      currentBlock = currentFunction.appendBlock(trueBlock);
+      // currentBlock.addInst(new IRStoreInst(currentBlock, irTrueConst, temp));
+      return;
     }
     if (node.lhs.type == StringType || node.rhs.type == StringType) {
       // TODO : special for string
@@ -289,23 +307,69 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   public void visit(UnaryExprNode node) {
     node.expr.accept(this);
     IRRegister dest = null;
-    IRType operandType = null;
     String op = null;
     switch (node.op) {
       case "++":
-        operandType = irIntType;
-
+        op = "add";
+        node.value = getVal(node.expr);
+        dest = new IRRegister("tmp", irIntType);
+        currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, dest, node.value, irIntConst1, op));
+        currentBlock.addInst(new IRStoreInst(currentBlock, dest, node.expr.storePtr));
+        break;
       case "--":
+        op = "sub";
+        node.value = getVal(node.expr);
+        dest = new IRRegister("tmp", irIntType);
+        currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, dest, node.value, irIntConst1, op));
+        currentBlock.addInst(new IRStoreInst(currentBlock, dest, node.expr.storePtr));
+        break;
       case "+":
+        node.value = getVal(node.expr);
+        break;
       case "-":
-      case "~":
+        op = "sub";
+        dest = new IRRegister("tmp", irIntType);
+        currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, dest, irIntConst0, getVal(node.expr), op));
+        node.value = dest;
+        break;
+      case "~":  // x ^ -1
+        op = "xor";
+        dest = new IRRegister("tmp", irIntType);
+        currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, dest, getVal(node.expr), irIntConstn1, op));
+        node.value = dest;
+        break;
       case "!":
+        assert node.expr.type == BoolType;
+        op = "xor";
+        dest = new IRRegister("tmp", irCondType);
+        currentBlock.addInst(new IRCalcInst(currentBlock, irCondType, dest, getVal(node.expr), irTrueConst, op));
+        node.value = dest;
     }
   }
 
   @Override
   public void visit(PreAddExprNode node) {
-
+    node.expr.accept(this);
+    IRRegister dest = null;
+    String op = null;
+    switch (node.op) {
+      case "++":
+        op = "add";
+        dest = new IRRegister("tmp", irIntType);
+        currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, dest, getVal(node.expr), irIntConst1, op));
+        currentBlock.addInst(new IRStoreInst(currentBlock, dest, node.expr.storePtr));
+        node.value = dest;
+        node.storePtr = node.expr.storePtr;
+        break;
+      case "--":
+        op = "sub";
+        dest = new IRRegister("tmp", irIntType);
+        currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, dest, getVal(node.expr), irIntConst1, op));
+        currentBlock.addInst(new IRStoreInst(currentBlock, dest, node.expr.storePtr));
+        node.value = dest;
+        node.storePtr = node.expr.storePtr;
+        break;
+    }
   }
 
   @Override
@@ -314,6 +378,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.lhs.accept(this);
     node.storePtr = node.lhs.storePtr;
     node.value = getVal(node.rhs);
+    if (node.value.type == irCondType) {
+      node.value = new IRRegister("tmp", irBoolType);
+      currentBlock.addInst(new IRZextInst(currentBlock, (IRRegister) node.value, getVal(node.rhs), irBoolType));
+    }
     currentBlock.addInst(new IRStoreInst(currentBlock, node.value, node.storePtr));
   }
 
@@ -338,8 +406,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   }
 
   @Override
-  public void visit(LambdaExprNode node) {
-  }
+  public void visit(LambdaExprNode node) {} // No need to implement
 
   @Override
   public void visit(ExprListNode node) {

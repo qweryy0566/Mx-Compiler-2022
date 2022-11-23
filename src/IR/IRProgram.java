@@ -12,8 +12,9 @@ public class IRProgram {
 
   public HashMap<String, IRStringConst> stringConst = new HashMap<>();
 
-  public void addStringConst(String str) {
+  public IRStringConst addStringConst(String str) {
     if (!stringConst.containsKey(str))
       stringConst.put(str, new IRStringConst(str));
+    return stringConst.get(str);
   }
 }
