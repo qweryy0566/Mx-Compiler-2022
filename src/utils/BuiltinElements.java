@@ -34,6 +34,7 @@ public interface BuiltinElements {
   IRType irNullType = new IRPtrType(irVoidType);
   IRType irBoolType = new IRIntType(8), irCharType = irBoolType;
   IRType irCondType = new IRIntType(1);
+  IRType irStringType = new IRPtrType(irCharType);
 
   // ------------------ IR Builtin Constants ------------------
 

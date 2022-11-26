@@ -1,9 +1,12 @@
 package ast;
 
+import IR.type.*;
 import utils.*;
 
 public class TypeNode extends Node {
   public Type type;
+  public IRType irType;
+
   public TypeNode(Position pos) {
     super(pos);
   }
