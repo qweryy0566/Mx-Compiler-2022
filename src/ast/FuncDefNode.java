@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class FuncDefNode extends Node {
   public TypeNode returnType;
-  public String name;
+  public String name, className = null;
   public ParameterListNode params = null;
   public ArrayList<StmtNode> stmts = new ArrayList<StmtNode>();
   public IRFunction irFunc = null;

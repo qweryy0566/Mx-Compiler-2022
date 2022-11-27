@@ -92,6 +92,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.varDefList.forEach(varDef -> varDef.accept(this)); // first add all the fields
     if (node.classBuild != null)
       node.classBuild.accept(this);
+    node.funcDefList.forEach(funcDef -> funcDef.className = node.name);
     node.funcDefList.forEach(funcDef -> funcDef.accept(this)); // ?
     currentScope = currentScope.parentScope;
     structTypeMap.put(node.name, currentClass);
@@ -489,6 +490,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   @Override
   public void visit(FuncExprNode node) {
     // TODO: call a function
+    
   }
 
   @Override
@@ -523,6 +525,6 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(ExprListNode node) {
-
+    node.exprs.forEach(expr -> expr.accept(this));
   }
 }
