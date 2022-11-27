@@ -51,19 +51,50 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(FuncDefNode node) {
-
-
+    node.returnType.accept(this);
+    String funcName = currentClass != null ? currentClass.name + "." + node.name : node.name;
+    currentFunction = new IRFunction(funcName, node.returnType.irType);
+    root.funcList.add(currentFunction);
+  
+    currentScope = new Scope(currentScope, node.returnType.type);
+    currentBlock = currentFunction.appendBlock(new IRBasicBlock(currentFunction, "entry"));
+    if (currentClass != null) {  // is a method
+      IRPtrType classPtrType = new IRPtrType(currentClass);
+      IRRegister thisVal = new IRRegister("this", classPtrType);
+      currentFunction.params.add(thisVal);
+      // store this pointer
+      IRRegister thisAddr = new IRRegister("this.addr", new IRPtrType(classPtrType));
+      currentBlock.addInst(new IRAllocaInst(currentBlock, classPtrType, thisAddr));
+      currentBlock.addInst(new IRStoreInst(currentBlock, thisVal, thisAddr));
+      currentScope.addIRVar("this", thisAddr);
+    }
+    if (node.params != null)
+      node.params.accept(this);
+    node.stmts.forEach(stmt -> stmt.accept(this));
+    if (currentBlock.terminalInst == null) {
+      if (node.returnType.type == VoidType)
+        currentBlock.addInst(new IRRetInst(currentBlock, irVoidConst));
+      else
+        currentBlock.addInst(new IRRetInst(currentBlock, irIntConst0));
+    }
+    node.irFunc = currentFunction;  // store the ir function
+    currentScope = currentScope.parentScope;
     currentFunction = null;
+    currentBlock = null;
   }
 
   @Override
   public void visit(ClassDefNode node) {
     currentScope = new Scope(currentScope, node);
     currentClass = new IRStructType(node.name);
-
-
-    node.funcDefList.forEach(funcDef -> funcDef.accept(this)); // add funcName to currentScope
+    root.structTypeList.add(currentClass);
+  
+    node.varDefList.forEach(varDef -> varDef.accept(this)); // first add all the fields
+    if (node.classBuild != null)
+      node.classBuild.accept(this);
+    node.funcDefList.forEach(funcDef -> funcDef.accept(this)); // ?
     currentScope = currentScope.parentScope;
+    structTypeMap.put(node.name, currentClass);
     currentClass = null;
   }
 
@@ -75,24 +106,31 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   @Override
   public void visit(VarDefUnitNode node) {
     node.type.accept(this);
-    if (currentFunction != null) {
-      IRRegister storePtr = new IRRegister(node.varName, new IRPtrType(node.type.irType));
-      currentScope.addIRVar(node.varName, storePtr);
+    if (currentFunction != null) {  // check if it's in a function first
+      IRRegister storePtr = new IRRegister(node.varName + ".addr", new IRPtrType(node.type.irType));
+      currentScope.addIRVar(node.varName, storePtr);  // use the varName as the key
       currentBlock.addInst(new IRAllocaInst(currentBlock, node.type.irType, storePtr));
       if (node.initVal != null) {
         node.initVal.accept(this);
         currentBlock.addInst(new IRStoreInst(currentBlock, getVal(node.initVal), storePtr));
       }
     } else if (currentClass != null) {
-
+      currentClass.addMember(node.varName, node.type.irType);
+      // do not add to currentScope
     } else {
-      
+      // TODO: global variable
     }
   }
 
   @Override
   public void visit(ParameterListNode node) {
-
+    node.units.forEach(unit -> {
+      assert unit.initVal == null;
+      unit.accept(this);
+      IRRegister input = new IRRegister(unit.varName, unit.type.irType);
+      currentFunction.params.add(input);
+      currentBlock.addInst(new IRStoreInst(currentBlock, input, currentScope.getIRVarPtr(unit.varName)));
+    });
   }
 
   @Override
@@ -103,6 +141,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       case "bool":
         node.irType = irBoolType; break;
       case "string":
+        // TODO : string
         node.irType = irStringType; break;
       case "void":
         node.irType = irVoidType; break;
@@ -115,12 +154,14 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(ClassBuildNode node) {
-
+    node.transToFuncDef().accept(this);
   }
 
   @Override
   public void visit(SuiteNode node) {
-
+    currentScope = new Scope(currentScope);
+    node.stmts.forEach(stmt -> stmt.accept(this));
+    currentScope = currentScope.parentScope;
   }
 
   @Override
@@ -136,7 +177,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     currentBlock = currentFunction.appendBlock(thenBlock);
     node.thenStmts.forEach(stmt -> stmt.accept(this));
     currentScope = currentScope.parentScope;
-    if (node.elseStmts.size() > 0) {
+    if (node.elseStmts != null && !node.elseStmts.isEmpty()) {
       IRBasicBlock elseBlock = new IRBasicBlock(currentFunction, "if_else_", nextBlock);
       currentScope = new Scope(currentScope);
       currentBlock.isFinished = true;
@@ -231,7 +272,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(ExprStmtNode node) {
-    node.expr.accept(this);
+    if (node.expr != null) node.expr.accept(this);
   }
 
   @Override
@@ -252,12 +293,16 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   public void visit(VarExprNode node) {
     // maybe get a null pointer
     node.storePtr = currentScope.getIRVarPtr(node.str);
-    // if (node.type != null && !node.type.isArrayType()) {
-    //   IRRegister ptr = currentScope.getIRVarPtr(node.str);
-    //   IRRegister val = new IRRegister(node.str, ((IRPtrType) ptr.type).baseType);
-    //   currentBlock.addInst(new IRLoadInst(currentBlock, val, ptr));
-    //   node.value = val;
-    // }
+    if (node.storePtr == null) {  // is a member
+      IRRegister thisAddr = currentScope.getIRVarPtr("this");
+      assert thisAddr != null && thisAddr.type instanceof IRPtrType;
+      IRType objRealType =  ((IRPtrType) thisAddr.type).pointToType();
+      IRRegister thisVal = new IRRegister("this", objRealType);
+      currentBlock.addInst(new IRLoadInst(currentBlock, thisVal, thisAddr));
+      node.storePtr = new IRRegister("this." + node.str, new IRPtrType(((IRStructType) objRealType).getMemberType(node.str)));
+      currentBlock.addInst(new IRGetElementPtrInst(currentBlock, thisVal, node.storePtr, irIntConst0,
+          new IRIntConst(((IRStructType) objRealType).memberOffset.get(node.str))));
+    }
   }
 
   @Override
@@ -266,7 +311,6 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     if (!node.op.equals("&&") && !node.op.equals("||"))
       node.rhs.accept(this);
     else {
-      // TODO: short circuit
       IRRegister temp = new IRRegister(".shortCirTemp", new IRPtrType(irBoolType));
       currentScope.addIRVar(String.valueOf(IRRegister.regCnt - 1), temp);  // 变量名不可能以数字开头
       IRBasicBlock rhsBlock = new IRBasicBlock(currentFunction, "rhsBlock_");
@@ -444,7 +488,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(FuncExprNode node) {
-
+    // TODO: call a function
   }
 
   @Override
@@ -452,23 +496,33 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.array.accept(this);
     node.index.accept(this);
     IRRegister dest = new IRRegister("", node.array.value.type);
-    currentBlock.addInst(new IRGetElementPtrInst(currentBlock, dest, (IRRegister) getVal(node.array), getVal(node.index)));
+    currentBlock.addInst(new IRGetElementPtrInst(currentBlock, getVal(node.array), dest, getVal(node.index)));
     node.storePtr = dest;
   }
 
   @Override
   public void visit(MemberExprNode node) {
-
+    // all class is pointer
+    node.obj.accept(this);
+    IRType objRealType = getVal(node.obj).type;
+    assert objRealType instanceof IRPtrType;
+    objRealType = ((IRPtrType) objRealType).pointToType();
+    assert objRealType instanceof IRStructType;
+    node.storePtr = new IRRegister(node.member, new IRPtrType(((IRStructType) objRealType).getMemberType(node.member)));
+    currentBlock.addInst(new IRGetElementPtrInst(currentBlock, getVal(node.obj), node.storePtr, irIntConst0,
+        new IRIntConst(((IRStructType) objRealType).memberOffset.get(node.member))));
   }
 
   @Override
   public void visit(NewExprNode node) {
-
+    // TODO : new array and new class
   }
 
   @Override
   public void visit(LambdaExprNode node) {} // No need to implement
 
   @Override
-  public void visit(ExprListNode node) {}
+  public void visit(ExprListNode node) {
+
+  }
 }

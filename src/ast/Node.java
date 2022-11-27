@@ -2,7 +2,7 @@ package ast;
 
 import utils.*;
 
-public abstract class Node {
+public abstract class Node implements BuiltinElements {
   public Position pos;
 
   public Node(Position pos) {

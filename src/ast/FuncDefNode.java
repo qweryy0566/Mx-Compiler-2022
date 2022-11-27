@@ -1,14 +1,16 @@
 package ast;
 
 import ast.stmt.*;
+import IR.*;
 import utils.*;
 import java.util.ArrayList;
 
 public class FuncDefNode extends Node {
   public TypeNode returnType;
   public String name;
-  public ParameterListNode params;
+  public ParameterListNode params = null;
   public ArrayList<StmtNode> stmts = new ArrayList<StmtNode>();
+  public IRFunction irFunc = null;
 
   public FuncDefNode(Position pos, String name) {
     super(pos);

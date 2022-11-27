@@ -8,7 +8,16 @@ public class IRStructType extends IRType {
   public HashMap<String, Integer> memberOffset = new HashMap<>();
 
   public IRStructType(String name) {
-    super(name, 0); // TODO: size
-    
+    super("class." + name, 0); // TODO: size
+
+  }
+
+  public void addMember(String name, IRType type) {
+    memberType.add(type);
+    memberOffset.put(name, memberType.size() - 1);
+  }
+
+  public IRType getMemberType(String name) {
+    return memberType.get(memberOffset.get(name));
   }
 }
