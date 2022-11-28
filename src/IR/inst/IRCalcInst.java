@@ -23,6 +23,6 @@ public class IRCalcInst extends IRInst {
   
   @Override
   public String toString() {
-    return "%" + String.valueOf(res.index) + " = " + op + " " + resultType.toString() + " " + lhs.toString() + ", " + rhs.toString();
+    return "%" + String.valueOf(res.index) + " = " + op + " " + lhs.toString() + ", " + rhs.toString();
   }
 }

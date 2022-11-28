@@ -10,6 +10,6 @@ public class IRIntType extends IRType {
 
   @Override
   public String toString() {
-    return "%i" + String.valueOf(bitWidth);
+    return "i" + String.valueOf(bitWidth);
   }
 }

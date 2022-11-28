@@ -25,6 +25,12 @@ public class IRFunction {
     return block;
   }
 
+  public void addAllocasToEntryBlock() {
+    IRBasicBlock entryBlock = blocks.getFirst();
+    for (IRAllocaInst inst : allocaInsts)
+      entryBlock.insts.addFirst(inst);
+  }
+
   public String toString() {
     String ret = "define " + returnType.toString() + " @" + name + "(";
     for (int i = 0; i < params.size(); ++i) {

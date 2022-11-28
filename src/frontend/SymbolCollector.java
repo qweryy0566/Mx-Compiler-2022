@@ -31,6 +31,7 @@ public class SymbolCollector implements ASTVisitor {
     for (var func : node.funcDefList) {
       if (node.funcMember.containsKey(func.name))
         throw new BaseError(func.pos, "Function " + func.name + " is already defined");
+      func.className = node.name;
       node.funcMember.put(func.name, func);
     }
     for (var var : node.varDefList)

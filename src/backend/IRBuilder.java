@@ -79,6 +79,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     }
     node.irFunc = currentFunction;  // store the ir function
     currentScope = currentScope.parentScope;
+    currentFunction.addAllocasToEntryBlock();
     currentFunction = null;
     currentBlock = null;
   }
@@ -392,9 +393,11 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
           break;
         case "==":
         case "!=":
+          getVal(node.lhs);
+          getVal(node.rhs);
           operandType = node.lhs.type == NullType ? node.rhs.getIRType() : node.lhs.getIRType();
           dest = new IRRegister("tmp", irCondType);
-          currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, getVal(node.lhs), getVal(node.rhs), op));
+          currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, node.lhs.value, node.rhs.value, op));
           break;
       }
       node.value = dest;
@@ -490,7 +493,8 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   @Override
   public void visit(FuncExprNode node) {
     // TODO: call a function
-    
+    node.funcName.accept(this);
+
   }
 
   @Override

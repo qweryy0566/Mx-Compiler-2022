@@ -23,6 +23,6 @@ public class IRIcmpInst extends IRInst {
 
   @Override
   public String toString() {
-    return "%" + String.valueOf(cmpReg.index) + " = icmp " + op + " " + type.toString() + " " + lhs.toString() + ", " + rhs.toString();
+    return "%" + String.valueOf(cmpReg.index) + " = icmp " + op + " " + lhs.toString() + ", " + rhs.toString();
   }
 }
