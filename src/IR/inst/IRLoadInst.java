@@ -13,7 +13,8 @@ public class IRLoadInst extends IRInst {
     this.srcAddr = srcAddr;
   }
 
+  @Override
   public String toString() {
-    return "";
+    return "%" + String.valueOf(destReg.index) + " = load " + srcAddr.toString();
   }
 }

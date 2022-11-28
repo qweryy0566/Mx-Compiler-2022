@@ -10,4 +10,9 @@ public class IRBoolConst extends IRConst {
     super(irBoolType);
     this.val = val;
   }
+
+  @Override
+  public String toString() {
+    return type.toString() + " " + (val ? "1" : "0");
+  }
 }

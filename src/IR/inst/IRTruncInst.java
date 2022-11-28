@@ -15,7 +15,9 @@ public class IRTruncInst extends IRInst {
     this.val = val;
     this.targetType = type;
   }
+
+  @Override
   public String toString() {
-    return "";
+    return "%" + String.valueOf(dest.index) + " = trunc " + val.toString() + " to " + targetType.toString();
   }
 } 

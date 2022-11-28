@@ -9,18 +9,23 @@ import java.util.ArrayList;
 public class IRGetElementPtrInst extends IRInst {
   public IRRegister res;
   public IREntity ptr;
-  public IRType ptrType;
+  public IRType pToType;
   public ArrayList<IREntity> indexList = new ArrayList<IREntity>();
 
   public IRGetElementPtrInst(IRBasicBlock block, IREntity ptr, IRRegister res, IREntity... indexList) {
     super(block);
     this.ptr = ptr;
-    this.ptrType = ptr.type;
+    this.pToType = ((IRPtrType) ptr.type).pointToType();
     this.res = res;
     for (IREntity index : indexList)
       this.indexList.add(index);
   }
+
+  @Override
   public String toString() {
-    return "";
+    String ret = "%" + String.valueOf(res.index) + " = getelementptr " + pToType.toString() + ", " + ptr.toString();
+    for (IREntity index : indexList)
+      ret += ", " + index.toString();
+    return ret;
   }
 }

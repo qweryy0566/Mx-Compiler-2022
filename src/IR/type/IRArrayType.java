@@ -9,4 +9,9 @@ public class IRArrayType extends IRType {
     this.baseType = baseType;
     this.cnt = cnt;
   }
+
+  @Override
+  public String toString() {
+    return "[" + String.valueOf(cnt) + " x " + baseType.toString() + "]";
+  }
 }

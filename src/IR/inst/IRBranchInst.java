@@ -14,7 +14,8 @@ public class IRBranchInst extends IRTerminalInst {
     this.thenBlock = thenBlock;
     this.elseBlock = elseBlock;
   }
+  @Override
   public String toString() {
-    return "";
+    return "br " + cond.toString() + ", label %" + thenBlock.name + ", label %" + elseBlock.name;
   }
 }

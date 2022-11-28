@@ -12,4 +12,9 @@ public class IRRegister extends IREntity {
     this.name = name;
     index = regCnt++;
   }
+
+  @Override
+  public String toString() {
+    return type.toString() + " %" + String.valueOf(index);
+  }
 }

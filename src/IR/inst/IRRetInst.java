@@ -10,7 +10,9 @@ public class IRRetInst extends IRTerminalInst {
     super(block);
     this.val = val;
   }
+  
+  @Override
   public String toString() {
-    return "";
+    return "ret " + val.toString();
   }
 }

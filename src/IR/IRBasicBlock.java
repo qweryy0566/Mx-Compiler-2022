@@ -34,6 +34,11 @@ public class IRBasicBlock {
       insts.add(inst);
   }
   public String toString() {
-    return "";
+    String ret = name + ":\n";
+    for (IRInst inst : insts)
+      ret += "  " + inst.toString() + "\n";
+    if (terminalInst != null)
+      ret += "  " + terminalInst.toString() + "\n";
+    return ret;
   }
 }

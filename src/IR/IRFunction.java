@@ -24,4 +24,17 @@ public class IRFunction {
     blocks.add(block);
     return block;
   }
+
+  public String toString() {
+    String ret = "define " + returnType.toString() + " @" + name + "(";
+    for (int i = 0; i < params.size(); ++i) {
+      ret += params.get(i).toString();
+      if (i != params.size() - 1) ret += ", ";
+    }
+    ret += ") {\n";
+    for (IRBasicBlock block : blocks)
+      ret += block.toString();
+    ret += "}\n";
+    return ret;
+  }
 }

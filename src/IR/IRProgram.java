@@ -17,4 +17,16 @@ public class IRProgram {
       stringConst.put(str, new IRStringConst(str));
     return stringConst.get(str);
   }
+
+  @Override
+  public String toString() {
+    String ret = "";
+    for (IRStructType structType : structTypeList)
+      ret += structType.toString() + "\n";
+    for (IRGlobalVar globalVar : globalVarList)
+      ret += globalVar.toString() + "\n";
+    for (IRFunction func : funcList)
+      ret += func.toString();
+    return ret;
+  }
 }

@@ -31,4 +31,9 @@ public class IRPtrType extends IRType {
     }
     return false;
   }
+
+  @Override
+  public String toString() {
+    return baseType.toString() + "*".repeat(dim);
+  }
 }

@@ -15,7 +15,9 @@ public class IRZextInst extends IRInst {
     this.val = val;
     this.targetType = type;
   }
+
+  @Override
   public String toString() {
-    return "";
+    return "%" + String.valueOf(dest.index) + " = zext " + val.toString() + " to " + targetType.toString();
   }
 } 

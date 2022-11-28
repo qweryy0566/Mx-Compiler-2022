@@ -11,8 +11,10 @@ public class IRStoreInst extends IRInst {
     this.val = val;
     this.destAddr = destAddr;
   }
+
+  @Override
   public String toString() {
-    return "";
+    return "store " + val.toString() + ", " + destAddr.toString();
   }
 }
 

@@ -10,7 +10,8 @@ public class IRJumpInst extends IRTerminalInst {
     this.toBlock = toBlock;
   }
 
+  @Override
   public String toString() {
-    return "";
+    return "br label %" + toBlock.name;
   }
 }

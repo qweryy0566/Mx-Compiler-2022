@@ -9,4 +9,6 @@ public abstract class IREntity implements BuiltinElements {
   IREntity(IRType type) {
     this.type = type;
   }
+
+  public abstract String toString();
 }

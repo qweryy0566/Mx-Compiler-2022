@@ -10,4 +10,9 @@ public class IRStringConst extends IRConst {
     super(new IRPtrType(new IRArrayType(irBoolType, val.length())));
     this.val = val;
   }
+
+  @Override
+  public String toString() {
+    return "0";
+  }
 }

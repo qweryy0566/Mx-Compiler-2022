@@ -10,4 +10,9 @@ public class IRCondConst extends IRConst {
     super(irCondType);
     this.val = val;
   }
+
+  @Override
+  public String toString() {
+    return val ? "true" : "false";
+  }
 }

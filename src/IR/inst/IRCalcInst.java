@@ -21,7 +21,8 @@ public class IRCalcInst extends IRInst {
     this.op = op;
   }
   
+  @Override
   public String toString() {
-    return "";
+    return "%" + String.valueOf(res.index) + " = " + op + " " + resultType.toString() + " " + lhs.toString() + ", " + rhs.toString();
   }
 }

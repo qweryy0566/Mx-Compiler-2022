@@ -10,4 +10,9 @@ public class IRIntConst extends IRConst {
     super(irIntType);
     this.val = val;
   }
+
+  @Override
+  public String toString() {
+    return type.toString() + " " + String.valueOf(val);
+  }
 }

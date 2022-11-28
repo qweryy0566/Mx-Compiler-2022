@@ -8,7 +8,7 @@ public class IRStructType extends IRType {
   public HashMap<String, Integer> memberOffset = new HashMap<>();
 
   public IRStructType(String name) {
-    super("class." + name, 0); // TODO: size
+    super("struct." + name, 0); // TODO: size
 
   }
 
@@ -19,5 +19,10 @@ public class IRStructType extends IRType {
 
   public IRType getMemberType(String name) {
     return memberType.get(memberOffset.get(name));
+  }
+
+  @Override
+  public String toString() {
+    return "%" + name;
   }
 }

@@ -12,8 +12,10 @@ public class IRAllocaInst extends IRInst {
     this.type = type;
     this.allocaReg = allocaReg;
   }
+
+  @Override
   public String toString() {
-    return "";
+    return "%" + String.valueOf(allocaReg.index) + " = alloca " + type.toString();
   }
 }
 

@@ -8,7 +8,9 @@ import java.io.FileInputStream;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import IR.*;
 import frontend.*;
+import backend.*;
 
 public class Compiler {
   public static void main(String[] args) throws Exception {
@@ -27,5 +29,8 @@ public class Compiler {
     GlobalScope globalScope = new GlobalScope();
     new SymbolCollector(globalScope).visit(ast);
     new SemanticChecker(globalScope).visit(ast);
+    IRProgram irProgram = new IRProgram();
+    new IRBuilder(irProgram, globalScope).visit(ast);
+    System.out.println(irProgram);
   }
 }

@@ -281,7 +281,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     if (node.type == IntType) {
       node.value = new IRIntConst(Integer.parseInt(node.str));
     } else if (node.type == BoolType) {
-      node.value = new IRBoolConst(node.str.equals("true"));
+      node.value = new IRCondConst(node.str.equals("true"));
     } else if (node.type == StringType) {
       node.value = root.addStringConst(node.str.substring(1, node.str.length() - 1));  // not contain quotes
     } else if (node.type == NullType) {

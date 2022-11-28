@@ -8,5 +8,7 @@ public abstract class IRType {
     this.name = name;
     this.size = size;
   }
+
+  public abstract String toString();
 }
 
