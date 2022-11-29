@@ -10,13 +10,12 @@ public class IRCallInst extends IRInst {
   public IRType returnType;
   public ArrayList<IREntity> args = new ArrayList<IREntity>();
   public IRRegister callReg;
-  public IRFunction callfunc;
+  public String funcName;
 
-  public IRCallInst(IRBasicBlock block, IRType returnType, IRFunction callfunc, IRRegister callReg) {
+  public IRCallInst(IRBasicBlock block, IRType returnType, String funcName) {
     super(block);
     this.returnType = returnType;
-    this.callfunc = callfunc;
-    this.callReg = callReg;
+    this.funcName = funcName;
   }
 
   public String toString() {
