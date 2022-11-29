@@ -8,6 +8,7 @@ import IR.*;
 import IR.inst.*;
 import IR.entity.*;
 import IR.type.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class IRBuilder implements ASTVisitor, BuiltinElements {
@@ -42,6 +43,25 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     currentBlock.addInst(new IRGetElementPtrInst(currentBlock, str, ret, irIntConst0, irIntConst0));
     return ret;
   }
+  private IRType typeTrans(Type type, boolean isReturnType) {
+    IRType irType;
+    switch (type.typeName) {
+      case "int":
+        irType = irIntType; break;
+      case "bool":
+        irType = isReturnType ? irCondType : irBoolType; break;
+      case "string":
+        // TODO : string
+        irType = irStringType; break;
+      case "void":
+        irType = irVoidType; break;
+      default:
+        irType = new IRPtrType(structTypeMap.get(type.typeName), 1);  // all class is pointer
+    }
+    if (type.dim > 0)
+      irType = new IRPtrType(irType, type.dim);
+    return irType;
+  }
 
   @Override
   public void visit(ProgramNode node) {
@@ -56,6 +76,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     });
   }
 
+  // TODO : only one return block
   @Override
   public void visit(FuncDefNode node) {
     node.returnType.accept(this);
@@ -104,6 +125,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.funcDefList.forEach(funcDef -> funcDef.accept(this)); // ?
     currentScope = currentScope.parentScope;
     structTypeMap.put(node.name, currentClass);
+    currentClass.calcSize();
     currentClass = null;
   }
 
@@ -112,16 +134,18 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.units.forEach(unit -> unit.accept(this));
   }
 
+  private IRRegister definingPtr;
+
   @Override
   public void visit(VarDefUnitNode node) {
     node.type.accept(this);
     if (currentFunction != null) {  // check if it's in a function first
-      IRRegister storePtr = new IRRegister(node.varName + ".addr", new IRPtrType(node.type.irType));
-      currentScope.addIRVar(node.varName, storePtr);  // use the varName as the key
-      currentBlock.addInst(new IRAllocaInst(currentBlock, node.type.irType, storePtr));
+      definingPtr = new IRRegister(node.varName + ".addr", new IRPtrType(node.type.irType));
+      currentScope.addIRVar(node.varName, definingPtr);  // use the varName as the key
+      currentBlock.addInst(new IRAllocaInst(currentBlock, node.type.irType, definingPtr));
       if (node.initVal != null) {
         node.initVal.accept(this);
-        currentBlock.addInst(new IRStoreInst(currentBlock, getVal(node.initVal), storePtr));
+        currentBlock.addInst(new IRStoreInst(currentBlock, getVal(node.initVal), definingPtr));
       }
     } else if (currentClass != null) {
       currentClass.addMember(node.varName, node.type.irType);
@@ -144,21 +168,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(TypeNode node) {
-    switch (node.type.typeName) {
-      case "int":
-        node.irType = irIntType; break;
-      case "bool":
-        node.irType = irBoolType; break;
-      case "string":
-        // TODO : string
-        node.irType = irStringType; break;
-      case "void":
-        node.irType = irVoidType; break;
-      default:
-        node.irType = new IRPtrType(structTypeMap.get(node.type.typeName), 1);  // all class is pointer
-    }
-    if (node.type.dim > 0)
-      node.irType = new IRPtrType(node.irType, node.type.dim);
+    node.irType = typeTrans(node.type, false);
   }
 
   @Override
@@ -541,10 +551,38 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
         new IRIntConst(((IRStructType) objRealType).memberOffset.get(node.member))));
   }
 
+  private IREntity newArray(IRType type, int at, ArrayList<ExprNode> sizeList) {
+    IRRegister callReg = new IRRegister("call", new IRPtrType(irCharType));
+    sizeList.get(at).accept(this);
+    IREntity cnt = getVal(sizeList.get(at)), size;
+    if (cnt instanceof IRIntConst) {
+      size = new IRIntConst(((IRIntConst) cnt).val * type.size);
+    } else {
+      IRIntConst typeSize = new IRIntConst(type.size);
+      size = new IRRegister("siz", irIntType);
+      currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, (IRRegister) size, cnt, typeSize, "mul"));
+    }
+    IRCallInst callInst = new IRCallInst(currentBlock, new IRPtrType(irCharType), "malloc");
+    callInst.args.add(size);
+    callInst.callReg = callReg;
+    currentBlock.addInst(callInst);
+    IRRegister ptr = new IRRegister("ptr", type);
+    currentBlock.addInst(new IRBitcastInst(currentBlock, callReg, type, ptr));
+    if (at + 1 < sizeList.size()) {
+      
+    }
+    return ptr;
+  }
+
   @Override
   public void visit(NewExprNode node) {
     // TODO : new array and new class
-    
+    IRType type = typeTrans(node.type, false);
+    if (node.dim > 0) {
+      node.value = newArray(type, 0, node.sizeList);
+    } else {
+
+    }
   }
 
   @Override
