@@ -16,6 +16,6 @@ public class IRBranchInst extends IRTerminalInst {
   }
   @Override
   public String toString() {
-    return "br " + cond.toString() + ", label %" + thenBlock.name + ", label %" + elseBlock.name;
+    return "br " + cond.toStringWithType() + ", label %" + thenBlock.name + ", label %" + elseBlock.name;
   }
 }

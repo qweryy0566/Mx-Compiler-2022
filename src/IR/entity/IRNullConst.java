@@ -12,4 +12,9 @@ public class IRNullConst extends IRConst {
   public String toString() {
     return "null";
   }
+
+  @Override
+  public String toStringWithType() {
+    return toString();
+  }
 }

@@ -23,9 +23,9 @@ public class IRGetElementPtrInst extends IRInst {
 
   @Override
   public String toString() {
-    String ret = "%" + String.valueOf(res.index) + " = getelementptr " + pToType.toString() + ", " + ptr.toString();
+    String ret = res + " = getelementptr " + pToType + ", " + ptr.toStringWithType();
     for (IREntity index : indexList)
-      ret += ", " + index.toString();
+      ret += ", " + index.toStringWithType();
     return ret;
   }
 }

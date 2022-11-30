@@ -19,6 +19,12 @@ public class IRCallInst extends IRInst {
   }
 
   public String toString() {
-    return "";
+    String ret = callReg + " = call " + returnType + " @" + funcName + "(";
+    for (int i = 0; i < args.size(); ++i) {
+      ret += args.get(i).toStringWithType();
+      if (i != args.size() - 1) ret += ", ";
+    }
+    ret += ")";
+    return ret;
   }
 }

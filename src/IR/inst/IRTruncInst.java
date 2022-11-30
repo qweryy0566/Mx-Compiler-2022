@@ -18,6 +18,6 @@ public class IRTruncInst extends IRInst {
 
   @Override
   public String toString() {
-    return "%" + String.valueOf(dest.index) + " = trunc " + val.toString() + " to " + targetType.toString();
+    return dest + " = trunc " + val.toStringWithType() + " to " + targetType;
   }
 } 

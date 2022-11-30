@@ -15,6 +15,6 @@ public class IRLoadInst extends IRInst {
 
   @Override
   public String toString() {
-    return "%" + String.valueOf(destReg.index) + " = load " + srcAddr.toString();
+    return destReg + " = load " + srcAddr.toStringWithType();
   }
 }

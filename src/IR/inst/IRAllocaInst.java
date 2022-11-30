@@ -15,7 +15,7 @@ public class IRAllocaInst extends IRInst {
 
   @Override
   public String toString() {
-    return "%" + String.valueOf(allocaReg.index) + " = alloca " + type.toString();
+    return allocaReg + " = alloca " + type;
   }
 }
 

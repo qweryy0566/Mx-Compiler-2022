@@ -11,4 +11,6 @@ public abstract class IREntity implements BuiltinElements {
   }
 
   public abstract String toString();
+
+  public abstract String toStringWithType();
 }

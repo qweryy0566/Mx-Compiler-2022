@@ -13,6 +13,11 @@ public class IRBoolConst extends IRConst {
 
   @Override
   public String toString() {
-    return type.toString() + " " + (val ? "1" : "0");
+    return val ? "1" : "0";
+  }
+
+  @Override
+  public String toStringWithType() {
+    return toString();
   }
 }

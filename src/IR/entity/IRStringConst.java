@@ -15,4 +15,9 @@ public class IRStringConst extends IRConst {
   public String toString() {
     return "0";
   }
+
+  @Override
+  public String toStringWithType() {
+    return toString();
+  }
 }

@@ -15,6 +15,11 @@ public class IRRegister extends IREntity {
 
   @Override
   public String toString() {
-    return type.toString() + " %" + String.valueOf(index);
+    return "%" + String.valueOf(index);
+  }
+
+  @Override
+  public String toStringWithType() {
+    return type + " " + toString();
   }
 }

@@ -5,12 +5,18 @@ public class IRPtrType extends IRType {
   public int dim = 1;
 
   public IRPtrType(IRType baseType) {
-    super(baseType.name + "*", 32);
+    super(baseType.name + "*", 4);
     this.baseType = baseType;
+    if (baseType instanceof IRPtrType) {
+      this.baseType = ((IRPtrType) baseType).baseType;
+      this.dim = ((IRPtrType) baseType).dim + 1;
+    } else {
+      this.dim = 1;
+    }
   }
 
   public IRPtrType(IRType baseType, int dim) {
-    super(baseType.name + "*".repeat(dim), 32);
+    super(baseType.name + "*".repeat(dim), 4);
     if (baseType instanceof IRPtrType) {
       this.baseType = ((IRPtrType) baseType).baseType;
       this.dim = ((IRPtrType) baseType).dim + dim;

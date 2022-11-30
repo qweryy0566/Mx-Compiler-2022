@@ -14,8 +14,8 @@ import backend.*;
 
 public class Compiler {
   public static void main(String[] args) throws Exception {
-    // CharStream input = CharStreams.fromStream(new FileInputStream("data/sema/basic-package/basic-68.mx"));
-    CharStream input = CharStreams.fromStream(System.in);
+    CharStream input = CharStreams.fromStream(new FileInputStream("input.mx"));
+    //CharStream input = CharStreams.fromStream(System.in);
     MxLexer lexer = new MxLexer(input);
     lexer.removeErrorListeners();
     lexer.addErrorListener(new MxErrorListener());

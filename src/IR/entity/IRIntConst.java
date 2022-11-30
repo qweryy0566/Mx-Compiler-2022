@@ -13,6 +13,11 @@ public class IRIntConst extends IRConst {
 
   @Override
   public String toString() {
-    return type.toString() + " " + String.valueOf(val);
+    return String.valueOf(val);
+  }
+
+  @Override
+  public String toStringWithType() {
+    return "i32 " + toString();
   }
 }

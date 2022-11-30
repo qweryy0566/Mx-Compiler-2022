@@ -14,7 +14,7 @@ public class IRStoreInst extends IRInst {
 
   @Override
   public String toString() {
-    return "store " + val.toString() + ", " + destAddr.toString();
+    return "store " + val.toStringWithType() + ", " + destAddr.toStringWithType();
   }
 }
 

@@ -321,8 +321,7 @@ public class SemanticChecker implements ASTVisitor, BuiltinElements {
     node.index.accept(this);
     if (node.array.type == null || node.index.type == null || !node.index.type.equals(IntType))
       throw new BaseError(node.pos, "invalid expression");
-    node.type = node.array.type;
-    --node.type.dim;
+    node.type = new Type(node.array.type.typeName, node.array.type.dim - 1);
     if (node.type.dim < 0)
       throw new BaseError(node.pos, "Type mismatch");
   }

@@ -9,4 +9,9 @@ public class IRVoidConst extends IRConst {
   public String toString() {
     return "void";
   }
+
+  @Override
+  public String toStringWithType() {
+    return toString();
+  }
 }

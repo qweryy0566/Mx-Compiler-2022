@@ -15,4 +15,9 @@ public class IRCondConst extends IRConst {
   public String toString() {
     return val ? "true" : "false";
   }
+
+  @Override
+  public String toStringWithType() {
+    return toString();
+  }
 }

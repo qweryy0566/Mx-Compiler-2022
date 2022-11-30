@@ -18,6 +18,6 @@ public class IRBitcastInst extends IRInst {
 
   @Override
   public String toString() {
-    return "%" + String.valueOf(dest.index) + " = bitcast " + val.toString() + " to " + type.toString();
+    return dest + " = bitcast " + val.toStringWithType() + " to " + type;
   }
 }

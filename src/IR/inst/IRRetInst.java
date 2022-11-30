@@ -13,6 +13,6 @@ public class IRRetInst extends IRTerminalInst {
   
   @Override
   public String toString() {
-    return "ret " + val.toString();
+    return "ret " + val.toStringWithType();
   }
 }
