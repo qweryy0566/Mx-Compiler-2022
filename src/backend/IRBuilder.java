@@ -569,7 +569,42 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     IRRegister ptr = new IRRegister("ptr", type);
     currentBlock.addInst(new IRBitcastInst(currentBlock, callReg, type, ptr));
     if (at + 1 < sizeList.size()) {
-      
+      IRRegister idx = new IRRegister("i", irIntType);
+      currentBlock.addInst(new IRAllocaInst(currentBlock, irIntType, idx));
+      currentBlock.addInst(new IRStoreInst(currentBlock, irIntConst0, idx));
+      IRBasicBlock condBlock = new IRBasicBlock(currentFunction, "for.cond_");
+      IRBasicBlock loopBlock = new IRBasicBlock(currentFunction, "for.loop_");
+      IRBasicBlock stepBlock = new IRBasicBlock(currentFunction, "for.step_");
+      IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "");
+      nextBlock.terminalInst = currentBlock.terminalInst;
+      currentBlock.terminalInst = new IRJumpInst(currentBlock, condBlock);
+      currentBlock.isFinished = true;
+
+      currentBlock = currentFunction.appendBlock(condBlock);
+      IRRegister cond = new IRRegister("cond", irCondType);
+      IRRegister iVal = new IRRegister("iVal", irIntType);
+      currentBlock.addInst(new IRLoadInst(currentBlock, iVal, idx));
+      currentBlock.addInst(new IRIcmpInst(currentBlock, irIntType, cond, iVal, cnt, "slt"));
+      currentBlock.terminalInst = new IRBranchInst(currentBlock, cond, loopBlock, nextBlock);
+      currentBlock.isFinished = true;
+
+      currentBlock = currentFunction.appendBlock(loopBlock);
+      IREntity iPtrVal = newArray(((IRPtrType) type).pointToType(), at + 1, sizeList);
+      IRRegister iPtr = new IRRegister("iPtr", type);
+      currentBlock.addInst(new IRGetElementPtrInst(currentBlock, ptr, iPtr, iVal));
+      currentBlock.addInst(new IRStoreInst(currentBlock, iPtrVal, iPtr));
+      currentBlock.terminalInst = new IRJumpInst(currentBlock, stepBlock);
+      currentBlock.isFinished = true;
+
+      currentBlock = currentFunction.appendBlock(stepBlock);
+      IRRegister iVal2 = new IRRegister("iVal2", irIntType), iRes = new IRRegister("iRes", irIntType);
+      currentBlock.addInst(new IRLoadInst(nextBlock, iVal2, idx));
+      currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, iRes, iVal2, irIntConst1, "add"));
+      currentBlock.addInst(new IRStoreInst(currentBlock, iRes, idx));
+      currentBlock.terminalInst = new IRJumpInst(currentBlock, condBlock);
+      currentBlock.isFinished = true;
+
+      currentBlock = currentFunction.appendBlock(nextBlock);
     }
     return ptr;
   }
