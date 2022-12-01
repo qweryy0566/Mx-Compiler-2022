@@ -17,9 +17,17 @@ public class IRCallInst extends IRInst {
     this.returnType = returnType;
     this.funcName = funcName;
   }
+  public IRCallInst(IRBasicBlock block, IRRegister callReg, IRType returnType, String funcName, IREntity... args) {
+    super(block);
+    this.returnType = returnType;
+    this.callReg = callReg;
+    this.funcName = funcName;
+    for (IREntity arg : args)
+      this.args.add(arg);
+  }
 
   public String toString() {
-    String ret = callReg + " = call " + returnType + " @" + funcName + "(";
+    String ret = (callReg != null ? callReg + " = call " : "call ") + returnType + " @" + funcName + "(";
     for (int i = 0; i < args.size(); ++i) {
       ret += args.get(i).toStringWithType();
       if (i != args.size() - 1) ret += ", ";

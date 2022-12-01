@@ -23,8 +23,13 @@ public class IRProgram {
     String ret = "";
     for (IRStructType structType : structTypeList)
       ret += structType.toString() + "\n";
+    ret += "\n";
+    for (IRStringConst str : stringConst.values())
+      ret += "@str." + String.valueOf(str.id) + " = private unnamed_addr constant [" + String.valueOf(str.val.length() + 1) + " x i8] c\"" + str.val + "\\00\"\n";
+    ret += "\n";
     for (IRGlobalVar globalVar : globalVarList)
       ret += globalVar.toString() + "\n";
+    ret += "\n";
     for (IRFunction func : funcList)
       ret += func.toString();
     return ret;

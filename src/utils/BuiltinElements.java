@@ -39,6 +39,7 @@ public interface BuiltinElements {
   // ------------------ IR Builtin Constants ------------------
 
   IRVoidConst irVoidConst = new IRVoidConst();
+  IRNullConst irNullConst = new IRNullConst();
   IRCondConst irTrueConst = new IRCondConst(true);
   IRCondConst irFalseConst = new IRCondConst(false);
   IRBoolConst irBoolTrueConst = new IRBoolConst(true);
