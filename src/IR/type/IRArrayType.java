@@ -1,5 +1,7 @@
 package IR.type;
 
+import IR.entity.*;
+
 public class IRArrayType extends IRType {
   public IRType baseType;
   public int cnt;
@@ -13,5 +15,10 @@ public class IRArrayType extends IRType {
   @Override
   public String toString() {
     return "[" + String.valueOf(cnt) + " x " + baseType.toString() + "]";
+  }
+
+  @Override
+  public IREntity defaultValue() {
+    return irNullConst;
   }
 }

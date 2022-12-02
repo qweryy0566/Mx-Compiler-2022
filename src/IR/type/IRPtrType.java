@@ -1,5 +1,7 @@
 package IR.type;
 
+import IR.entity.*;
+
 public class IRPtrType extends IRType {
   public IRType baseType;
   public int dim = 1, cnt = 1;
@@ -41,5 +43,10 @@ public class IRPtrType extends IRType {
   @Override
   public String toString() {
     return baseType.toString() + "*".repeat(dim);
+  }
+
+  @Override
+  public IREntity defaultValue() {
+    return irNullConst;
   }
 }

@@ -3,7 +3,7 @@ package ast.expr;
 import ast.*;
 import utils.*;
 
-public class MemberExprNode extends ExprNode implements BuiltinElements {
+public class MemberExprNode extends ExprNode {
   public ExprNode obj;
   public String member;
 

@@ -1,6 +1,9 @@
 package IR.type;
 
-public abstract class IRType {
+import utils.*;
+import IR.entity.*;
+
+public abstract class IRType implements BuiltinElements {
   public String name;
   public int size;  // cnt of bit
 
@@ -14,5 +17,6 @@ public abstract class IRType {
   }
 
   public abstract String toString();
+  public abstract IREntity defaultValue();
 }
 

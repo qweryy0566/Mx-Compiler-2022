@@ -2,8 +2,8 @@ package utils;
 
 import java.util.HashMap;
 
-import IR.IRFunction;
-import IR.entity.IRRegister;
+import IR.*;
+import IR.entity.*;
 import ast.*;
 import ast.stmt.LoopStmtNode;
 

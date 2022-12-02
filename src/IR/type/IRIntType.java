@@ -1,5 +1,7 @@
 package IR.type;
 
+import IR.entity.*;
+
 public class IRIntType extends IRType {
   public int bitWidth;
 
@@ -11,5 +13,10 @@ public class IRIntType extends IRType {
   @Override
   public String toString() {
     return "i" + String.valueOf(bitWidth);
+  }
+
+  @Override
+  public IREntity defaultValue() {
+    return irIntConst0;
   }
 }

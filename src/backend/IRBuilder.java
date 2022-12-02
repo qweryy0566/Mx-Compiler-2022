@@ -69,6 +69,14 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.defList.forEach(def -> {
       if (def instanceof FuncDefNode) def.accept(this);
     });
+
+    // add global var init function
+    if (root.initEntry.insts.size() > 0) {
+      root.initEntry.terminalInst = new IRRetInst(root.initEntry, irVoidConst);
+      root.initEntry.isFinished = true;
+    } else {
+      root.initFunc = null;
+    }
   }
 
   // TODO : only one return block
@@ -114,8 +122,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     root.structTypeList.add(currentClass);
   
     node.varDefList.forEach(varDef -> varDef.accept(this)); // first add all the fields
-    if (node.classBuild != null)
+    if (node.classBuild != null) {
+      currentClass.hasBuild = true;
       node.classBuild.accept(this);
+    }
     node.funcDefList.forEach(funcDef -> funcDef.className = node.name);
     node.funcDefList.forEach(funcDef -> funcDef.accept(this)); // ?
     currentScope = currentScope.parentScope;
@@ -147,7 +157,30 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       currentClass.addMember(node.varName, node.type.irType);
       // do not add to currentScope
     } else {
-      // TODO: global variable
+      assert currentScope == globalScope;
+      IRGlobalVar gVar = new IRGlobalVar(node.varName, node.type.irType);
+      if (node.initVal != null && node.initVal instanceof AtomExprNode
+          && !node.initVal.type.equals(StringType) && !node.initVal.str.equals("this")) {
+        node.initVal.accept(this);
+        gVar.initVal = getVal(node.initVal) instanceof IRCondConst
+            ? new IRBoolConst(((IRCondConst) node.initVal.value).val)
+            : node.initVal.value;
+        globalScope.addIRVar(node.varName, gVar);
+      } else {
+        gVar.initVal = node.type.irType.defaultValue();
+        globalScope.addIRVar(node.varName, gVar);
+        if (node.initVal != null) {
+          IRFunction tmpFunc = currentFunction;
+          IRBasicBlock tmpBlock = currentBlock;
+          currentFunction = root.initFunc;
+          currentBlock = root.initEntry;
+          node.initVal.accept(this);
+          currentBlock.addInst(new IRStoreInst(currentBlock, getVal(node.initVal), gVar));
+          currentFunction = tmpFunc;
+          currentBlock = tmpBlock;
+        }
+      }
+      root.globalVarList.add(gVar);
     }
   }
 
@@ -307,9 +340,9 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       currentBlock.addInst(new IRGetElementPtrInst(currentBlock, strPtr, (IRRegister) node.value, irIntConst0, irIntConst0));
     } else if (node.type.equals(NullType)) {
       node.value = new IRNullConst();
-    } else {
-      // class object or this
-
+    } else { // this
+      assert currentClass != null && node.str.equals("this");
+      node.storePtr = currentScope.getIRVarPtr("this");
     }
   }
 
@@ -318,10 +351,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     // maybe get a null pointer
     node.storePtr = currentScope.getIRVarPtr(node.str);
     if (node.storePtr == null) {  // is a member
-      IRRegister thisAddr = currentScope.getIRVarPtr("this");
+      IRRegister thisAddr = (IRRegister) currentScope.getIRVarPtr("this");
       assert thisAddr != null && thisAddr.type instanceof IRPtrType;
-      IRType objRealType =  ((IRPtrType) thisAddr.type).pointToType();
-      IRRegister thisVal = new IRRegister("this", objRealType);
+      IRType objPtrType =  ((IRPtrType) thisAddr.type).pointToType(), objRealType = ((IRPtrType) objPtrType).pointToType();
+      IRRegister thisVal = new IRRegister("this", objPtrType);
       currentBlock.addInst(new IRLoadInst(currentBlock, thisVal, thisAddr));
       node.storePtr = new IRRegister("this." + node.str, new IRPtrType(((IRStructType) objRealType).getMemberType(node.str)));
       currentBlock.addInst(new IRGetElementPtrInst(currentBlock, thisVal, node.storePtr, irIntConst0,
@@ -597,12 +630,13 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       size = new IRRegister("siz", irIntType);
       currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, (IRRegister) size, cnt, typeSize, "mul"));
     }
-    IRCallInst callInst = new IRCallInst(currentBlock, new IRPtrType(irCharType), "malloc");
-    callInst.args.add(size);
-    callInst.callReg = callReg;
-    currentBlock.addInst(callInst);
-    IRRegister ptr = new IRRegister("ptr", type);
-    currentBlock.addInst(new IRBitcastInst(currentBlock, callReg, type, ptr));
+    currentBlock.addInst(new IRCallInst(currentBlock, callReg, new IRPtrType(irCharType), "malloc", size));
+    IRRegister ptr;
+    if (irStringType.equals(type)) ptr = callReg;
+    else {
+      ptr = new IRRegister("ptr", new IRPtrType(type));
+      currentBlock.addInst(new IRBitcastInst(currentBlock, callReg, type, ptr));
+    }
     if (at + 1 < sizeList.size()) {
       IRRegister idx = new IRRegister("i", new IRPtrType(irIntType));
       currentBlock.addInst(new IRAllocaInst(currentBlock, irIntType, idx));
@@ -652,7 +686,13 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     if (node.dim > 0) {
       node.value = newArray(type, 0, node.sizeList);
     } else {
-
+      IRStructType classType = (IRStructType) ((IRPtrType) type).pointToType();
+      IRRegister callReg = new IRRegister("call", irStringType);
+      currentBlock.addInst(new IRCallInst(currentBlock, callReg, irStringType, "malloc", new IRIntConst(classType.size)));
+      node.value = new IRRegister("newPtr", type);
+      currentBlock.addInst(new IRBitcastInst(currentBlock, callReg, type, (IRRegister) node.value));
+      if (classType.hasBuild)
+        currentBlock.addInst(new IRCallInst(currentBlock, null, irVoidType, classType.name + "." + classType.name, node.value));
     }
   }
 

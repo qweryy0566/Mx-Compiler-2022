@@ -2,13 +2,15 @@ package IR.type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import IR.entity.*;
 
 public class IRStructType extends IRType {
   public ArrayList<IRType> memberType = new ArrayList<IRType>();
   public HashMap<String, Integer> memberOffset = new HashMap<>();
+  public boolean hasBuild = false;
 
   public IRStructType(String name) {
-    super("struct." + name); // TODO: size
+    super(name);
   }
 
   public void addMember(String name, IRType type) {
@@ -28,6 +30,11 @@ public class IRStructType extends IRType {
 
   @Override
   public String toString() {
-    return "%" + name;
+    return "%struct." + name;
+  }
+
+  @Override
+  public IREntity defaultValue() {
+    return irNullConst;
   }
 }

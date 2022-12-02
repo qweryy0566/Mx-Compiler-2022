@@ -34,7 +34,7 @@ public class IRFunction {
   public String toString() {
     String ret = "define " + returnType.toString() + " @" + name + "(";
     for (int i = 0; i < params.size(); ++i) {
-      ret += params.get(i).toString();
+      ret += params.get(i).toStringWithType();
       if (i != params.size() - 1) ret += ", ";
     }
     ret += ") {\n";
