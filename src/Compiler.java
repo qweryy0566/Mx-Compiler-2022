@@ -3,6 +3,7 @@ import utils.*;
 import ast.*;
 
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.FileInputStream; 
 
 import org.antlr.v4.runtime.*;
@@ -15,6 +16,8 @@ import backend.*;
 public class Compiler {
   public static void main(String[] args) throws Exception {
     CharStream input = CharStreams.fromStream(new FileInputStream("input.mx"));
+    PrintStream output = new PrintStream("output.ll"); 
+    System.setOut(output);
     //CharStream input = CharStreams.fromStream(System.in);
     MxLexer lexer = new MxLexer(input);
     lexer.removeErrorListeners();

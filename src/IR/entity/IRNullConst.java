@@ -8,6 +8,10 @@ public class IRNullConst extends IRConst {
     super(irNullType);
   }
 
+  public IRNullConst(IRType type) {
+    super(type);
+  }
+
   @Override
   public String toString() {
     return "null";
@@ -15,6 +19,6 @@ public class IRNullConst extends IRConst {
 
   @Override
   public String toStringWithType() {
-    return toString();
+    return type == irNullType ? toString()  : type + " " + toString();
   }
 }

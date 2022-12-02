@@ -31,6 +31,7 @@ public interface BuiltinElements {
 
   IRType irVoidType = new IRVoidType();
   IRType irIntType = new IRIntType(32);
+  IRType irIntPtrType = new IRPtrType(irIntType);
   IRType irNullType = new IRPtrType(irVoidType);
   IRType irBoolType = new IRIntType(8), irCharType = irBoolType;
   IRType irCondType = new IRIntType(1);
@@ -47,5 +48,5 @@ public interface BuiltinElements {
   IRIntConst irIntConst0 = new IRIntConst(0);
   IRIntConst irIntConst1 = new IRIntConst(1);
   IRIntConst irIntConstn1 = new IRIntConst(-1);
-
+  IRIntConst irIntConst4 = new IRIntConst(4);
 }

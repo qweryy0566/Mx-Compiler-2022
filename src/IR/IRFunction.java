@@ -11,9 +11,11 @@ public class IRFunction {
   public String name;
   public IRType returnType;
   public ArrayList<IRRegister> params = new ArrayList<IRRegister>();
-  // public IRBasicBlock entryBlock;
   public LinkedList<IRBasicBlock> blocks = new LinkedList<IRBasicBlock>();
   public ArrayList<IRAllocaInst> allocaInsts = new ArrayList<IRAllocaInst>();
+
+  public IRBasicBlock exitBlock;
+  public IRRegister retAddr;
 
   public IRFunction(String name, IRType returnType) {
     this.name = name;
@@ -25,10 +27,19 @@ public class IRFunction {
     return block;
   }
 
-  public void addAllocasToEntryBlock() {
+  public void finish() {
     IRBasicBlock entryBlock = blocks.getFirst();
     for (IRAllocaInst inst : allocaInsts)
       entryBlock.insts.addFirst(inst);
+    blocks.add(exitBlock);
+    // LinkedList<IRBasicBlock> old = blocks;
+    // blocks = new LinkedList<IRBasicBlock>();
+    // for (IRBasicBlock block : old)
+    //   if (blocks.size() > 0 && blocks.getLast().terminalInst instanceof IRJumpInst
+    //       && ((IRJumpInst) blocks.getLast().terminalInst).toBlock == block)
+    //     blocks.getLast().mergeBlock(block);
+    //   else
+    //     blocks.add(block);
   }
 
   public String toString() {

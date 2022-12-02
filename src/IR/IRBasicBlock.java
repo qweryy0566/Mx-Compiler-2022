@@ -9,7 +9,7 @@ public class IRBasicBlock {
   public LinkedList<IRInst> insts = new LinkedList<IRInst>();
   public IRTerminalInst terminalInst = null;
   public IRFunction parentFunction = null;
-  public ArrayList<IRBasicBlock> pres = new ArrayList<IRBasicBlock>(), succs = new ArrayList<IRBasicBlock>();
+  // public ArrayList<IRBasicBlock> pres = new ArrayList<IRBasicBlock>(), succs = new ArrayList<IRBasicBlock>();
   public boolean isFinished = false;
 
   public static int blockCnt = 0;
@@ -33,12 +33,22 @@ public class IRBasicBlock {
     else
       insts.add(inst);
   }
+
+  public void mergeBlock(IRBasicBlock block) {
+    if (block == this) return;
+    isFinished = false;
+    for (IRInst inst : block.insts)
+      addInst(inst);
+    terminalInst = block.terminalInst;
+    isFinished = true;
+  }
+
   public String toString() {
     String ret = name + ":\n";
     for (IRInst inst : insts)
-      ret += "  " + inst.toString() + "\n";
+      ret += "  " + inst + "\n";
     if (terminalInst != null)
-      ret += "  " + terminalInst.toString() + "\n";
+      ret += "  " + terminalInst + "\n";
     return ret;
   }
 }
