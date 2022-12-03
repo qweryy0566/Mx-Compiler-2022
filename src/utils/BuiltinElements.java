@@ -8,7 +8,7 @@ public interface BuiltinElements {
   Type VoidType = new Type("void");
   Type IntType = new Type("int");
   Type BoolType = new Type("bool");
-  Type StringType = new Type("string");  
+  Type StringType = new Type("string");
   Type NullType = new Type("null");
   Type ThisType = new Type("this");
   Type AutoType = new Type("auto");
@@ -21,10 +21,11 @@ public interface BuiltinElements {
   FuncDefNode GetIntFunc = new FuncDefNode(null, IntType, "getInt", null, 0);
   FuncDefNode ToStringFunc = new FuncDefNode(null, StringType, "toString", IntType, 1);
 
-  FuncDefNode StringLengthFunc = new FuncDefNode(null, IntType, "length", null, 0);
-  FuncDefNode StringSubStringFunc = new FuncDefNode(null, StringType, "substring", IntType, 2);
-  FuncDefNode StringParseIntFunc = new FuncDefNode(null, IntType, "parseInt", null, 0);
-  FuncDefNode StringOrdFunc = new FuncDefNode(null, IntType, "ord", IntType, 1);
+  FuncDefNode StringLengthFunc = new FuncDefNode(null, IntType, "length", "string", null, 0);
+  FuncDefNode StringSubStringFunc = new FuncDefNode(null, StringType, "substring", "string", IntType, 2);
+  FuncDefNode StringParseIntFunc = new FuncDefNode(null, IntType, "parseInt", "string", null, 0);
+  FuncDefNode StringOrdFunc = new FuncDefNode(null, IntType, "ord", "string", IntType, 1);
+
   FuncDefNode ArraySizeFunc = new FuncDefNode(null, IntType, "size", null, 0);
 
   // ------------------ IR Builtin Types ------------------

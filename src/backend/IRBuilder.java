@@ -80,7 +80,6 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     }
   }
 
-  // TODO : only one return block
   @Override
   public void visit(FuncDefNode node) {
     node.returnType.accept(this);
@@ -365,15 +364,16 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   public void visit(VarExprNode node) {
     // maybe get a null pointer
     node.storePtr = currentScope.getIRVarPtr(node.str);
-    if (node.storePtr == null) {  // is a member
+    if (node.storePtr == null) {  // is a member or a function
       IRRegister thisAddr = (IRRegister) currentScope.getIRVarPtr("this");
-      assert thisAddr != null && thisAddr.type instanceof IRPtrType;
-      IRType objPtrType =  ((IRPtrType) thisAddr.type).pointToType(), objRealType = ((IRPtrType) objPtrType).pointToType();
-      IRRegister thisVal = new IRRegister("this", objPtrType);
-      currentBlock.addInst(new IRLoadInst(currentBlock, thisVal, thisAddr));
-      node.storePtr = new IRRegister("this." + node.str, new IRPtrType(((IRStructType) objRealType).getMemberType(node.str)));
-      currentBlock.addInst(new IRGetElementPtrInst(currentBlock, thisVal, node.storePtr, irIntConst0,
-          new IRIntConst(((IRStructType) objRealType).memberOffset.get(node.str))));
+      if (thisAddr != null) {  // is a member
+        IRType objPtrType =  ((IRPtrType) thisAddr.type).pointToType(), objRealType = ((IRPtrType) objPtrType).pointToType();
+        IRRegister thisVal = new IRRegister("this", objPtrType);
+        currentBlock.addInst(new IRLoadInst(currentBlock, thisVal, thisAddr));
+        node.storePtr = new IRRegister("this." + node.str, new IRPtrType(((IRStructType) objRealType).getMemberType(node.str)));
+        currentBlock.addInst(new IRGetElementPtrInst(currentBlock, thisVal, node.storePtr, irIntConst0,
+            new IRIntConst(((IRStructType) objRealType).memberOffset.get(node.str))));
+      }
     }
   }
 
@@ -612,15 +612,19 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       if (array.type.toString().equals("i32*"))
         tmp1 = array;
       else {
-        tmp1 = new IRRegister("tmp", irIntType);
+        tmp1 = new IRRegister("tmp", irIntPtrType);
         currentBlock.addInst(new IRBitcastInst(currentBlock, array, irIntPtrType, tmp1));
       }
       currentBlock.addInst(new IRGetElementPtrInst(currentBlock, tmp1, tmp2, irIntConstn1));
       node.value = new IRRegister("call", irIntType);
-      currentBlock.addInst(new IRLoadInst(currentBlock, tmp2, node.value));
-    } else if (funcDef.className == "string") {
-    
+      currentBlock.addInst(new IRLoadInst(currentBlock, tmp2, node.value)); 
+
     } else {
+      if (funcDef == StringLengthFunc) call.funcName = "strlen_";
+      else if (funcDef == StringSubStringFunc) call.funcName = "substring_";
+      else if (funcDef == StringParseIntFunc) call.funcName = "parseInt_";
+      else if (funcDef == StringOrdFunc) call.funcName = "ord_";
+
       if (node.funcName instanceof MemberExprNode)
         call.args.add(((MemberExprNode) node.funcName).objAddr);
       if (node.args != null) {
