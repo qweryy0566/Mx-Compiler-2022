@@ -3,7 +3,6 @@ package utils;
 import java.util.HashMap;
 
 import ast.*;
-import IR.entity.*;
 
 public class GlobalScope extends Scope implements BuiltinElements {
   public HashMap<String, FuncDefNode> funcMember = new HashMap<>();

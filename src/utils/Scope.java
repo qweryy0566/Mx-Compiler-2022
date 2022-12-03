@@ -23,6 +23,7 @@ public class Scope {
   public Scope(Scope parentScope) {
     this.parentScope = parentScope;
     this.inLoop = parentScope.inLoop;
+    this.inWhichLoop = parentScope.inWhichLoop;
     this.inWhichClass = parentScope.inWhichClass;
   }
   public Scope(Scope parentScope, boolean isLoopScope) {

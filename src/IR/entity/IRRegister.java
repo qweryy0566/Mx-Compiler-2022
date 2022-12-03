@@ -4,18 +4,19 @@ import IR.type.*;
 
 public class IRRegister extends IREntity {
   public String name;
-  public int index;
+  public int index = -1;
   public static int regCnt = 0;
 
   public IRRegister(String name, IRType type) {
     super(type);
     this.name = name;
-    index = regCnt++;
   }
 
   @Override
   public String toString() {
-    return "%" + String.valueOf(index);
+    if (index == -1 && !name.equals("retval"))
+      index = regCnt++;
+    return "%" + (name.equals("retval") ? name : String.valueOf(index));
   }
 
   @Override

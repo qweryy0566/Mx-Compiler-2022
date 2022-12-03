@@ -18,6 +18,6 @@ public class IRZextInst extends IRInst {
 
   @Override
   public String toString() {
-    return "%" + String.valueOf(dest.index) + " = zext " + val.toStringWithType() + " to " + targetType;
+    return dest + " = zext " + val.toStringWithType() + " to " + targetType;
   }
 } 

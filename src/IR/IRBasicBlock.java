@@ -2,7 +2,6 @@ package IR;
 
 import IR.inst.*;
 import java.util.LinkedList;
-import java.util.ArrayList;
 
 public class IRBasicBlock {
   public String name;

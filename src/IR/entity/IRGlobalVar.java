@@ -1,6 +1,5 @@
 package IR.entity;
 
-import IR.*;
 import IR.type.*;
 
 public class IRGlobalVar extends IRRegister {  // 写成屎山了
