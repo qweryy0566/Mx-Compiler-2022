@@ -18,6 +18,6 @@ public class IRCondConst extends IRConst {
 
   @Override
   public String toStringWithType() {
-    return toString();
+    return "i1 " + toString();
   }
 }

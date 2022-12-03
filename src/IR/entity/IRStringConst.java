@@ -23,4 +23,18 @@ public class IRStringConst extends IRConst {
   public String toStringWithType() {
     return "[" + String.valueOf(val.length() + 1) + " x i8]* " + toString();
   }
+
+  public String printStr() {
+    String ret = "";
+    for (int i = 0; i < val.length(); ++i) {
+      char c = val.charAt(i);
+      switch (c) {
+        case '\n': ret += "\\0A"; break;
+        case '\"': ret += "\\22"; break;
+        case '\\': ret += "\\\\"; break;
+        default: ret += c;
+      }
+    }
+    return ret + "\\00";
+  }
 }
