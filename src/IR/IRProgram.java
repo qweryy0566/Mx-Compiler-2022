@@ -2,6 +2,7 @@ package IR;
 
 import IR.entity.*;
 import IR.type.*;
+import IR.inst.*;
 import utils.BuiltinElements;
 
 import java.util.ArrayList;
@@ -15,10 +16,13 @@ public class IRProgram implements BuiltinElements {
   public HashMap<String, IRStringConst> stringConst = new HashMap<>();
 
   public IRFunction initFunc = new IRFunction("__mx_global_var_init", irVoidType), mainFunc;
-  public IRBasicBlock initEntry = new IRBasicBlock(initFunc, "entry");
+  public IRBasicBlock initBlock = new IRBasicBlock(initFunc, "entry");
 
   public IRProgram() {
-    initFunc.appendBlock(initEntry);
+    initFunc.appendBlock(initBlock);
+    initFunc.exitBlock = new IRBasicBlock(initFunc, "return");
+    initBlock.terminalInst = new IRJumpInst(initBlock, initFunc.exitBlock);
+    initFunc.exitBlock.terminalInst = new IRRetInst(initFunc.exitBlock, irVoidConst);
   }
 
   public IRStringConst addStringConst(String str) {

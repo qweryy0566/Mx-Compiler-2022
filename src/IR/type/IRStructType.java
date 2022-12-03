@@ -18,6 +18,10 @@ public class IRStructType extends IRType {
     memberOffset.put(name, memberType.size() - 1);
   }
 
+  public boolean hasMember(String name) {
+    return memberOffset.containsKey(name);
+  }
+
   public IRType getMemberType(String name) {
     return !memberOffset.containsKey(name) ? null : memberType.get(memberOffset.get(name));
   }
