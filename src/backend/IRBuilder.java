@@ -340,6 +340,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       currentBlock.terminalInst = new IRJumpInst(currentBlock, node.loopBlock);
     }
     currentBlock.isFinished = true;
+    currentScope = new Scope(currentScope);
     currentBlock = currentFunction.appendBlock(node.loopBlock);
     node.stmts.forEach(stmt -> stmt.accept(this));
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.stepBlock);
@@ -351,6 +352,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
     currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(node.nextBlock);
+    currentScope = currentScope.parentScope;
   }
 
   @Override
