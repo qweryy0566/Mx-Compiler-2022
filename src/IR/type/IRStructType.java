@@ -39,6 +39,6 @@ public class IRStructType extends IRType {
 
   @Override
   public IREntity defaultValue() {
-    return irNullConst;
+    return new IRNullConst(this);
   }
 }

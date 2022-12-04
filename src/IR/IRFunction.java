@@ -29,17 +29,10 @@ public class IRFunction {
 
   public void finish() {
     IRBasicBlock entryBlock = blocks.getFirst();
-    for (IRAllocaInst inst : allocaInsts)
-      entryBlock.insts.addFirst(inst);
+    for (int i = allocaInsts.size() - 1; i >= 0; --i)
+      entryBlock.insts.addFirst(allocaInsts.get(i));
     blocks.add(exitBlock);
-    // LinkedList<IRBasicBlock> old = blocks;
-    // blocks = new LinkedList<IRBasicBlock>();
-    // for (IRBasicBlock block : old)
-    //   if (blocks.size() > 0 && blocks.getLast().terminalInst instanceof IRJumpInst
-    //       && ((IRJumpInst) blocks.getLast().terminalInst).toBlock == block)
-    //     blocks.getLast().mergeBlock(block);
-    //   else
-    //     blocks.add(block);
+    // TODO : dead block elimination
   }
 
   public String toString() {
