@@ -15,4 +15,9 @@ public class IRRetInst extends IRTerminalInst {
   public String toString() {
     return "ret " + val.toStringWithType();
   }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }

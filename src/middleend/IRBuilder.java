@@ -1,4 +1,4 @@
-package backend;
+package middleend;
 
 import utils.*;
 import ast.*;

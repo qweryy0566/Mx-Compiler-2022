@@ -10,5 +10,7 @@ public abstract class IRInst {
   public IRInst(IRBasicBlock block) {
     this.parentBlock = block;
   }
+
+  public abstract void accept(IRVisitor visitor);
 }
 

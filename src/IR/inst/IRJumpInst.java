@@ -14,4 +14,9 @@ public class IRJumpInst extends IRTerminalInst {
   public String toString() {
     return "br label %" + toBlock.name;
   }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }

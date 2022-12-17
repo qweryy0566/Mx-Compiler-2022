@@ -26,6 +26,7 @@ public class IRCallInst extends IRInst {
       this.args.add(arg);
   }
 
+  @Override
   public String toString() {
     String ret = (callReg != null ? callReg + " = call " : "call ") + returnType + " @" + funcName + "(";
     for (int i = 0; i < args.size(); ++i) {
@@ -34,5 +35,10 @@ public class IRCallInst extends IRInst {
     }
     ret += ")";
     return ret;
+  }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
   }
 }

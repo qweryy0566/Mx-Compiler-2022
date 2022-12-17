@@ -25,4 +25,9 @@ public class IRIcmpInst extends IRInst {
   public String toString() {
     return cmpReg + " = icmp " + op +" " + type +  " " + lhs + ", " + rhs;
   }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }

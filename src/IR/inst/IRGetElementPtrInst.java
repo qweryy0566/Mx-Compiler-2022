@@ -28,4 +28,9 @@ public class IRGetElementPtrInst extends IRInst {
       ret += ", " + index.toStringWithType();
     return ret;
   }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }

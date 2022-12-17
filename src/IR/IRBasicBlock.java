@@ -50,4 +50,8 @@ public class IRBasicBlock {
       ret += "  " + terminalInst + "\n";
     return ret;
   }
+
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }

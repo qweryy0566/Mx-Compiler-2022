@@ -16,5 +16,10 @@ public class IRStoreInst extends IRInst {
   public String toString() {
     return "store " + val.toStringWithType() + ", " + destAddr.toStringWithType();
   }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }
 

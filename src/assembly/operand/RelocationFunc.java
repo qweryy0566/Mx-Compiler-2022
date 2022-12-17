@@ -6,6 +6,7 @@ public class RelocationFunc extends Imm {
   public String symbol;
 
   public RelocationFunc(Type type, String symbol) {
+    super(0);
     this.type = type;
     this.symbol = symbol;
   }

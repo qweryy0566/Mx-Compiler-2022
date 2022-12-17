@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.tree.*;
 
 import IR.*;
 import frontend.*;
+import middleend.*;
 import backend.*;
 
 public class Compiler {
@@ -34,7 +35,6 @@ public class Compiler {
     new SemanticChecker(globalScope).visit(ast);
     IRProgram irProgram = new IRProgram();
     new IRBuilder(irProgram, globalScope).visit(ast);
-    irProgram.toString();
-    
+    System.out.print(irProgram.toString());
   }
 }

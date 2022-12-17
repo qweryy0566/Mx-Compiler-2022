@@ -20,4 +20,9 @@ public class IRLoadInst extends IRInst {
   public String toString() {
     return destReg + " = load " + type + ", " + srcAddr.toStringWithType();
   }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }

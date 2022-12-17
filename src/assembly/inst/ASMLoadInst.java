@@ -3,7 +3,6 @@ package assembly.inst;
 import assembly.operand.*;
 
 public class ASMLoadInst extends ASMInst {
-  Reg rd, rs1;
   int size, offset;
   // size : 1 -> lb, 4 -> lw
 

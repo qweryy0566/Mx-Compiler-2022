@@ -25,4 +25,9 @@ public class IRCalcInst extends IRInst {
   public String toString() {
     return res + " = " + op + " " + lhs.toStringWithType() + ", " + rhs;
   }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }

@@ -48,4 +48,8 @@ public class IRFunction {
     ret += "}\n";
     return ret;
   }
+
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }

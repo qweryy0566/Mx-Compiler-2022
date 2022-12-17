@@ -3,7 +3,6 @@ package assembly.inst;
 import assembly.operand.*;
 
 public class ASMStoreInst extends ASMInst {
-  Reg rs1, rs2;
   int size, offset;
   // size : 1 -> sb, 4 -> sw
 

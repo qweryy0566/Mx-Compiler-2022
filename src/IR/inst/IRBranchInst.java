@@ -18,4 +18,9 @@ public class IRBranchInst extends IRTerminalInst {
   public String toString() {
     return "br " + cond.toStringWithType() + ", label %" + thenBlock.name + ", label %" + elseBlock.name;
   }
+
+  @Override
+  public void accept(IRVisitor visitor) {
+    visitor.visit(this);
+  }
 }
