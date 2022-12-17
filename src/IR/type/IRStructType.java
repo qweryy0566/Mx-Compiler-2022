@@ -27,9 +27,7 @@ public class IRStructType extends IRType {
   }
 
   public void calcSize() {
-    size = 0;
-    for (IRType type : memberType)
-      size += type.size;
+    size = memberType.size() << 2; // 速度大点没事。
   }
 
   @Override

@@ -34,6 +34,7 @@ public class Compiler {
     new SemanticChecker(globalScope).visit(ast);
     IRProgram irProgram = new IRProgram();
     new IRBuilder(irProgram, globalScope).visit(ast);
-    System.out.println(irProgram);
+    irProgram.toString();
+    
   }
 }
