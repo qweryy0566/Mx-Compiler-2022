@@ -9,13 +9,12 @@ public class GlobalString extends Global {
   }
 
   public String toString() {
-    String ret = "  .section .rodata\n";
-    ret += name + ":\n";
-    ret += "  .string " + str.replace("\\", "\\\\")
+    String ret = name + ":\n";
+    ret += "  .string \"" + str.replace("\\", "\\\\")
         .replace("\n", "\\n")
         .replace("\0", "")
         .replace("\t", "\\t")
-        .replace("\"", "\\\"") + "\n";
+        .replace("\"", "\\\"") + "\"\n";
     return ret;
   }
 }

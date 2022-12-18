@@ -21,8 +21,7 @@ public class GlobalValue extends Global {
   }
 
   public String toString() {
-    String ret = "  .section .data\n";
-    ret += name + ":\n";
+    String ret = name + ":\n";
     ret += (size == 4 ? "  .word " : "  .byte ") + word + "\n";
     return ret;
   }

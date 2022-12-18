@@ -10,4 +10,9 @@ public class RelocationFunc extends Imm {
     this.type = type;
     this.symbol = symbol;
   }
+
+  @Override
+  public String toString() {
+    return type == Type.hi ? "%hi(" + symbol + ")" : "%lo(" + symbol + ")";
+  }
 }

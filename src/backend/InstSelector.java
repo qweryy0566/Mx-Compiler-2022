@@ -15,6 +15,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
   ASMModule module;
   ASMFunction curFunc;
   ASMBlock curBlock;
+  int blockCnt = 0;
 
   HashMap<IRBasicBlock, ASMBlock> blockMap = new HashMap<>();
 
@@ -64,6 +65,11 @@ public class InstSelector implements IRVisitor, BuiltinElements {
       module.globalStrings.add(globalStr);
       str.asmReg = globalStr;
     });
+    if (node.initFunc != null) {
+      curFunc = new ASMFunction(node.initFunc.name);
+      module.functions.add(curFunc);
+      node.initFunc.accept(this);
+    }
     node.funcList.forEach(func -> {
       curFunc = new ASMFunction(func.name);
       module.functions.add(curFunc);
@@ -78,12 +84,18 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     // find max argument cnt
     int maxArgCnt = 0;
     for (IRBasicBlock blk : node.blocks) {
-      blockMap.put(blk, new ASMBlock("." + blk.name));
+      blockMap.put(blk, new ASMBlock(".L" + blockCnt++));
       for (IRInst inst : blk.insts)
         if (inst instanceof IRCallInst)
           maxArgCnt = Math.max(maxArgCnt, ((IRCallInst) inst).args.size());
     }
     curFunc.paramUsed = (maxArgCnt > 8 ? maxArgCnt - 8 : 0) << 2;
+    // set params
+    for (int i = 0; i < node.params.size(); ++i)
+      if (i < 8)
+        node.params.get(i).asmReg = PhysicsReg.regMap.get("a" + i);
+      else
+        node.params.get(i).asmReg = new VirtualReg(i);
 
     for (int i = 0; i < node.blocks.size(); ++i) {
       curBlock = blockMap.get(node.blocks.get(i));
@@ -103,12 +115,6 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     exitBlock.insts.add(new ASMBinaryInst("add", PhysicsReg.regMap.get("sp"), PhysicsReg.regMap.get("sp"),
         new VirtualImm(curFunc.totalStack)));
     exitBlock.insts.add(new ASMRetInst());
-    // set params
-    for (int i = 0; i < node.params.size(); ++i)
-      if (i < 8)
-        node.params.get(i).asmReg = PhysicsReg.regMap.get("a" + i);
-      else
-        node.params.get(i).asmReg = new VirtualReg(i);
   }
 
   public void visit(IRBasicBlock node) {
@@ -201,7 +207,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   public void visit(IRRetInst node) {
     // ret val -> load val to a0 and return
-    if (node.val != null)
+    if (node.val != irVoidConst)
       curBlock.addInst(new ASMMvInst(PhysicsReg.regMap.get("a0"), getReg(node.val)));
     loadReg(4, PhysicsReg.regMap.get("ra"), PhysicsReg.regMap.get("sp"), curFunc.paramUsed);
     // 寄存器分配完再加 ret

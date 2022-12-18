@@ -91,7 +91,9 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   public void visit(ProgramNode node) {
     node.defList.forEach(def -> {
       if (def instanceof ClassDefNode)
-        structTypeMap.put(((ClassDefNode) def).name, new IRStructType(((ClassDefNode) def).name));
+        structTypeMap.put(((ClassDefNode) def).name,
+            new IRStructType(((ClassDefNode) def).name, ((ClassDefNode) def).varMember.size() << 2));
+            // 4 bytes for each member
     });  // first pass to get all struct type
     node.defList.forEach(def -> {
       if (def instanceof ClassDefNode) def.accept(this);
@@ -158,7 +160,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     }
     if (funcName.equals("main")) {
       root.mainFunc = currentFunction;
-      currentBlock.addInst(new IRStoreInst(currentBlock, irIntConst0, currentFunction.retAddr));
+      // currentBlock.addInst(new IRStoreInst(currentBlock, irIntConst0, currentFunction.retAddr));
     }
 
     node.stmts.forEach(stmt -> stmt.accept(this));
@@ -189,7 +191,6 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.funcDefList.forEach(funcDef -> funcDef.className = node.name);
     node.funcDefList.forEach(funcDef -> funcDef.accept(this)); // ?
     currentScope = currentScope.parentScope;
-    currentClass.calcSize();
     currentClass = null;
   }
 
@@ -412,8 +413,8 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
         IRType objPtrType =  ((IRPtrType) thisAddr.type).pointToType();
         IRType objRealType = ((IRPtrType) objPtrType).pointToType();
         IRRegister thisVal = new IRRegister("this", objPtrType);
-        currentBlock.addInst(new IRLoadInst(currentBlock, thisVal, thisAddr));
         if (((IRStructType) objRealType).hasMember(node.str)) {
+          currentBlock.addInst(new IRLoadInst(currentBlock, thisVal, thisAddr));
           node.storePtr = new IRRegister("this." + node.str,
               new IRPtrType(((IRStructType) objRealType).getMemberType(node.str)));
           currentBlock.addInst(new IRGetElementPtrInst(currentBlock, thisVal, node.storePtr, irIntConst0,
@@ -466,20 +467,9 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       switch (node.op) {
         case "+":
           node.value = new IRRegister("", irStringType);
-          IRRegister lhsLen = new IRRegister("lhsLen", irIntType), rhsLen = new IRRegister("rhsLen", irIntType);
-          currentBlock.addInst(new IRCallInst(currentBlock, lhsLen, irIntType, "strlen", getVal(node.lhs)));
-          currentBlock.addInst(new IRCallInst(currentBlock, rhsLen, irIntType, "strlen", getVal(node.rhs)));
-          IRRegister tmp = new IRRegister("", irIntType);
-          currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, tmp, lhsLen, rhsLen, "add"));
-          IRRegister strLen = new IRRegister("strLen", irIntType);
-          currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, strLen, tmp, irIntConst1, "add"));
-          currentBlock.addInst(new IRCallInst(currentBlock, (IRRegister) node.value, irStringType, "malloc", strLen));
           currentBlock
-              .addInst(new IRCallInst(currentBlock, new IRRegister("", irStringType), irStringType, "strcpy",
-                  node.value, getVal(node.lhs)));
-          currentBlock
-              .addInst(new IRCallInst(currentBlock, new IRRegister("", irStringType), irStringType, "strcat",
-                  node.value, getVal(node.rhs)));
+              .addInst(new IRCallInst(currentBlock, (IRRegister) node.value, irStringType, "__mx_stradd",
+                  getVal(node.lhs), getVal(node.rhs)));
           break;
         case "<":
           node.value = stringCmp("__mx_strlt", getVal(node.lhs), getVal(node.rhs));
@@ -664,7 +654,6 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       currentBlock.addInst(new IRGetElementPtrInst(currentBlock, tmp1, tmp2, irIntConstn1));
       node.value = new IRRegister("", irIntType);
       currentBlock.addInst(new IRLoadInst(currentBlock, (IRRegister) node.value, tmp2)); 
-
     } else {
       if (funcDef == StringLengthFunc) call.funcName = "strlen";
       else if (funcDef == StringSubStringFunc) call.funcName = "__mx_substring";

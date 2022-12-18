@@ -9,8 +9,8 @@ public class IRStructType extends IRType {
   public HashMap<String, Integer> memberOffset = new HashMap<>();
   public boolean hasBuild = false;
 
-  public IRStructType(String name) {
-    super(name);
+  public IRStructType(String name, int size) {
+    super(name, size);
   }
 
   public void addMember(String name, IRType type) {

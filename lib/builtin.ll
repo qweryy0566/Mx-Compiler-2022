@@ -57,16 +57,16 @@ declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #2
 define dso_local i32 @getInt() local_unnamed_addr #3 {
   %1 = alloca i32, align 4
   %2 = bitcast i32* %1 to i8*
-  call void @llvm.lifetime.start.p0i8(i64 4, i8* nonnull %2) #8
+  call void @llvm.lifetime.start.p0i8(i64 4, i8* nonnull %2) #9
   %3 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), i32* nonnull %1)
   %4 = load i32, i32* %1, align 4, !tbaa !3
-  call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %2) #8
+  call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %2) #9
   ret i32 %4
 }
 
 ; Function Attrs: nofree nounwind
 define dso_local noalias i8* @toString(i32 %0) local_unnamed_addr #0 {
-  %2 = tail call dereferenceable_or_null(256) i8* @malloc(i32 256)
+  %2 = tail call dereferenceable_or_null(16) i8* @malloc(i32 16)
   %3 = tail call i32 (i8*, i8*, ...) @sprintf(i8* nonnull dereferenceable(1) %2, i8* nonnull dereferenceable(1) getelementptr inbounds ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), i32 %0)
   ret i8* %2
 }
@@ -97,10 +97,10 @@ define dso_local noalias i8* @__mx_substring(i8* nocapture readonly %0, i32 %1, 
 define dso_local i32 @__mx_parseInt(i8* nocapture readonly %0) local_unnamed_addr #3 {
   %2 = alloca i32, align 4
   %3 = bitcast i32* %2 to i8*
-  call void @llvm.lifetime.start.p0i8(i64 4, i8* nonnull %3) #8
+  call void @llvm.lifetime.start.p0i8(i64 4, i8* nonnull %3) #9
   %4 = call i32 (i8*, i8*, ...) @sscanf(i8* %0, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), i32* nonnull %2)
   %5 = load i32, i32* %2, align 4, !tbaa !3
-  call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %3) #8
+  call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %3) #9
   ret i32 %5
 }
 
@@ -115,8 +115,29 @@ define dso_local i32 @__mx_ord(i8* nocapture readonly %0, i32 %1) local_unnamed_
   ret i32 %5
 }
 
+; Function Attrs: nofree nounwind
+define dso_local i8* @__mx_stradd(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #0 {
+  %3 = tail call i32 @strlen(i8* nonnull dereferenceable(1) %0)
+  %4 = tail call i32 @strlen(i8* nonnull dereferenceable(1) %1)
+  %5 = add i32 %3, 1
+  %6 = add i32 %5, %4
+  %7 = tail call i8* @malloc(i32 %6)
+  %8 = tail call i8* @strcpy(i8* nonnull dereferenceable(1) %7, i8* nonnull dereferenceable(1) %0)
+  %9 = tail call i8* @strcat(i8* nonnull dereferenceable(1) %7, i8* nonnull dereferenceable(1) %1)
+  ret i8* %7
+}
+
+; Function Attrs: argmemonly nofree nounwind readonly
+declare dso_local i32 @strlen(i8* nocapture) local_unnamed_addr #5
+
+; Function Attrs: nofree nounwind
+declare dso_local i8* @strcpy(i8* noalias returned, i8* noalias nocapture readonly) local_unnamed_addr #1
+
+; Function Attrs: nofree nounwind
+declare dso_local i8* @strcat(i8* returned, i8* nocapture readonly) local_unnamed_addr #1
+
 ; Function Attrs: nounwind readonly
-define dso_local zeroext i8 @__mx_strlt(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #5 {
+define dso_local zeroext i8 @__mx_strlt(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #6 {
   %3 = tail call i32 @strcmp(i8* nonnull dereferenceable(1) %0, i8* nonnull dereferenceable(1) %1)
   %4 = lshr i32 %3, 31
   %5 = trunc i32 %4 to i8
@@ -124,10 +145,10 @@ define dso_local zeroext i8 @__mx_strlt(i8* nocapture readonly %0, i8* nocapture
 }
 
 ; Function Attrs: nofree nounwind readonly
-declare dso_local i32 @strcmp(i8* nocapture, i8* nocapture) local_unnamed_addr #6
+declare dso_local i32 @strcmp(i8* nocapture, i8* nocapture) local_unnamed_addr #7
 
 ; Function Attrs: nounwind readonly
-define dso_local zeroext i8 @__mx_strle(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #5 {
+define dso_local zeroext i8 @__mx_strle(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #6 {
   %3 = tail call i32 @strcmp(i8* nonnull dereferenceable(1) %0, i8* nonnull dereferenceable(1) %1)
   %4 = icmp slt i32 %3, 1
   %5 = zext i1 %4 to i8
@@ -135,7 +156,7 @@ define dso_local zeroext i8 @__mx_strle(i8* nocapture readonly %0, i8* nocapture
 }
 
 ; Function Attrs: nounwind readonly
-define dso_local zeroext i8 @__mx_strgt(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #5 {
+define dso_local zeroext i8 @__mx_strgt(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #6 {
   %3 = tail call i32 @strcmp(i8* nonnull dereferenceable(1) %0, i8* nonnull dereferenceable(1) %1)
   %4 = icmp sgt i32 %3, 0
   %5 = zext i1 %4 to i8
@@ -143,7 +164,7 @@ define dso_local zeroext i8 @__mx_strgt(i8* nocapture readonly %0, i8* nocapture
 }
 
 ; Function Attrs: nounwind readonly
-define dso_local zeroext i8 @__mx_strge(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #5 {
+define dso_local zeroext i8 @__mx_strge(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #6 {
   %3 = tail call i32 @strcmp(i8* nonnull dereferenceable(1) %0, i8* nonnull dereferenceable(1) %1)
   %4 = lshr i32 %3, 31
   %5 = trunc i32 %4 to i8
@@ -152,7 +173,7 @@ define dso_local zeroext i8 @__mx_strge(i8* nocapture readonly %0, i8* nocapture
 }
 
 ; Function Attrs: nounwind readonly
-define dso_local zeroext i8 @__mx_streq(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #5 {
+define dso_local zeroext i8 @__mx_streq(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #6 {
   %3 = tail call i32 @strcmp(i8* nonnull dereferenceable(1) %0, i8* nonnull dereferenceable(1) %1)
   %4 = icmp eq i32 %3, 0
   %5 = zext i1 %4 to i8
@@ -160,7 +181,7 @@ define dso_local zeroext i8 @__mx_streq(i8* nocapture readonly %0, i8* nocapture
 }
 
 ; Function Attrs: nounwind readonly
-define dso_local zeroext i8 @__mx_strneq(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #5 {
+define dso_local zeroext i8 @__mx_strneq(i8* nocapture readonly %0, i8* nocapture readonly %1) local_unnamed_addr #6 {
   %3 = tail call i32 @strcmp(i8* nonnull dereferenceable(1) %0, i8* nonnull dereferenceable(1) %1)
   %4 = icmp ne i32 %3, 0
   %5 = zext i1 %4 to i8
@@ -168,7 +189,7 @@ define dso_local zeroext i8 @__mx_strneq(i8* nocapture readonly %0, i8* nocaptur
 }
 
 ; Function Attrs: nofree nounwind
-declare i32 @puts(i8* nocapture readonly) local_unnamed_addr #7
+declare i32 @puts(i8* nocapture readonly) local_unnamed_addr #8
 
 ; Function Attrs: argmemonly nounwind willreturn
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i32, i1 immarg) #2
@@ -178,10 +199,11 @@ attributes #1 = { nofree nounwind "correctly-rounded-divide-sqrt-fp-math"="false
 attributes #2 = { argmemonly nounwind willreturn }
 attributes #3 = { nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="i686" "target-features"="+cx8,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #4 = { norecurse nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="i686" "target-features"="+cx8,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #5 = { nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="i686" "target-features"="+cx8,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #6 = { nofree nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="i686" "target-features"="+cx8,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #7 = { nofree nounwind }
-attributes #8 = { nounwind }
+attributes #5 = { argmemonly nofree nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="i686" "target-features"="+cx8,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #6 = { nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="i686" "target-features"="+cx8,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #7 = { nofree nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="i686" "target-features"="+cx8,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #8 = { nofree nounwind }
+attributes #9 = { nounwind }
 
 !llvm.module.flags = !{!0, !1}
 !llvm.ident = !{!2}

@@ -3,7 +3,6 @@ package utils;
 import ast.*;
 import IR.entity.*;
 import IR.type.*;
-import assembly.operand.*;
 
 public interface BuiltinElements {
   Type VoidType = new Type("void");

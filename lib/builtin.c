@@ -19,7 +19,7 @@ int getInt() {
 }
 
 char *toString(int x) {
-  char *s = malloc(1 << 8);
+  char *s = malloc(1 << 4);
   sprintf(s, "%d", x);
   return s;
 }
@@ -39,26 +39,21 @@ int __mx_parseInt(char *s) {
 
 int __mx_ord(char *s, int x) { return s[x]; }
 
-unsigned char __mx_strlt(char *s, char *t) {
-  return strcmp(s, t) < 0;
+char *__mx_stradd(char *s, char *t) {
+  char *p = malloc(strlen(s) + strlen(t) + 1);
+  strcpy(p, s);
+  strcat(p, t);
+  return p;
 }
 
-unsigned char __mx_strle(char *s, char *t) {
-  return strcmp(s, t) <= 0;
-}
+unsigned char __mx_strlt(char *s, char *t) { return strcmp(s, t) < 0; }
 
-unsigned char __mx_strgt(char *s, char *t) {
-  return strcmp(s, t) > 0;
-}
+unsigned char __mx_strle(char *s, char *t) { return strcmp(s, t) <= 0; }
 
-unsigned char __mx_strge(char *s, char *t) {
-  return strcmp(s, t) >= 0;
-}
+unsigned char __mx_strgt(char *s, char *t) { return strcmp(s, t) > 0; }
 
-unsigned char __mx_streq(char *s, char *t) {
-  return strcmp(s, t) == 0;
-}
+unsigned char __mx_strge(char *s, char *t) { return strcmp(s, t) >= 0; }
 
-unsigned char __mx_strneq(char *s, char *t) {
-  return strcmp(s, t) != 0;
-}
+unsigned char __mx_streq(char *s, char *t) { return strcmp(s, t) == 0; }
+
+unsigned char __mx_strneq(char *s, char *t) { return strcmp(s, t) != 0; }

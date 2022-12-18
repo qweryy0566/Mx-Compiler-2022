@@ -12,6 +12,8 @@ public class RegAllocator {
   PhysicsReg RegT0 = PhysicsReg.regMap.get("t0");
   PhysicsReg RegT1 = PhysicsReg.regMap.get("t1");
   PhysicsReg RegT2 = PhysicsReg.regMap.get("t2");
+  PhysicsReg RegA4 = PhysicsReg.regMap.get("a4");
+  PhysicsReg RegA5 = PhysicsReg.regMap.get("a5");
   PhysicsReg RegSp = PhysicsReg.regMap.get("sp");
   LinkedList<ASMInst> workList;
 
@@ -39,11 +41,11 @@ public class RegAllocator {
         allocateSrc(RegT0, inst.rs2);
         inst.rs2 = RegT0;
       }
-      Reg rd = inst.rd;
-      inst.rd = rd == null ? null : RegT0;
       workList.add(inst);
-      if (rd != null && !(rd instanceof PhysicsReg))
-        allocaDest(RegT0, rd);
+      if (inst.rd != null && !(inst.rd instanceof PhysicsReg)) {
+        allocaDest(RegT0, inst.rd);
+        inst.rd = RegT0;
+      }
     }
     block.insts = workList;
   }

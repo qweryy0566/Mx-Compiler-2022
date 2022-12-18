@@ -10,8 +10,12 @@ public class ASMModule {
 
   public String toString() {
     String ret = "";
+    if (globalValues.size() > 0)
+      ret += "  .section .data\n";
     for (GlobalValue globalValue : globalValues)
       ret += globalValue;
+    if (globalStrings.size() > 0)
+      ret += "  .section .rodata\n";
     for (GlobalString globalString : globalStrings)
       ret += globalString;
     for (ASMFunction function : functions)
