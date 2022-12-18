@@ -19,4 +19,11 @@ public class GlobalValue extends Global {
       throw new Error("GlobalValue: " + var.initVal);
     }
   }
+
+  public String toString() {
+    String ret = "  .section .data\n";
+    ret += name + ":\n";
+    ret += (size == 4 ? "  .word " : "  .byte ") + word + "\n";
+    return ret;
+  }
 }

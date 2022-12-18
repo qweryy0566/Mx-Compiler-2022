@@ -19,4 +19,8 @@ public class VirtualImm extends Reg {
       value = 0;
     }
   }
+
+  public String toString() {
+    return Integer.toString(value);
+  }
 }

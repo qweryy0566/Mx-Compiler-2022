@@ -3,11 +3,13 @@ package assembly.inst;
 import assembly.operand.*;
 
 public class ASMMvInst extends ASMInst {
-    public Reg rd;
-    public Reg rs1;
+  public ASMMvInst(Reg rd, Reg rs) {
+    this.rd = rd;
+    this.rs1 = rs;
+  }
 
-    public ASMMvInst(Reg rd, Reg rs) {
-        this.rd = rd;
-        this.rs1 = rs;
-    }
+  @Override
+  public String toString() {
+    return "mv " + rd + ", " + rs1;
+  }
 }

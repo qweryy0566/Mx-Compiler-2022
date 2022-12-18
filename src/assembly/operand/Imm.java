@@ -6,4 +6,8 @@ public class Imm extends Operand {
   public Imm(int value) {
     this.value = value;
   }
+
+  public String toString() {
+    return Integer.toString(value);
+  }
 }

@@ -26,4 +26,8 @@ public class PhysicsReg extends Reg {
   public PhysicsReg(String name) {
     this.name = name;
   }
+
+  public String toString() {
+    return name;
+  }
 }

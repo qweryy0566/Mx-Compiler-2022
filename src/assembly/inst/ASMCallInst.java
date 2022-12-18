@@ -6,4 +6,9 @@ public class ASMCallInst extends ASMInst {
   public ASMCallInst(String funcName) {
     this.funcName = funcName;
   }
+
+  @Override
+  public String toString() {
+    return "call " + funcName;
+  }
 }

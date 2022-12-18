@@ -16,11 +16,10 @@ public class ASMBinaryInst extends ASMInst {
     this.rd = rd;
     this.rs1 = rs1;
     this.rs2 = rs2;
-  } 
-  // public ASMBinaryInst(String op, Reg rd, Reg rs1, Imm imm) {
-  //   this.op = op;
-  //   this.rd = rd;
-  //   this.rs1 = rs1;
-  //   this.imm = imm;
-  // }
+  }
+
+  @Override
+  public String toString() {
+    return op + " " + rd + ", " + rs1 + ", " + rs2;
+  }
 }
