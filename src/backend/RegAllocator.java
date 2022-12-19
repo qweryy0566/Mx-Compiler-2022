@@ -12,8 +12,6 @@ public class RegAllocator {
   PhysicsReg RegT0 = PhysicsReg.regMap.get("t0");
   PhysicsReg RegT1 = PhysicsReg.regMap.get("t1");
   PhysicsReg RegT2 = PhysicsReg.regMap.get("t2");
-  PhysicsReg RegA4 = PhysicsReg.regMap.get("a4");
-  PhysicsReg RegA5 = PhysicsReg.regMap.get("a5");
   PhysicsReg RegSp = PhysicsReg.regMap.get("sp");
   LinkedList<ASMInst> workList;
 
