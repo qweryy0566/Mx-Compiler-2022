@@ -19,8 +19,6 @@ import backend.*;
 public class Compiler {
   public static void main(String[] args) throws Exception {
     // CharStream input = CharStreams.fromStream(new FileInputStream("input.mx"));
-    // PrintStream irOutput = new PrintStream("output.ll"); 
-    // PrintStream asmOutput = new PrintStream("output.s");
     CharStream input = CharStreams.fromStream(System.in);
     MxLexer lexer = new MxLexer(input);
     lexer.removeErrorListeners();
@@ -36,15 +34,16 @@ public class Compiler {
     new SymbolCollector(globalScope).visit(ast);
     new SemanticChecker(globalScope).visit(ast);
     // AST -> LLVM IR
-    // System.setOut(irOutput);
     IRProgram irProgram = new IRProgram();
     new IRBuilder(irProgram, globalScope).visit(ast);
-    // System.out.print(irProgram.toString());
+    FileOutputStream irOut = new FileOutputStream("output.ll");
+    irOut.write(irProgram.toString().getBytes());
+    irOut.close();
     // LLVM IR -> ASM
-    // System.setOut(asmOutput);
     ASMModule asmModule = new ASMModule();
     new InstSelector(asmModule).visit(irProgram);
     new RegAllocator(asmModule).work();
+    // System.out.print(asmModule.toString());
 
     new BuiltinAsmPrinter("builtin.s");
     FileOutputStream out = new FileOutputStream("output.s");

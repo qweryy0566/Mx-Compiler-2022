@@ -491,24 +491,74 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
           break;
       }
     } else {
+      IREntity lhs = getVal(node.lhs), rhs = getVal(node.rhs);
       switch (node.op) {
-        case "+": op = "add"; break;
-        case "-": op = "sub"; break;
-        case "*": op = "mul"; break;
-        case "/": op = "sdiv"; break;
-        case "%": op = "srem"; break;
-        case "<<": op = "shl"; break;
-        case ">>": op = "ashr"; break;
-        case "&": op = "and"; break;
-        case "|": op = "or"; break; 
-        case "^": op = "xor"; break;
-        case "<": op = "slt"; break; 
-        case "<=": op = "sle"; break;
-        case ">": op = "sgt"; break;
-        case ">=": op = "sge"; break;
-        case "==": op = "eq"; break;
-        case "!=": op = "ne"; break;
+        case "+":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val + ((IRIntConst) rhs).val);
+          op = "add"; break;
+        case "-":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val - ((IRIntConst) rhs).val);
+          op = "sub"; break;
+        case "*":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val * ((IRIntConst) rhs).val);
+          op = "mul"; break;
+        case "/":
+          if (lhs instanceof IRConst && rhs instanceof IRConst && ((IRIntConst) rhs).val != 0)
+            node.value = new IRIntConst(((IRIntConst) lhs).val / ((IRIntConst) rhs).val);
+          op = "sdiv"; break;
+        case "%":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val % ((IRIntConst) rhs).val);
+          op = "srem"; break;
+        case "<<":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val << ((IRIntConst) rhs).val);
+          op = "shl"; break;
+        case ">>":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val >> ((IRIntConst) rhs).val);
+          op = "ashr"; break;
+        case "&":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val & ((IRIntConst) rhs).val);
+          op = "and"; break;
+        case "|":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val | ((IRIntConst) rhs).val);
+          op = "or"; break; 
+        case "^":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRIntConst(((IRIntConst) lhs).val ^ ((IRIntConst) rhs).val);
+          op = "xor"; break;
+        case "<":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRCondConst(((IRIntConst) lhs).val < ((IRIntConst) rhs).val);
+          op = "slt"; break; 
+        case "<=":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRCondConst(((IRIntConst) lhs).val <= ((IRIntConst) rhs).val);
+          op = "sle"; break;
+        case ">":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRCondConst(((IRIntConst) lhs).val > ((IRIntConst) rhs).val);
+          op = "sgt"; break;
+        case ">=":
+          if (lhs instanceof IRConst && rhs instanceof IRConst)
+            node.value = new IRCondConst(((IRIntConst) lhs).val >= ((IRIntConst) rhs).val);
+          op = "sge"; break;
+        case "==":
+          if (lhs instanceof IRIntConst && rhs instanceof IRIntConst)
+            node.value = new IRCondConst(((IRIntConst) lhs).val == ((IRIntConst) rhs).val);
+          op = "eq"; break;
+        case "!=":
+          if (lhs instanceof IRIntConst && rhs instanceof IRIntConst)
+            node.value = new IRCondConst(((IRIntConst) lhs).val != ((IRIntConst) rhs).val);
+          op = "ne"; break;
       }
+      if (node.value != null) return;
       switch (node.op) {
         case "+":
         case "-": 
@@ -522,7 +572,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
         case "^": 
           operandType = irIntType;
           dest = new IRRegister("", irIntType);
-          currentBlock.addInst(new IRCalcInst(currentBlock, operandType, dest, getVal(node.lhs), getVal(node.rhs), op));
+          currentBlock.addInst(new IRCalcInst(currentBlock, operandType, dest, lhs, rhs, op));
           break;
         case "<": 
         case "<=":
@@ -530,11 +580,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
         case ">=":
           operandType = irIntType;
           dest = new IRRegister("", irCondType);
-          currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, getVal(node.lhs), getVal(node.rhs), op));
+          currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, lhs, rhs, op));
           break;
         case "==":
-        case "!=": {
-          IREntity lhs = getVal(node.lhs), rhs = getVal(node.rhs);
+        case "!=":
           if (lhs.type instanceof IRIntType && lhs.type != irIntType) {
             IRRegister tmp = new IRRegister("", irIntType);
             currentBlock.addInst(new IRZextInst(currentBlock, tmp, lhs, irIntType));
@@ -549,7 +598,6 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
           dest = new IRRegister("tmp", irCondType);
           currentBlock.addInst(new IRIcmpInst(currentBlock, operandType, dest, lhs, rhs, op));
           break;
-        }
       }
       node.value = dest;
     }

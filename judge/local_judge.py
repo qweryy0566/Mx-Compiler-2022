@@ -8,7 +8,8 @@ import os, time
 """
 # test_cases_dir = '../testcases/semantic/'
 test_cases_dir = '../data/codegen/'
-# test_cases_dir = '../testcases/optim/'
+# test_cases_dir = '../data/optim-new/'
+# test_cases_dir = '../data/need/'
 # compile_cmd = "bash ./build.bash"
 execute_cmd = "bash ./codegen.bash"
 excluded_test_cases = ["foo.mx"]
