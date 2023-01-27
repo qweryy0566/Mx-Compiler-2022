@@ -63,6 +63,7 @@ public class RegAllocator {
     } else if (src instanceof VirtualImm) {
       workList.add(new ASMLiInst(reg, (VirtualImm) src));
     } else if (src instanceof Global) {
+      // CAUTION: include instrution selection
       workList.add(new ASMLuiInst(reg, new RelocationFunc(RelocationFunc.Type.hi, ((Global) src).name)));
       workList.add(new ASMUnaryInst("addi", reg, reg, new RelocationFunc(RelocationFunc.Type.lo, ((Global) src).name)));
     }

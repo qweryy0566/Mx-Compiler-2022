@@ -109,19 +109,20 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     curFunc.virtualRegCnt = VirtualReg.cnt;
     // set stack frame
     curFunc.totalStack = curFunc.paramUsed + curFunc.allocaUsed + curFunc.virtualRegCnt * 4;
-    ASMBlock entryBlock = curFunc.blocks.get(0), exitBlock = curFunc.blocks.get(curFunc.blocks.size() - 1);
+    curFunc.entryBlock = curFunc.blocks.get(0);
+    curFunc.exitBlock = curFunc.blocks.get(curFunc.blocks.size() - 1);
     if (curFunc.totalStack < 1 << 11) {
-      entryBlock.insts.addFirst(new ASMUnaryInst("addi", PhysicsReg.regMap.get("sp"), PhysicsReg.regMap.get("sp"),
-          new Imm(-curFunc.totalStack)));
-      exitBlock.insts.add(new ASMUnaryInst("addi", PhysicsReg.regMap.get("sp"), PhysicsReg.regMap.get("sp"),
-          new Imm(curFunc.totalStack)));
+      curFunc.entryBlock.insts.addFirst(new ASMUnaryInst("addi", PhysicsReg.regMap.get("sp"),
+          PhysicsReg.regMap.get("sp"), new Imm(-curFunc.totalStack)));
+      curFunc.exitBlock.insts.add(new ASMUnaryInst("addi", PhysicsReg.regMap.get("sp"),
+          PhysicsReg.regMap.get("sp"), new Imm(curFunc.totalStack)));
     } else {
-      entryBlock.insts.addFirst(new ASMBinaryInst("add", PhysicsReg.regMap.get("sp"), PhysicsReg.regMap.get("sp"),
-          new VirtualImm(-curFunc.totalStack)));
-      exitBlock.insts.add(new ASMBinaryInst("add", PhysicsReg.regMap.get("sp"), PhysicsReg.regMap.get("sp"),
-          new VirtualImm(curFunc.totalStack)));
+      curFunc.entryBlock.insts.addFirst(new ASMBinaryInst("add", PhysicsReg.regMap.get("sp"),
+          PhysicsReg.regMap.get("sp"), new VirtualImm(-curFunc.totalStack)));
+      curFunc.exitBlock.insts.add(new ASMBinaryInst("add", PhysicsReg.regMap.get("sp"),
+          PhysicsReg.regMap.get("sp"), new VirtualImm(curFunc.totalStack)));
     }
-    exitBlock.insts.add(new ASMRetInst());
+    curFunc.exitBlock.insts.add(new ASMRetInst());
   }
 
   public void visit(IRBasicBlock node) {
@@ -139,7 +140,11 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   public void visit(IRBranchInst node) {
     curBlock.addInst(new ASMBeqzInst(getReg(node.cond), blockMap.get(node.elseBlock)));
+    curBlock.succ.add(blockMap.get(node.elseBlock));
+    blockMap.get(node.elseBlock).pred.add(curBlock);
     curBlock.addInst(new ASMJumpInst(blockMap.get(node.thenBlock)));
+    curBlock.succ.add(blockMap.get(node.thenBlock));
+    blockMap.get(node.thenBlock).pred.add(curBlock);
   }
 
   public void visit(IRCalcInst node) {
@@ -224,6 +229,8 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   public void visit(IRJumpInst node) {
     curBlock.addInst(new ASMJumpInst(blockMap.get(node.toBlock)));
+    curBlock.succ.add(blockMap.get(node.toBlock));
+    blockMap.get(node.toBlock).pred.add(curBlock);
   }
 
   public void visit(IRLoadInst node) {

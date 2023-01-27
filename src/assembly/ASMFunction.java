@@ -7,6 +7,7 @@ public class ASMFunction {
   public String name;
   public ArrayList<ASMBlock> blocks = new ArrayList<ASMBlock>();
   public ArrayList<Reg> params = new ArrayList<Reg>();
+  public ASMBlock entryBlock, exitBlock;
 
   // for stack frame
   public int virtualRegCnt = 0;
