@@ -39,45 +39,29 @@ public class LivenessAnalyzer {
   // chapter 17.4.5
   public void work() {
     for (ASMFunction func : module.functions) {
-      livenessOfBlock(func);
-      func.blocks.forEach(block -> livenessOfInst(block));
-    }
-  }
-
-  void livenessOfBlock(ASMFunction func) {
-    workList.clear();
-    inWorkList.clear();
-    workList.add(func.exitBlock);
-    inWorkList.add(func.exitBlock);
-    while (!workList.isEmpty()) {
-      ASMBlock block = workList.removeFirst();
-      inWorkList.remove(block);
-      HashSet<Reg> newLiveOut = new HashSet<>();
-      block.succ.forEach(succ -> newLiveOut.addAll(succ.liveIn));
-      HashSet<Reg> newLiveIn = new HashSet<>(block.use);
-      newLiveIn.addAll(newLiveOut);
-      newLiveIn.removeAll(block.def);
-      if (!newLiveIn.equals(newLiveIn)) {
-        block.liveIn = newLiveIn;
-        block.liveOut = newLiveOut;
-        block.pred.forEach(pred -> {
-          if (!inWorkList.contains(pred)) {
-            workList.add(pred);
-            inWorkList.add(pred);
-          }
-        });
+      workList.clear();
+      inWorkList.clear();
+      workList.add(func.exitBlock);
+      inWorkList.add(func.exitBlock);
+      while (!workList.isEmpty()) {
+        ASMBlock block = workList.removeFirst();
+        inWorkList.remove(block);
+        HashSet<Reg> newLiveOut = new HashSet<>();
+        block.succ.forEach(succ -> newLiveOut.addAll(succ.liveIn));
+        HashSet<Reg> newLiveIn = new HashSet<>(block.use);
+        newLiveIn.addAll(newLiveOut);
+        newLiveIn.removeAll(block.def);
+        if (!newLiveIn.equals(block.liveIn)) {
+          block.liveIn = newLiveIn;
+          block.liveOut = newLiveOut;
+          block.pred.forEach(pred -> {
+            if (!inWorkList.contains(pred)) {
+              workList.add(pred);
+              inWorkList.add(pred);
+            }
+          });
+        }
       }
-    }
-  }
-
-  void livenessOfInst(ASMBlock block) {
-    HashSet<Reg> live = new HashSet<>(block.liveOut);
-    for (int i = block.insts.size() - 1; i >= 0; --i) {
-      ASMInst inst = block.insts.get(i);
-      inst.liveOut = new HashSet<>(live);
-      inst.getDef().forEach(reg -> live.remove(reg));
-      inst.getUse().forEach(reg -> live.add(reg));
-      inst.liveIn = new HashSet<>(live);
     }
   }
 }
