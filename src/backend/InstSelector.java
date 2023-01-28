@@ -23,15 +23,21 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     this.module = module;
   }
 
+  Reg immToReg(VirtualImm imm) {
+    VirtualReg reg = new VirtualReg(4);
+    curBlock.addInst(new ASMLiInst(reg, imm));
+    return reg;
+    // return imm;
+  }
+
   Reg getReg(IREntity entity) {
     if (entity.asmReg == null) {
       assert !(entity instanceof IRGlobalVar);
       assert !(entity instanceof IRStringConst);
-      if (entity instanceof IRRegister) {
+      if (entity instanceof IRRegister)
         entity.asmReg = new VirtualReg(entity.type.size);
-      } else if (entity instanceof IRConst) {
-        entity.asmReg = new VirtualImm((IRConst) entity);
-      }
+      else if (entity instanceof IRConst)
+        return immToReg(new VirtualImm((IRConst) entity));
     }
     return entity.asmReg;
   }
@@ -41,7 +47,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
       curBlock.addInst(new ASMStoreInst(size, dest, value, new Imm(offset)));
     else {
       VirtualReg tmp = new VirtualReg(4);
-      curBlock.addInst(new ASMBinaryInst("add", tmp, dest, new VirtualImm(offset)));
+      curBlock.addInst(new ASMBinaryInst("add", tmp, dest, immToReg(new VirtualImm(offset))));
       curBlock.addInst(new ASMStoreInst(size, tmp, value));
     }
   }
@@ -51,7 +57,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
       curBlock.addInst(new ASMLoadInst(size, dest, src, new Imm(offset)));
     else {
       VirtualReg tmp = new VirtualReg(4);
-      curBlock.addInst(new ASMBinaryInst("add", tmp, src, new VirtualImm(offset)));
+      curBlock.addInst(new ASMBinaryInst("add", tmp, src, immToReg(new VirtualImm(offset))));
       curBlock.addInst(new ASMLoadInst(size, dest, tmp));
     }
   }
@@ -134,7 +140,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   public void visit(IRAllocaInst node) {
     curBlock.addInst(new ASMBinaryInst("add", getReg(node.allocaReg), PhysicsReg.regMap.get("sp"),
-        new VirtualImm(curFunc.paramUsed + curFunc.allocaUsed)));
+        immToReg(new VirtualImm(curFunc.paramUsed + curFunc.allocaUsed))));
     curFunc.allocaUsed += 4;
   }
 
@@ -170,14 +176,16 @@ public class InstSelector implements IRVisitor, BuiltinElements {
   }
 
   public void visit(IRCallInst node) {
+    ASMCallInst callInst = new ASMCallInst(node.funcName);
     for (int i = 0; i < node.args.size(); ++i) {
       IREntity arg = node.args.get(i);
-      if (i < 8)
+      if (i < 8) {
         curBlock.addInst(new ASMMvInst(PhysicsReg.regMap.get("a" + i), getReg(arg)));
-      else
+        callInst.addUse(PhysicsReg.regMap.get("a" + i));
+      } else
         storeReg(arg.type.size, getReg(arg), PhysicsReg.regMap.get("sp"), i - 8 << 2);
     }
-    curBlock.addInst(new ASMCallInst(node.funcName));
+    curBlock.addInst(callInst);
     if (node.callReg != null)
       curBlock.addInst(new ASMMvInst(getReg(node.callReg), PhysicsReg.regMap.get("a0")));
   }

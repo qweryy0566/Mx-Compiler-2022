@@ -43,11 +43,14 @@ public class Compiler {
     ASMModule asmModule = new ASMModule();
     new InstSelector(asmModule).visit(irProgram);
     new RegAllocator(asmModule).work();
-    // System.out.print(asmModule.toString());
 
-    new BuiltinAsmPrinter("builtin.s");
-    FileOutputStream out = new FileOutputStream("output.s");
-    out.write(asmModule.toString().getBytes());
-    out.close();
+    // Local Judge
+    System.out.print(asmModule.toString());
+
+    // Online Judge
+    // new BuiltinAsmPrinter("builtin.s");
+    // FileOutputStream out = new FileOutputStream("output.s");
+    // out.write(asmModule.toString().getBytes());
+    // out.close();
   }
 }

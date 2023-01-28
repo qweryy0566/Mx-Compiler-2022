@@ -10,9 +10,15 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Stack;
 
+/*
+ * Register allocation using the graph coloring algorithm
+ * reference: Modern Compiler Implementation in C
+ */
 
 public class PremAllocator {
   public ASMModule module;
+
+  public static final int kCnt = 27; // number of physical registers
 
   public LinkedHashSet<Reg> preColored = new LinkedHashSet<Reg>(PhysicsReg.regMap.values());
   public LinkedHashSet<Reg> initial = new LinkedHashSet<Reg>();
@@ -23,7 +29,7 @@ public class PremAllocator {
   public LinkedHashSet<Reg> coalescedNodes = new LinkedHashSet<Reg>();
   public LinkedHashSet<Reg> coloredNodes = new LinkedHashSet<Reg>();
   public Stack<Reg> selectStack = new Stack<Reg>();
-  
+
   public LinkedHashSet<ASMMvInst> coalescedMoves = new LinkedHashSet<>();
   public LinkedHashSet<ASMMvInst> constrainedMoves = new LinkedHashSet<>();
   public LinkedHashSet<ASMMvInst> frozenMoves = new LinkedHashSet<>();
@@ -31,22 +37,25 @@ public class PremAllocator {
   public LinkedHashSet<ASMMvInst> activeMoves = new LinkedHashSet<>();
 
   // interference graph
-
   public static class Edge {
     public Reg u, v;
+
     public Edge(Reg u, Reg v) {
       this.u = u;
       this.v = v;
     }
+
     @Override
     public boolean equals(Object obj) {
-      if (obj == null || !(obj instanceof Edge)) return false;
+      if (obj == null || !(obj instanceof Edge))
+        return false;
       Edge e = (Edge) obj;
       return (u == e.u && v == e.v) || (u == e.v && v == e.u);
     }
+
     @Override
     public int hashCode() {
-      return u.hashCode() + v.hashCode();
+      return u.hashCode() ^ v.hashCode();
     }
   }
 
@@ -63,14 +72,26 @@ public class PremAllocator {
 
   public void work() {
     new LivenessAnalyzer(module).work();
+    initAll();
     build();
     makeWorkList();
+    do {
+      if (!simplifyWorkList.isEmpty())
+        stepSimplify();
+      else if (!workListMoves.isEmpty())
+        stepCoalesce();
+      else if (!freezeWorkList.isEmpty())
+        freeze();
+      else if (!spillWorkList.isEmpty())
+        selectSpill();
+    } while (!simplifyWorkList.isEmpty() || !workListMoves.isEmpty() ||
+        !freezeWorkList.isEmpty() || !spillWorkList.isEmpty());
   }
 
   void addEdge(Reg u, Reg v) {
-    if (u == v) return;
     Edge e = new Edge(u, v);
-    if (adjSet.contains(e)) return;
+    if (u == v || adjSet.contains(e))
+      return;
     adjSet.add(e);
     if (!preColored.contains(u)) {
       adjList.get(u).add(v);
@@ -81,31 +102,212 @@ public class PremAllocator {
       degree.put(v, degree.get(v) + 1);
     }
   }
-  void build() {
-    // init
-    // TODO
-    // build interference graph
+
+  void initAll() {
+    preColored.clear();
+    initial.clear();
+    simplifyWorkList.clear();
+    freezeWorkList.clear();
+    spillWorkList.clear();
+    spilledNodes.clear();
+    coalescedNodes.clear();
+    coloredNodes.clear();
+    selectStack.clear();
+
+    coalescedMoves.clear();
+    constrainedMoves.clear();
+    frozenMoves.clear();
+    workListMoves.clear();
+    activeMoves.clear();
+
+    adjSet.clear();
+    adjList.clear();
+    degree.clear();
+    moveList.clear();
+    alias.clear();
+    color.clear();
+
+    PhysicsReg.regMap.values().forEach(reg -> {
+      preColored.add(reg);
+      adjList.put(reg, new HashSet<>());
+      degree.put(reg, Integer.MAX_VALUE);
+      moveList.put(reg, new HashSet<>());
+      alias.put(reg, null);
+      color.put(reg, reg.id);
+    });
+
     for (ASMFunction func : module.functions)
-      for (ASMBlock block : func.blocks) {
-        HashSet<Reg> live = new HashSet<>(block.liveOut);
-        for (int i = block.insts.size() - 1; i >= 0; i--) {
-          ASMInst inst = block.insts.get(i);
-          if (inst instanceof ASMMvInst) {
-            live.removeAll(inst.getUse());
-            inst.getDef().forEach(reg -> moveList.get(reg).add((ASMMvInst) inst));
-            inst.getUse().forEach(reg -> moveList.get(reg).add((ASMMvInst) inst));
-            workListMoves.add((ASMMvInst) inst); 
-          }
-          live.addAll(inst.getDef());
-          for (Reg def : inst.getDef())
-            live.forEach(l -> addEdge(def, l));
-          live.removeAll(inst.getDef());
-          live.addAll(inst.getUse());
+      for (ASMBlock block : func.blocks)
+        block.insts.forEach(inst -> {
+          initial.addAll(inst.getDef());
+          initial.addAll(inst.getUse());
+        });
+    initial.removeAll(preColored);
+    initial.forEach(reg -> {
+      adjList.put(reg, new HashSet<>());
+      degree.put(reg, 0);
+      moveList.put(reg, new HashSet<>());
+      alias.put(reg, null);
+      color.put(reg, null);
+    });
+  }
+
+  void build() {
+    // build interference graph
+    module.functions.forEach(func -> func.blocks.forEach(block -> {
+      HashSet<Reg> live = new HashSet<>(block.liveOut);
+      for (int i = block.insts.size() - 1; i >= 0; i--) {
+        ASMInst inst = block.insts.get(i);
+        if (inst instanceof ASMMvInst) {
+          live.removeAll(inst.getUse());
+          inst.getDef().forEach(reg -> moveList.get(reg).add((ASMMvInst) inst));
+          inst.getUse().forEach(reg -> moveList.get(reg).add((ASMMvInst) inst));
+          // all add to workListMoves initially
+          workListMoves.add((ASMMvInst) inst);
         }
+        live.addAll(inst.getDef());
+        for (Reg def : inst.getDef())
+          live.forEach(l -> addEdge(def, l));
+        live.removeAll(inst.getDef());
+        live.addAll(inst.getUse());
       }
+    }));
+  }
+
+  // the move instructions that are related to reg and can be coalesced currently
+  HashSet<ASMMvInst> nodeMoves(Reg reg) {
+    HashSet<ASMMvInst> ret = new HashSet<ASMMvInst>(activeMoves);
+    ret.addAll(workListMoves);
+    ret.retainAll(moveList.get(reg));
+    return ret;
+  }
+
+  boolean moveRelated(Reg reg) {
+    return nodeMoves(reg).size() > 0;
   }
 
   void makeWorkList() {
+    initial.forEach(reg -> {
+      initial.remove(reg);
+      if (degree.get(reg) >= kCnt)
+        spillWorkList.add(reg);
+      else if (moveRelated(reg))
+        freezeWorkList.add(reg);
+      else
+        simplifyWorkList.add(reg);
+    });
+  }
 
+  // the registers that are adjacent to reg CURRENTLY
+  HashSet<Reg> adjacent(Reg reg) {
+    HashSet<Reg> ret = new HashSet<>(adjList.get(reg));
+    ret.removeAll(selectStack);
+    ret.removeAll(coalescedNodes);
+    return ret;
+  }
+
+  void decrementDegree(Reg reg) {
+    int d = degree.get(reg);
+    degree.put(reg, d - 1);
+    if (d == kCnt) {
+      HashSet<Reg> nodes = adjacent(reg);
+      nodes.add(reg);
+      enableMoves(nodes);
+      spillWorkList.remove(reg);
+      if (moveRelated(reg))
+        freezeWorkList.add(reg);
+      else
+        simplifyWorkList.add(reg);
+    }
+  }
+
+  void enableMoves(HashSet<Reg> nodes) {
+    nodes.forEach(reg -> nodeMoves(reg).forEach(mv -> {
+      if (activeMoves.contains(mv)) {
+        activeMoves.remove(mv);
+        workListMoves.add(mv);
+      }
+    }));
+  }
+
+  void stepSimplify() {
+    Reg reg = simplifyWorkList.getFirst();
+    simplifyWorkList.remove(reg);
+    selectStack.push(reg);
+    adjacent(reg).forEach(adj -> decrementDegree(adj));
+  }
+
+  Reg getAlias(Reg reg){
+    // TODO : compress path
+    if (coalescedNodes.contains(reg))
+      return getAlias(alias.get(reg));
+    else
+      return reg;
+  }
+  // add reg to simplifyWorkList if it is not preColored and not move related
+  void addWorkList(Reg reg) {
+    if (!preColored.contains(reg) && !moveRelated(reg) && degree.get(reg) < kCnt) {
+      freezeWorkList.remove(reg);
+      simplifyWorkList.add(reg); // low degree and no move related
+    }
+  }
+  boolean George(Reg t, Reg r) {
+    return degree.get(t) < kCnt || preColored.contains(t) || adjSet.contains(new Edge(t, r));
+  }
+  boolean Briggs(HashSet<Reg> uv) {
+    int k = 0;
+    for (Reg reg : uv)
+      if (degree.get(reg) >= kCnt)
+        k++;
+    return k < kCnt;
+  }
+  void combine(Reg u, Reg v) {
+    if (freezeWorkList.contains(v))
+      freezeWorkList.remove(v);
+    else
+      spillWorkList.remove(v);
+    coalescedNodes.add(v);
+    alias.put(v, u); // fa[v] = u
+    moveList.get(u).addAll(moveList.get(v));
+    enableMoves(new HashSet<Reg>(){{add(v);}});
+    adjacent(v).forEach(t -> {
+      addEdge(t, u);
+      decrementDegree(t);
+    });
+    if (degree.get(u) >= kCnt && freezeWorkList.contains(u)) {
+      freezeWorkList.remove(u);
+      spillWorkList.add(u);
+    }
+  }
+  void stepCoalesce() {
+    ASMMvInst mv = workListMoves.iterator().next();
+    Reg x = getAlias(mv.rd), y = getAlias(mv.rs1);
+    Edge e = preColored.contains(y) ? new Edge(y, x) : new Edge(x, y);
+    workListMoves.remove(mv);
+    if (e.u == e.v) {
+      // delete the move instruction directly
+      coalescedMoves.add(mv);
+      addWorkList(e.u);
+    } else if (preColored.contains(e.v) || adjSet.contains(e)) {
+      // physical registers must conflict with each other
+      // or two virtual registers are already adjacent
+      constrainedMoves.add(mv);
+      addWorkList(e.u);
+      addWorkList(e.v);
+    } else {
+      // e.v can't be preColored
+      boolean flag = true;
+      for (Reg reg : adjacent(e.v))
+        flag &= George(reg, e.u);
+      HashSet<Reg> uv = new HashSet<>(adjacent(e.u));
+      uv.addAll(adjacent(e.v));
+      if (preColored.contains(e.u) && flag || !preColored.contains(e.u) && Briggs(uv)) {
+        coalescedMoves.add(mv);
+        combine(e.u, e.v); // combine e.v to e.u
+        addWorkList(e.u);
+      } else {
+        activeMoves.add(mv);
+      }
+    }
   }
 }
