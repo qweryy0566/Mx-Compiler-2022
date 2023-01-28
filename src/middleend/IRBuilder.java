@@ -125,7 +125,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     root.funcList.add(currentFunction);
   
     currentScope = new Scope(currentScope, node.returnType.type);
-    currentBlock = currentFunction.appendBlock(new IRBasicBlock(currentFunction, "entry_"));
+    currentBlock = currentFunction.appendBlock(new IRBasicBlock(currentFunction, "entry_", 0));
     if (currentClass != null) {  // is a method
       IRPtrType classPtrType = new IRPtrType(currentClass);
       IRRegister thisVal = new IRRegister("this", classPtrType);
@@ -140,7 +140,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       node.params.accept(this);
   
     // exit block
-    currentFunction.exitBlock = new IRBasicBlock(currentFunction, "return_");
+    currentFunction.exitBlock = new IRBasicBlock(currentFunction, "return_", 0);
     currentBlock.terminalInst = new IRJumpInst(currentBlock, currentFunction.exitBlock);
     if (node.returnType.type.equals(VoidType)) {
       currentFunction.exitBlock.terminalInst = new IRRetInst(currentFunction.exitBlock, irVoidConst);
@@ -277,16 +277,16 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.cond.accept(this);
     IREntity cond = getCond(node.cond);
     IRBasicBlock lastBlock = currentBlock;
-    IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "if.end_");
+    IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "if.end_", currentBlock.loopDepth);
     nextBlock.terminalInst = currentBlock.terminalInst;
-    IRBasicBlock thenBlock = new IRBasicBlock(currentFunction, "if.then_", nextBlock);
+    IRBasicBlock thenBlock = new IRBasicBlock(currentFunction, "if.then_", nextBlock, currentBlock.loopDepth);
     currentScope = new Scope(currentScope);
     currentBlock.isFinished = true;
     currentBlock = currentFunction.appendBlock(thenBlock);
     node.thenStmts.forEach(stmt -> stmt.accept(this));
     currentScope = currentScope.parentScope;
     if (node.elseStmts != null && !node.elseStmts.isEmpty()) {
-      IRBasicBlock elseBlock = new IRBasicBlock(currentFunction, "if.else_", nextBlock);
+      IRBasicBlock elseBlock = new IRBasicBlock(currentFunction, "if.else_", nextBlock, currentBlock.loopDepth);
       currentScope = new Scope(currentScope);
       currentBlock.isFinished = true;
       currentBlock = currentFunction.appendBlock(elseBlock);
@@ -302,9 +302,9 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(WhileStmtNode node) {
-    node.condBlock = new IRBasicBlock(currentFunction, "while.cond_");
-    node.loopBlock = new IRBasicBlock(currentFunction, "while.loop_");
-    node.nextBlock = new IRBasicBlock(currentFunction, "while.end_");
+    node.condBlock = new IRBasicBlock(currentFunction, "while.cond_", currentBlock.loopDepth + 1);
+    node.loopBlock = new IRBasicBlock(currentFunction, "while.loop_", currentBlock.loopDepth + 1);
+    node.nextBlock = new IRBasicBlock(currentFunction, "while.end_", currentBlock.loopDepth);
     node.nextBlock.terminalInst = currentBlock.terminalInst;
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
     currentBlock.isFinished = true;
@@ -325,10 +325,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     currentScope = new Scope(currentScope, node);
     if (node.varDef != null) node.varDef.accept(this);
     if (node.init != null) node.init.accept(this);
-    node.condBlock = new IRBasicBlock(currentFunction, "for.cond_");
-    node.loopBlock = new IRBasicBlock(currentFunction, "for.loop_");
-    node.stepBlock = new IRBasicBlock(currentFunction, "for.step_");
-    node.nextBlock = new IRBasicBlock(currentFunction, "for.end_");
+    node.condBlock = new IRBasicBlock(currentFunction, "for.cond_", currentBlock.loopDepth + 1);
+    node.loopBlock = new IRBasicBlock(currentFunction, "for.loop_", currentBlock.loopDepth + 1);
+    node.stepBlock = new IRBasicBlock(currentFunction, "for.step_", currentBlock.loopDepth + 1);
+    node.nextBlock = new IRBasicBlock(currentFunction, "for.end_", currentBlock.loopDepth);
     node.nextBlock.terminalInst = currentBlock.terminalInst;
     currentBlock.terminalInst = new IRJumpInst(currentBlock, node.condBlock);
     currentBlock.isFinished = true;
@@ -432,10 +432,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     else {
       IRRegister temp = new IRRegister(".shortCirTemp", new IRPtrType(irBoolType));
       currentBlock.addInst(new IRAllocaInst(currentBlock, irBoolType, temp));
-      IRBasicBlock rhsBlock = new IRBasicBlock(currentFunction, "rhsBlock_");
-      IRBasicBlock trueBlock = new IRBasicBlock(currentFunction, "trueBlock_");
-      IRBasicBlock falseBlock = new IRBasicBlock(currentFunction, "falseBlock_");
-      IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "shortCir.end_");
+      IRBasicBlock rhsBlock = new IRBasicBlock(currentFunction, "rhsBlock_", currentBlock.loopDepth);
+      IRBasicBlock trueBlock = new IRBasicBlock(currentFunction, "trueBlock_", currentBlock.loopDepth);
+      IRBasicBlock falseBlock = new IRBasicBlock(currentFunction, "falseBlock_", currentBlock.loopDepth);
+      IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "shortCir.end_", currentBlock.loopDepth);
       nextBlock.terminalInst = currentBlock.terminalInst;
       currentBlock.terminalInst = node.op.equals("&&")
           ? new IRBranchInst(currentBlock, getCond(node.lhs), rhsBlock, falseBlock)
@@ -787,10 +787,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       IRRegister idx = new IRRegister("", irIntPtrType);
       currentBlock.addInst(new IRAllocaInst(currentBlock, irIntType, idx));
       currentBlock.addInst(new IRStoreInst(currentBlock, irIntConst0, idx));
-      IRBasicBlock condBlock = new IRBasicBlock(currentFunction, "for.cond_");
-      IRBasicBlock loopBlock = new IRBasicBlock(currentFunction, "for.loop_");
-      IRBasicBlock stepBlock = new IRBasicBlock(currentFunction, "for.step_");
-      IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "for.end_");
+      IRBasicBlock condBlock = new IRBasicBlock(currentFunction, "for.cond_", currentBlock.loopDepth + 1);
+      IRBasicBlock loopBlock = new IRBasicBlock(currentFunction, "for.loop_", currentBlock.loopDepth + 1);
+      IRBasicBlock stepBlock = new IRBasicBlock(currentFunction, "for.step_", currentBlock.loopDepth + 1);
+      IRBasicBlock nextBlock = new IRBasicBlock(currentFunction, "for.end_", currentBlock.loopDepth);
       nextBlock.terminalInst = currentBlock.terminalInst;
       currentBlock.terminalInst = new IRJumpInst(currentBlock, condBlock);
       currentBlock.isFinished = true;

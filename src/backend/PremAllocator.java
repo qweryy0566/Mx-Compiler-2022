@@ -81,9 +81,9 @@ public class PremAllocator {
       else if (!workListMoves.isEmpty())
         stepCoalesce();
       else if (!freezeWorkList.isEmpty())
-        freeze();
+        stepFreeze();
       else if (!spillWorkList.isEmpty())
-        selectSpill();
+        stepSelectSpill();
     } while (!simplifyWorkList.isEmpty() || !workListMoves.isEmpty() ||
         !freezeWorkList.isEmpty() || !spillWorkList.isEmpty());
   }
@@ -134,6 +134,7 @@ public class PremAllocator {
       moveList.put(reg, new HashSet<>());
       alias.put(reg, null);
       color.put(reg, reg.id);
+      reg.spillWeight = 0;
     });
 
     for (ASMFunction func : module.functions)
@@ -149,7 +150,17 @@ public class PremAllocator {
       moveList.put(reg, new HashSet<>());
       alias.put(reg, null);
       color.put(reg, null);
+      reg.spillWeight = 0;
     });
+
+    // compute spill weight
+    module.functions.forEach(func -> func.blocks.forEach(block -> {
+      double weight = Math.pow(10, block.loopDepth);
+      block.insts.forEach(inst -> {
+        inst.getDef().forEach(reg -> reg.spillWeight += weight);
+        inst.getUse().forEach(reg -> reg.spillWeight += weight);
+      });
+    }));
   }
 
   void build() {
@@ -306,8 +317,39 @@ public class PremAllocator {
         combine(e.u, e.v); // combine e.v to e.u
         addWorkList(e.u);
       } else {
+        // can't combine temporarily
         activeMoves.add(mv);
       }
     }
+  }
+
+  void freezeMoves(Reg reg) {
+    nodeMoves(reg).forEach(mv -> {
+      Reg x = mv.rd, y = mv.rs1, v;
+      v = getAlias(y) == getAlias(reg) ? getAlias(x) : getAlias(y);
+      activeMoves.remove(mv);
+      frozenMoves.add(mv);
+      if (nodeMoves(v).size() == 0 && degree.get(v) < kCnt) {
+        // then v is not move related anymore
+        freezeWorkList.remove(v);
+        simplifyWorkList.add(v);
+      }
+    }); 
+  }
+  void stepFreeze() {
+    Reg reg = freezeWorkList.getFirst();
+    freezeWorkList.remove(reg);
+    simplifyWorkList.add(reg);
+    freezeMoves(reg);
+  }
+
+  void stepSelectSpill() {
+    Reg m = null;
+    for (Reg reg : spillWorkList)
+      if (m == null || reg.spillWeight / degree.get(reg) > m.spillWeight / degree.get(m))
+        m = reg;
+    spillWorkList.remove(m);
+    simplifyWorkList.add(m);
+    freezeMoves(m);
   }
 }

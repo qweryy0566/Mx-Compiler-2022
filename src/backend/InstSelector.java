@@ -92,7 +92,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     // find max argument cnt
     int maxArgCnt = 0;
     for (IRBasicBlock blk : node.blocks) {
-      blockMap.put(blk, new ASMBlock(".L" + blockCnt++));
+      blockMap.put(blk, new ASMBlock(".L" + blockCnt++, blk.loopDepth));
       for (IRInst inst : blk.insts)
         if (inst instanceof IRCallInst)
           maxArgCnt = Math.max(maxArgCnt, ((IRCallInst) inst).args.size());

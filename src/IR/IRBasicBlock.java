@@ -8,18 +8,19 @@ public class IRBasicBlock {
   public LinkedList<IRInst> insts = new LinkedList<IRInst>();
   public IRTerminalInst terminalInst = null;
   public IRFunction parentFunction = null;
+  public int loopDepth = 0;
   // public ArrayList<IRBasicBlock> pres = new ArrayList<IRBasicBlock>(), succs = new ArrayList<IRBasicBlock>();
   public boolean isFinished = false;
 
   public static int blockCnt = 0;
 
-  public IRBasicBlock(IRFunction function, String name) {
+  public IRBasicBlock(IRFunction function, String name, int loopDepth) {
     this.parentFunction = function;
     this.name = name + String.valueOf(blockCnt++);
+    this.loopDepth = loopDepth;
   }
-  public IRBasicBlock(IRFunction function, String name, IRBasicBlock toBlock) {
-    this.parentFunction = function;
-    this.name = name + String.valueOf(blockCnt++);
+  public IRBasicBlock(IRFunction function, String name, IRBasicBlock toBlock, int loopDepth) {
+    this(function, name, loopDepth);
     this.terminalInst = new IRJumpInst(this, toBlock);
   }
   
