@@ -451,7 +451,7 @@ public class PremAllocator {
 
   void allocateDef(VirtualReg newReg, VirtualReg reg) {
     if (reg.stackOffset < 1 << 11)
-      newInsts.add(new ASMStoreInst(reg.size, newReg, RegSp, new Imm(reg.stackOffset)));
+      newInsts.add(new ASMStoreInst(reg.size, RegSp, newReg, new Imm(reg.stackOffset)));
     else {
       VirtualReg addr = new VirtualReg(4);
       newInsts.add(new ASMLiInst(addr, new VirtualImm(reg.stackOffset)));
