@@ -42,8 +42,8 @@ public class Compiler {
     // LLVM IR -> ASM
     ASMModule asmModule = new ASMModule();
     new InstSelector(asmModule).visit(irProgram);
-    new RegAllocator(asmModule).work();
-    // new PremAllocator(asmModule).work();
+    // new RegAllocator(asmModule).work();
+    new PremAllocator(asmModule).work();
     new CalleeManager(asmModule).work();
 
     // Local Judge

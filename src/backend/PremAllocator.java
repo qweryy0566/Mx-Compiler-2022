@@ -226,7 +226,6 @@ public class PremAllocator {
 
   void makeWorkList() {
     initial.forEach(reg -> {
-      initial.remove(reg);
       if (degree.get(reg) >= kCnt)
         spillWorkList.add(reg);
       else if (moveRelated(reg))
@@ -234,6 +233,7 @@ public class PremAllocator {
       else
         simplifyWorkList.add(reg);
     });
+    initial.clear();
   }
 
   // the registers that are adjacent to reg CURRENTLY
@@ -311,11 +311,7 @@ public class PremAllocator {
     coalescedNodes.add(v);
     alias.put(v, u); // fa[v] = u
     moveList.get(u).addAll(moveList.get(v));
-    enableMoves(new HashSet<Reg>() {
-      {
-        add(v);
-      }
-    });
+    enableMoves(new HashSet<Reg>() {{ add(v); }});
     adjacent(v).forEach(t -> {
       addEdge(t, u);
       decrementDegree(t);
