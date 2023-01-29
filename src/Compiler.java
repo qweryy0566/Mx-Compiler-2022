@@ -43,6 +43,8 @@ public class Compiler {
     ASMModule asmModule = new ASMModule();
     new InstSelector(asmModule).visit(irProgram);
     new RegAllocator(asmModule).work();
+    // new PremAllocator(asmModule).work();
+    new CalleeManager(asmModule).work();
 
     // Local Judge
     System.out.print(asmModule.toString());

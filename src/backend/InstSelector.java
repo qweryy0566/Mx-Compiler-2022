@@ -32,12 +32,16 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   Reg getReg(IREntity entity) {
     if (entity.asmReg == null) {
-      assert !(entity instanceof IRGlobalVar);
-      assert !(entity instanceof IRStringConst);
       if (entity instanceof IRRegister)
         entity.asmReg = new VirtualReg(entity.type.size);
       else if (entity instanceof IRConst)
         return immToReg(new VirtualImm((IRConst) entity));
+    } else if (entity.asmReg instanceof Global) {
+      VirtualReg reg = new VirtualReg(4);
+      String name = ((Global) entity.asmReg).name;
+      curBlock.addInst(new ASMLuiInst(reg, new RelocationFunc(RelocationFunc.Type.hi, name)));
+      curBlock.addInst(new ASMUnaryInst("addi", reg, reg, new RelocationFunc(RelocationFunc.Type.lo, name)));
+      return reg;
     }
     return entity.asmReg;
   }
@@ -68,6 +72,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
       globalVar.asmReg = new GlobalValue(globalVar);
       module.globalValues.add((GlobalValue) globalVar.asmReg);
     });
+    // add global strings
     node.stringConst.values().forEach(str -> {
       GlobalString globalStr = new GlobalString(".str." + String.valueOf(str.id), str.val);
       module.globalStrings.add(globalStr);
@@ -87,7 +92,6 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   public void visit(IRFunction node) {
     // add params
-    blockMap.clear();
     VirtualReg.cnt = 0;
     // find max argument cnt
     int maxArgCnt = 0;
@@ -103,7 +107,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
       if (i < 8)
         node.params.get(i).asmReg = PhysicsReg.regMap.get("a" + i);
       else
-        node.params.get(i).asmReg = new VirtualReg(i);
+        node.params.get(i).asmReg = new VirtualReg(4, i);
 
     for (int i = 0; i < node.blocks.size(); ++i) {
       curBlock = blockMap.get(node.blocks.get(i));
@@ -112,23 +116,11 @@ public class InstSelector implements IRVisitor, BuiltinElements {
       node.blocks.get(i).accept(this);
       curFunc.addBlock(curBlock);
     }
-    curFunc.virtualRegCnt = VirtualReg.cnt;
-    // set stack frame
-    curFunc.totalStack = curFunc.paramUsed + curFunc.allocaUsed + curFunc.virtualRegCnt * 4;
     curFunc.entryBlock = curFunc.blocks.get(0);
     curFunc.exitBlock = curFunc.blocks.get(curFunc.blocks.size() - 1);
-    if (curFunc.totalStack < 1 << 11) {
-      curFunc.entryBlock.insts.addFirst(new ASMUnaryInst("addi", PhysicsReg.regMap.get("sp"),
-          PhysicsReg.regMap.get("sp"), new Imm(-curFunc.totalStack)));
-      curFunc.exitBlock.insts.add(new ASMUnaryInst("addi", PhysicsReg.regMap.get("sp"),
-          PhysicsReg.regMap.get("sp"), new Imm(curFunc.totalStack)));
-    } else {
-      curFunc.entryBlock.insts.addFirst(new ASMBinaryInst("add", PhysicsReg.regMap.get("sp"),
-          PhysicsReg.regMap.get("sp"), new VirtualImm(-curFunc.totalStack)));
-      curFunc.exitBlock.insts.add(new ASMBinaryInst("add", PhysicsReg.regMap.get("sp"),
-          PhysicsReg.regMap.get("sp"), new VirtualImm(curFunc.totalStack)));
-    }
-    curFunc.exitBlock.insts.add(new ASMRetInst());
+
+    curFunc.virtualRegCnt = VirtualReg.cnt;
+    // setting stack frame was moved to the CalleeManager
   }
 
   public void visit(IRBasicBlock node) {
@@ -138,10 +130,22 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     node.terminalInst.accept(this);
   }
 
+  /*
+   * 将带有 param_idx 且 >= 8 的 allocaInst 替换为
+   * li reg, ParaImm(param_idx - 8 << 2)
+   * add allocaReg, sp, reg
+   * 且不占用栈的 alloca 区
+   */
   public void visit(IRAllocaInst node) {
-    curBlock.addInst(new ASMBinaryInst("add", getReg(node.allocaReg), PhysicsReg.regMap.get("sp"),
-        immToReg(new VirtualImm(curFunc.paramUsed + curFunc.allocaUsed))));
-    curFunc.allocaUsed += 4;
+    if (node.param_idx < 8) {
+      curBlock.addInst(new ASMBinaryInst("add", getReg(node.allocaReg), PhysicsReg.regMap.get("sp"),
+          immToReg(new VirtualImm(curFunc.paramUsed + curFunc.allocaUsed))));
+      curFunc.allocaUsed += 4;
+    } else {
+      VirtualReg reg = new VirtualReg(4);
+      curBlock.addInst(new ASMLiInst(reg, new StackImm(curFunc, node.param_idx - 8 << 2)));
+      curBlock.addInst(new ASMBinaryInst("add", getReg(node.allocaReg), PhysicsReg.regMap.get("sp"), reg));
+    }
   }
 
   public void visit(IRBranchInst node) {
@@ -253,8 +257,10 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     // 寄存器分配完再加 ret
   }
 
+  // 忽略 param_idx 且 >= 8 的 storeInst
   public void visit(IRStoreInst node) {
     // store : rs2 -> (rs1) address
-    storeReg(node.val.type.size, getReg(node.val), getReg(node.destAddr), 0);
+    if (node.param_idx < 8)
+      storeReg(node.val.type.size, getReg(node.val), getReg(node.destAddr), 0);
   }
 }

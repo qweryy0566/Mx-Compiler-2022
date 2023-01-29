@@ -19,6 +19,7 @@ public class PremAllocator {
   public ASMModule module;
 
   public static final int kCnt = 27; // number of physical registers
+  PhysicsReg RegSp = PhysicsReg.regMap.get("sp");
 
   public LinkedHashSet<Reg> preColored = new LinkedHashSet<Reg>(PhysicsReg.regMap.values());
   public LinkedHashSet<Reg> initial = new LinkedHashSet<Reg>();
@@ -71,21 +72,50 @@ public class PremAllocator {
   }
 
   public void work() {
-    new LivenessAnalyzer(module).work();
-    initAll();
-    build();
-    makeWorkList();
-    do {
-      if (!simplifyWorkList.isEmpty())
-        stepSimplify();
-      else if (!workListMoves.isEmpty())
-        stepCoalesce();
-      else if (!freezeWorkList.isEmpty())
-        stepFreeze();
-      else if (!spillWorkList.isEmpty())
-        stepSelectSpill();
-    } while (!simplifyWorkList.isEmpty() || !workListMoves.isEmpty() ||
-        !freezeWorkList.isEmpty() || !spillWorkList.isEmpty());
+    module.functions.forEach(func -> workOnFunc(func));
+  }
+
+  LinkedList<ASMInst> newInsts;
+
+  void workOnFunc(ASMFunction func) {
+    while (true) {
+      new LivenessAnalyzer(func).work();
+      initAll(func);
+      build(func);
+      makeWorkList();
+      do {
+        if (!simplifyWorkList.isEmpty())
+          stepSimplify();
+        else if (!workListMoves.isEmpty())
+          stepCoalesce();
+        else if (!freezeWorkList.isEmpty())
+          stepFreeze();
+        else if (!spillWorkList.isEmpty())
+          stepSelectSpill();
+      } while (!simplifyWorkList.isEmpty() || !workListMoves.isEmpty() ||
+          !freezeWorkList.isEmpty() || !spillWorkList.isEmpty());
+      assignColors();
+      if (spilledNodes.isEmpty())
+        break;
+      rewriteProgram(func);
+    }
+
+    func.blocks.forEach(block -> {
+      newInsts = new LinkedList<>();
+      for (ASMInst inst : block.insts) {
+        if (inst instanceof ASMLiInst && ((ASMLiInst) inst).pseudoImm instanceof StackImm)
+          ((StackImm) ((ASMLiInst) inst).pseudoImm).calc();
+        if (inst.rd instanceof VirtualReg)
+          inst.rd = PhysicsReg.idReg.get(color.get(inst.rd));
+        if (inst.rs1 instanceof VirtualReg)
+          inst.rs1 = PhysicsReg.idReg.get(color.get(inst.rs1));
+        if (inst.rs2 instanceof VirtualReg)
+          inst.rs2 = PhysicsReg.idReg.get(color.get(inst.rs2));
+        if (!(inst instanceof ASMMvInst) || inst.rd != inst.rs1)
+          newInsts.add(inst);
+      }
+      block.insts = newInsts;
+    });
   }
 
   void addEdge(Reg u, Reg v) {
@@ -103,7 +133,7 @@ public class PremAllocator {
     }
   }
 
-  void initAll() {
+  void initAll(ASMFunction func) {
     preColored.clear();
     initial.clear();
     simplifyWorkList.clear();
@@ -136,13 +166,10 @@ public class PremAllocator {
       color.put(reg, reg.id);
       reg.spillWeight = 0;
     });
-
-    for (ASMFunction func : module.functions)
-      for (ASMBlock block : func.blocks)
-        block.insts.forEach(inst -> {
-          initial.addAll(inst.getDef());
-          initial.addAll(inst.getUse());
-        });
+    func.blocks.forEach(block -> block.insts.forEach(inst -> {
+      initial.addAll(inst.getDef());
+      initial.addAll(inst.getUse());
+    }));
     initial.removeAll(preColored);
     initial.forEach(reg -> {
       adjList.put(reg, new HashSet<>());
@@ -154,18 +181,18 @@ public class PremAllocator {
     });
 
     // compute spill weight
-    module.functions.forEach(func -> func.blocks.forEach(block -> {
+    func.blocks.forEach(block -> {
       double weight = Math.pow(10, block.loopDepth);
       block.insts.forEach(inst -> {
         inst.getDef().forEach(reg -> reg.spillWeight += weight);
         inst.getUse().forEach(reg -> reg.spillWeight += weight);
       });
-    }));
+    });
   }
 
-  void build() {
+  void build(ASMFunction func) {
     // build interference graph
-    module.functions.forEach(func -> func.blocks.forEach(block -> {
+    func.blocks.forEach(block -> {
       HashSet<Reg> live = new HashSet<>(block.liveOut);
       for (int i = block.insts.size() - 1; i >= 0; i--) {
         ASMInst inst = block.insts.get(i);
@@ -182,7 +209,7 @@ public class PremAllocator {
         live.removeAll(inst.getDef());
         live.addAll(inst.getUse());
       }
-    }));
+    });
   }
 
   // the move instructions that are related to reg and can be coalesced currently
@@ -248,13 +275,14 @@ public class PremAllocator {
     adjacent(reg).forEach(adj -> decrementDegree(adj));
   }
 
-  Reg getAlias(Reg reg){
+  Reg getAlias(Reg reg) {
     // TODO : compress path
     if (coalescedNodes.contains(reg))
       return getAlias(alias.get(reg));
     else
       return reg;
   }
+
   // add reg to simplifyWorkList if it is not preColored and not move related
   void addWorkList(Reg reg) {
     if (!preColored.contains(reg) && !moveRelated(reg) && degree.get(reg) < kCnt) {
@@ -262,9 +290,11 @@ public class PremAllocator {
       simplifyWorkList.add(reg); // low degree and no move related
     }
   }
+
   boolean George(Reg t, Reg r) {
     return degree.get(t) < kCnt || preColored.contains(t) || adjSet.contains(new Edge(t, r));
   }
+
   boolean Briggs(HashSet<Reg> uv) {
     int k = 0;
     for (Reg reg : uv)
@@ -272,6 +302,7 @@ public class PremAllocator {
         k++;
     return k < kCnt;
   }
+
   void combine(Reg u, Reg v) {
     if (freezeWorkList.contains(v))
       freezeWorkList.remove(v);
@@ -280,7 +311,11 @@ public class PremAllocator {
     coalescedNodes.add(v);
     alias.put(v, u); // fa[v] = u
     moveList.get(u).addAll(moveList.get(v));
-    enableMoves(new HashSet<Reg>(){{add(v);}});
+    enableMoves(new HashSet<Reg>() {
+      {
+        add(v);
+      }
+    });
     adjacent(v).forEach(t -> {
       addEdge(t, u);
       decrementDegree(t);
@@ -290,6 +325,7 @@ public class PremAllocator {
       spillWorkList.add(u);
     }
   }
+
   void stepCoalesce() {
     ASMMvInst mv = workListMoves.iterator().next();
     Reg x = getAlias(mv.rd), y = getAlias(mv.rs1);
@@ -334,8 +370,9 @@ public class PremAllocator {
         freezeWorkList.remove(v);
         simplifyWorkList.add(v);
       }
-    }); 
+    });
   }
+
   void stepFreeze() {
     Reg reg = freezeWorkList.getFirst();
     freezeWorkList.remove(reg);
@@ -346,10 +383,84 @@ public class PremAllocator {
   void stepSelectSpill() {
     Reg m = null;
     for (Reg reg : spillWorkList)
-      if (m == null || reg.spillWeight / degree.get(reg) > m.spillWeight / degree.get(m))
+      if (m == null || reg.spillWeight / degree.get(reg) < m.spillWeight / degree.get(m))
         m = reg;
     spillWorkList.remove(m);
     simplifyWorkList.add(m);
     freezeMoves(m);
+  }
+
+  void assignColors() {
+    while (!selectStack.isEmpty()) {
+      Reg reg = selectStack.pop();
+      HashSet<Integer> okColors = new HashSet<>();
+      for (int i = 5; i < 32; i++)
+        okColors.add(i);
+      adjacent(reg).forEach(adj -> {
+        Reg adjAlias = getAlias(adj);
+        if (coloredNodes.contains(adjAlias) || preColored.contains(adjAlias))
+          okColors.remove(color.get(adjAlias));
+      });
+      if (okColors.isEmpty())
+        spilledNodes.add(reg);
+      else {
+        coloredNodes.add(reg);
+        color.put(reg, okColors.iterator().next());
+      }
+    }
+    coalescedNodes.forEach(reg -> color.put(reg, color.get(getAlias(reg))));
+  }
+
+  void rewriteProgram(ASMFunction func) {
+    // allocate stack space for spilled variables
+    spilledNodes.forEach(reg -> {
+      ((VirtualReg) reg).stackOffset = func.paramUsed + func.allocaUsed + func.spillUsed;
+      func.spillUsed += 4;
+    });
+
+    // create a new VirtualReg for each def and use in spilledNodes
+    func.blocks.forEach(block -> {
+      newInsts = new LinkedList<>();
+      for (ASMInst inst : block.insts) {
+        if (inst.rs1 != null && inst.rs1.stackOffset != null) {
+          VirtualReg newReg = new VirtualReg(4);
+          allocateUse(newReg, (VirtualReg) inst.rs1);
+          inst.rs1 = newReg;
+        }
+        if (inst.rs2 != null && inst.rs2.stackOffset != null) {
+          VirtualReg newReg = new VirtualReg(4);
+          allocateUse(newReg, (VirtualReg) inst.rs2);
+          inst.rs2 = newReg;
+        }
+        newInsts.add(inst);
+        if (inst.rd != null && inst.rd.stackOffset != null) {
+          VirtualReg newReg = new VirtualReg(4);
+          allocateDef(newReg, (VirtualReg) inst.rd);
+          inst.rd = newReg;
+        }
+      }
+      block.insts = newInsts;
+    });
+  }
+
+  void allocateUse(VirtualReg newReg, VirtualReg reg) {
+    if (reg.stackOffset < 1 << 11)
+      newInsts.add(new ASMLoadInst(reg.size, newReg, RegSp, new Imm(reg.stackOffset)));
+    else {
+      newInsts.add(new ASMLiInst(newReg, new VirtualImm(reg.stackOffset)));
+      newInsts.add(new ASMBinaryInst("add", newReg, newReg, RegSp));
+      newInsts.add(new ASMLoadInst(reg.size, newReg, newReg));
+    }
+  }
+
+  void allocateDef(VirtualReg newReg, VirtualReg reg) {
+    if (reg.stackOffset < 1 << 11)
+      newInsts.add(new ASMStoreInst(reg.size, newReg, RegSp, new Imm(reg.stackOffset)));
+    else {
+      VirtualReg addr = new VirtualReg(4);
+      newInsts.add(new ASMLiInst(addr, new VirtualImm(reg.stackOffset)));
+      newInsts.add(new ASMBinaryInst("add", addr, addr, RegSp));
+      newInsts.add(new ASMStoreInst(reg.size, addr, newReg));
+    }
   }
 }

@@ -7,10 +7,18 @@ import IR.*;
 public class IRAllocaInst extends IRInst {
   public IRType type;
   public IRRegister allocaReg;
+  public int param_idx = -1;
+  // if param_idx != -1, then this is allocated for a parameter
   public IRAllocaInst(IRBasicBlock block, IRType type, IRRegister allocaReg) {
     super(block);
     this.type = type;
     this.allocaReg = allocaReg;
+  }
+  public IRAllocaInst(IRBasicBlock block, IRType type, IRRegister allocaReg, int param_idx) {
+    super(block);
+    this.type = type;
+    this.allocaReg = allocaReg;
+    this.param_idx = param_idx;
   }
 
   @Override

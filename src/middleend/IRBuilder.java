@@ -132,7 +132,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       currentFunction.params.add(thisVal);
       // store this pointer
       IRRegister thisAddr = new IRRegister("this.addr", new IRPtrType(classPtrType));
-      currentBlock.addInst(new IRAllocaInst(currentBlock, classPtrType, thisAddr));
+      currentBlock.addInst(new IRAllocaInst(currentBlock, classPtrType, thisAddr, 0));
       currentBlock.addInst(new IRStoreInst(currentBlock, thisVal, thisAddr));
       currentScope.addIRVar("this", thisAddr);
     }
@@ -205,12 +205,12 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     if (currentFunction != null) {  // check if it's in a function first
       IRRegister definingPtr = new IRRegister(node.varName + ".addr", new IRPtrType(node.type.irType));
       currentScope.addIRVar(node.varName, definingPtr);  // use the varName as the key
-      // System.out.println(definingPtr.type);
-      currentBlock.addInst(new IRAllocaInst(currentBlock, node.type.irType, definingPtr));
+      currentBlock.addInst(new IRAllocaInst(currentBlock, node.type.irType, definingPtr,
+          param_idx == -1 ? -1 : param_idx + (currentClass == null ? 0 : 1))); // record the index of the parameter
       if (node.initVal != null) {
         node.initVal.accept(this);
         addStore(definingPtr, node.initVal);
-      } else if (node.type.type.isReferenceType()) {
+      } else if (node.type.type.isReferenceType() && param_idx == -1) {
         currentBlock.addInst(new IRStoreInst(currentBlock, new IRNullConst(node.type.irType), definingPtr));
       }
     } else if (currentClass != null) {
@@ -244,15 +244,19 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     }
   }
 
+  int param_idx = -1;
   @Override
   public void visit(ParameterListNode node) {
-    node.units.forEach(unit -> {
+    for (param_idx = 0; param_idx < node.units.size(); ++param_idx) {
+      VarDefUnitNode unit = node.units.get(param_idx);
       assert unit.initVal == null;
       unit.accept(this);
       IRRegister input = new IRRegister("", unit.type.irType);
       currentFunction.params.add(input);
-      currentBlock.addInst(new IRStoreInst(currentBlock, input, currentScope.getIRVarPtr(unit.varName)));
-    });
+      currentBlock.addInst(new IRStoreInst(currentBlock, input, currentScope.getIRVarPtr(unit.varName),
+          param_idx + (currentClass == null ? 0 : 1)));
+    }
+    param_idx = -1;
   }
 
   @Override

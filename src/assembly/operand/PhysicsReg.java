@@ -1,5 +1,6 @@
 package assembly.operand;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -54,6 +55,21 @@ public class PhysicsReg extends Reg {
   public static HashSet<Reg> calleeSave = new HashSet<>() {
     {
       for (int i = 0; i < 12; i++) add(regMap.get("s" + i));
+    }
+  };
+
+  public static ArrayList<Reg> idReg = new ArrayList<>() {
+    {
+      add(regMap.get("zero"));
+      add(regMap.get("ra"));
+      add(regMap.get("sp"));
+      add(regMap.get("gp"));
+      add(regMap.get("tp"));  
+      for (int i = 0; i < 3; i++) add(regMap.get("t" + i));
+      for (int i = 0; i < 2; i++) add(regMap.get("s" + i));
+      for (int i = 0; i < 8; i++) add(regMap.get("a" + i));
+      for (int i = 2; i < 12; i++) add(regMap.get("s" + i));
+      for (int i = 3; i < 7; i++) add(regMap.get("t" + i));
     }
   };
 

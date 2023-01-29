@@ -10,10 +10,9 @@ public class ASMFunction {
   public ASMBlock entryBlock, exitBlock;
 
   // for stack frame
-  public int virtualRegCnt = 0;
-  public int allocaUsed = 4; // 4 for return address
+  public int virtualRegCnt = 0, spillUsed = 0;
+  public int allocaUsed = 1 + 12 << 2; // 1 for return address and 12 for callee-save registers
   public int paramUsed = 0;
-  public int totalStack = 0;
 
   public ASMFunction(String name) {
     this.name = name;

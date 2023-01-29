@@ -16,11 +16,11 @@ public class IRProgram implements BuiltinElements {
   public HashMap<String, IRStringConst> stringConst = new HashMap<>();
 
   public IRFunction initFunc = new IRFunction("__mx_global_var_init", irVoidType), mainFunc;
-  public IRBasicBlock initBlock = new IRBasicBlock(initFunc, "entry_");
+  public IRBasicBlock initBlock = new IRBasicBlock(initFunc, "entry_", 0);
 
   public IRProgram() {
     initFunc.appendBlock(initBlock);
-    initFunc.exitBlock = new IRBasicBlock(initFunc, "return_");
+    initFunc.exitBlock = new IRBasicBlock(initFunc, "return_", 0);
     initBlock.terminalInst = new IRJumpInst(initBlock, initFunc.exitBlock);
     initFunc.exitBlock.terminalInst = new IRRetInst(initFunc.exitBlock, irVoidConst);
   }

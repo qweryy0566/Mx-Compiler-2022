@@ -21,8 +21,9 @@ public class RegAllocator {
 
   public void work() {
     for (ASMFunction function : module.functions) {
-      totalStack = function.totalStack;
+      function.spillUsed = function.virtualRegCnt << 2;
       virtualRegBegin = function.paramUsed + function.allocaUsed;
+      totalStack = virtualRegBegin + function.spillUsed;
       for (ASMBlock block : function.blocks)
         visitBlock(block);
     }
@@ -31,6 +32,8 @@ public class RegAllocator {
   public void visitBlock(ASMBlock block) {
     workList = new LinkedList<ASMInst>();
     for (ASMInst inst : block.insts) {
+      if (inst instanceof ASMLiInst && ((ASMLiInst) inst).pseudoImm instanceof StackImm)
+        ((StackImm) ((ASMLiInst) inst).pseudoImm).calc();
       if (inst.rs1 != null && !(inst.rs1 instanceof PhysicsReg)) {
         allocateSrc(RegT1, inst.rs1);
         inst.rs1 = RegT1;
@@ -61,11 +64,11 @@ public class RegAllocator {
         workList.add(new ASMLoadInst(((VirtualReg) src).size, reg, RegT2));
       }
     } else if (src instanceof VirtualImm) {
-      workList.add(new ASMLiInst(reg, (VirtualImm) src));
+      // workList.add(new ASMLiInst(reg, (VirtualImm) src));
     } else if (src instanceof Global) {
       // CAUTION: include instrution selection
-      workList.add(new ASMLuiInst(reg, new RelocationFunc(RelocationFunc.Type.hi, ((Global) src).name)));
-      workList.add(new ASMUnaryInst("addi", reg, reg, new RelocationFunc(RelocationFunc.Type.lo, ((Global) src).name)));
+      // workList.add(new ASMLuiInst(reg, new RelocationFunc(RelocationFunc.Type.hi, ((Global) src).name)));
+      // workList.add(new ASMUnaryInst("addi", reg, reg, new RelocationFunc(RelocationFunc.Type.lo, ((Global) src).name)));
     }
   }
 
