@@ -17,4 +17,9 @@ public class IRBoolConst extends IRConst {
   public String toStringWithType() {
     return "i8 " + toString();
   }
+
+  @Override
+  public boolean isZero() {
+    return !val;
+  }
 }

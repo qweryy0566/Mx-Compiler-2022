@@ -17,4 +17,9 @@ public class IRIntConst extends IRConst {
   public String toStringWithType() {
     return "i32 " + toString();
   }
+
+  @Override
+  public boolean isZero() {
+    return val == 0;
+  }
 }

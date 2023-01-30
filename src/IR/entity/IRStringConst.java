@@ -37,4 +37,9 @@ public class IRStringConst extends IRConst {
     }
     return ret + "\\00";
   }
+
+  @Override
+  public boolean isZero() {
+    return false;
+  }
 }

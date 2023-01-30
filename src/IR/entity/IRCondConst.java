@@ -17,4 +17,9 @@ public class IRCondConst extends IRConst {
   public String toStringWithType() {
     return "i1 " + toString();
   }
+
+  @Override
+  public boolean isZero() {
+    return !val;
+  }
 }

@@ -14,4 +14,9 @@ public class IRVoidConst extends IRConst {
   public String toStringWithType() {
     return toString();
   }
+
+  @Override
+  public boolean isZero() {
+    return false;
+  }
 }
