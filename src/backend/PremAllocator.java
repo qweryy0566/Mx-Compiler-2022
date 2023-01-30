@@ -382,7 +382,7 @@ public class PremAllocator {
       if (m == null || reg.spillWeight / degree.get(reg) < m.spillWeight / degree.get(m))
         m = reg;
     spillWorkList.remove(m);
-    simplifyWorkList.add(m);
+    simplifyWorkList.add(m); // 看看是否是实际溢出
     freezeMoves(m);
   }
 
@@ -418,19 +418,26 @@ public class PremAllocator {
     func.blocks.forEach(block -> {
       newInsts = new LinkedList<>();
       for (ASMInst inst : block.insts) {
+        VirtualReg same = null;
         if (inst.rs1 != null && inst.rs1.stackOffset != null) {
           VirtualReg newReg = new VirtualReg(4);
           allocateUse(newReg, (VirtualReg) inst.rs1);
+          if (inst.rs1 == inst.rs2)
+            inst.rs2 = newReg;
+          if (inst.rs1 == inst.rd)
+            same = newReg;
           inst.rs1 = newReg;
         }
         if (inst.rs2 != null && inst.rs2.stackOffset != null) {
           VirtualReg newReg = new VirtualReg(4);
           allocateUse(newReg, (VirtualReg) inst.rs2);
+          if (inst.rs2 == inst.rd)
+            same = newReg;
           inst.rs2 = newReg;
         }
         newInsts.add(inst);
         if (inst.rd != null && inst.rd.stackOffset != null) {
-          VirtualReg newReg = new VirtualReg(4);
+          VirtualReg newReg = same == null ? new VirtualReg(4) : same;
           allocateDef(newReg, (VirtualReg) inst.rd);
           inst.rd = newReg;
         }

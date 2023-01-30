@@ -137,8 +137,12 @@ public class InstSelector implements IRVisitor, BuiltinElements {
    */
   public void visit(IRAllocaInst node) {
     if (node.param_idx < 8) {
-      curBlock.addInst(new ASMBinaryInst("add", getReg(node.allocaReg), PhysicsReg.get("sp"),
-          immToReg(new VirtualImm(curFunc.paramUsed + curFunc.allocaUsed))));
+      int offset = curFunc.paramUsed + curFunc.allocaUsed;
+      if (offset < 1 << 11)
+        curBlock.addInst(new ASMUnaryInst("addi", getReg(node.allocaReg), PhysicsReg.get("sp"), new Imm(offset)));
+      else
+        curBlock.addInst(new ASMBinaryInst("add", getReg(node.allocaReg), PhysicsReg.get("sp"),
+            immToReg(new VirtualImm(offset))));
       curFunc.allocaUsed += 4;
     } else {
       VirtualReg reg = new VirtualReg(4);
@@ -203,8 +207,12 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     } else {
       Reg idx = node.pToType instanceof IRStructType ? getReg(node.indexList.get(1)) : getReg(node.indexList.get(0));
       VirtualReg tmp = new VirtualReg(4);
-      curBlock.addInst(new ASMUnaryInst("slli", tmp, idx, new Imm(2)));
-      curBlock.addInst(new ASMBinaryInst("add", getReg(node.res), getReg(node.ptr), tmp));
+      if (idx == PhysicsReg.get("zero"))
+        curBlock.addInst(new ASMMvInst(getReg(node.res), getReg(node.ptr)));
+      else {
+        curBlock.addInst(new ASMUnaryInst("slli", tmp, idx, new Imm(2)));
+        curBlock.addInst(new ASMBinaryInst("add", getReg(node.res), getReg(node.ptr), tmp));
+      }
     }
   }
 
