@@ -9,8 +9,11 @@ public class IRBasicBlock {
   public IRTerminalInst terminalInst = null;
   public IRFunction parentFunction = null;
   public int loopDepth = 0;
-  // public ArrayList<IRBasicBlock> pres = new ArrayList<IRBasicBlock>(), succs = new ArrayList<IRBasicBlock>();
   public boolean isFinished = false;
+
+  public LinkedList<IRBasicBlock> preds = new LinkedList<>(), succs = new LinkedList<>();
+  public IRBasicBlock idom = null;
+  public LinkedList<IRBasicBlock> domFrontier = new LinkedList<>();
 
   public static int blockCnt = 0;
 
