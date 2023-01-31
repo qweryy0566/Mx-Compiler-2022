@@ -5,7 +5,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import IR.*;
-import IR.inst.*;
+
+/*
+ * references:
+ *  https://blog.csdn.net/dashuniuniu/article/details/52224882
+ *  https://www.cs.rice.edu/~keith/EMBED/dom.pdf (A Simple, Fast Dominance Algorithm)
+ */
 
 public class DomTreeBuilder {
   IRProgram program;
