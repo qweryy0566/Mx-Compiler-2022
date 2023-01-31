@@ -61,6 +61,7 @@ public class DomTreeBuilder {
     }
 
     // calculate dominance frontiers
+    blockSeq.addFirst(func.entryBlock);
     for (IRBasicBlock block : blockSeq) {
       if (block.preds.size() < 2)
         continue;

@@ -277,9 +277,11 @@ public class PremAllocator {
 
   Reg getAlias(Reg reg) {
     // TODO : compress path
-    if (coalescedNodes.contains(reg))
-      return getAlias(alias.get(reg));
-    else
+    if (coalescedNodes.contains(reg)) {
+      Reg regAlias = getAlias(alias.get(reg));
+      alias.put(reg, regAlias);
+      return regAlias;
+    } else
       return reg;
   }
 
