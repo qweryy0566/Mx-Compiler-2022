@@ -76,8 +76,10 @@ public class PremAllocator {
   }
 
   LinkedList<ASMInst> newInsts;
+  ASMFunction curFunc;
 
   void workOnFunc(ASMFunction func) {
+    curFunc = func;
     while (true) {
       new LivenessAnalyzer(func).work();
       initAll(func);
@@ -204,6 +206,7 @@ public class PremAllocator {
           workListMoves.add((ASMMvInst) inst);
         }
         live.addAll(inst.getDef());
+        // debug
         for (Reg def : inst.getDef())
           live.forEach(l -> addEdge(def, l));
         live.removeAll(inst.getDef());
@@ -394,7 +397,7 @@ public class PremAllocator {
       HashSet<Integer> okColors = new HashSet<>();
       for (int i = 5; i < 32; i++)
         okColors.add(i);
-      adjacent(reg).forEach(adj -> {
+      adjList.get(reg).forEach(adj -> {
         Reg adjAlias = getAlias(adj);
         if (coloredNodes.contains(adjAlias) || preColored.contains(adjAlias))
           okColors.remove(color.get(adjAlias));

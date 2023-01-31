@@ -12,4 +12,9 @@ public class VirtualReg extends Reg {
     this.size = size;
     this.param_idx = param_idx - 8;
   }
+
+  @Override
+  public String toString() {
+    return "%" + Integer.toString(id);
+  }
 }
