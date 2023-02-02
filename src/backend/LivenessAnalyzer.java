@@ -25,10 +25,9 @@ public class LivenessAnalyzer {
       block.use.clear();
       block.def.clear();
       for (ASMInst inst : block.insts) {
-        inst.getUse().forEach(reg -> {
+        for (var reg : inst.getUse())
           if (!block.def.contains(reg))
             block.use.add(reg);
-        });
         block.def.addAll(inst.getDef());
       }
     }
@@ -44,19 +43,19 @@ public class LivenessAnalyzer {
       ASMBlock block = workList.removeFirst();
       inWorkList.remove(block);
       HashSet<Reg> newLiveOut = new HashSet<>();
-      block.succ.forEach(succ -> newLiveOut.addAll(succ.liveIn));
+      for (var succ : block.succ)
+        newLiveOut.addAll(succ.liveIn);
       HashSet<Reg> newLiveIn = new HashSet<>(block.use);
       newLiveIn.addAll(newLiveOut);
       newLiveIn.removeAll(block.def);
       if (!newLiveIn.equals(block.liveIn) || !newLiveOut.equals(block.liveOut)) { // TODO: simplify
         block.liveIn = newLiveIn;
         block.liveOut = newLiveOut;
-        block.pred.forEach(pred -> {
+        for (var pred : block.pred)
           if (!inWorkList.contains(pred)) {
             workList.add(pred);
             inWorkList.add(pred);
           }
-        });
       }
     }
   }

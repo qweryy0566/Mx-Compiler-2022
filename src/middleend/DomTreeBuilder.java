@@ -30,10 +30,9 @@ public class DomTreeBuilder {
 
   void calcReversePostOrder(IRBasicBlock block) {
     visited.add(block);
-    block.succs.forEach(succ -> {
+    for (var succ : block.succs)
       if (!visited.contains(succ))
         calcReversePostOrder(succ);
-    });
     order.put(block, blockSeq.size()); // negative for reverse order
     blockSeq.addFirst(block);
   }

@@ -67,26 +67,26 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   public void visit(IRProgram node) {
     // add global vars
-    node.globalVarList.forEach(globalVar -> {
+    for (var globalVar : node.globalVarList) {
       globalVar.asmReg = new GlobalValue(globalVar);
       module.globalValues.add((GlobalValue) globalVar.asmReg);
-    });
+    }
     // add global strings
-    node.stringConst.values().forEach(str -> {
+    for (var str : node.stringConst.values()) {
       GlobalString globalStr = new GlobalString(".str." + String.valueOf(str.id), str.val);
       module.globalStrings.add(globalStr);
       str.asmReg = globalStr;
-    });
+    }
     if (node.initFunc != null) {
       curFunc = new ASMFunction(node.initFunc.name);
       module.functions.add(curFunc);
       node.initFunc.accept(this);
     }
-    node.funcList.forEach(func -> {
+    for (var func : node.funcList) {
       curFunc = new ASMFunction(func.name);
       module.functions.add(curFunc);
       func.accept(this);
-    });
+    }
   }
 
   public void visit(IRFunction node) {
@@ -121,14 +121,15 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     curFunc.virtualRegCnt = VirtualReg.cnt;
     // setting stack frame was moved to the CalleeManager
 
-    curFunc.blocks.forEach(block -> block.insts.addAll(block.phiConvert));
-    curFunc.blocks.forEach(block -> block.insts.addAll(block.jumpOrBr));
+    for (var block : curFunc.blocks) {
+      block.insts.addAll(block.phiConvert);
+      block.insts.addAll(block.jumpOrBr);
+    }
   }
 
   public void visit(IRBasicBlock node) {
-    node.insts.forEach(inst -> {
+    for (var inst : node.insts)
       inst.accept(this);
-    });
     node.terminalInst.accept(this);
   }
 
