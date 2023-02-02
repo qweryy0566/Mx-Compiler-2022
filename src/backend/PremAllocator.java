@@ -336,7 +336,10 @@ public class PremAllocator {
       // delete the move instruction directly
       coalescedMoves.add(mv);
       addWorkList(e.u);
-    } else if (preColored.contains(e.v) || adjSet.contains(e)) {
+    } else if (preColored.contains(e.v) || adjSet.contains(e)
+        || e.u == PhysicsReg.get("zero") || e.v == PhysicsReg.get("zero")) {
+      // NOTICE : zero register cna't be coalesced (t61.mx: mv %8, zero + mv %19 %8)
+
       // physical registers must conflict with each other
       // or two virtual registers are already adjacent
       constrainedMoves.add(mv);

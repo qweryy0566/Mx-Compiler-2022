@@ -120,6 +120,9 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
     curFunc.virtualRegCnt = VirtualReg.cnt;
     // setting stack frame was moved to the CalleeManager
+
+    curFunc.blocks.forEach(block -> block.insts.addAll(block.phiConvert));
+    curFunc.blocks.forEach(block -> block.insts.addAll(block.jumpOrBr));
   }
 
   public void visit(IRBasicBlock node) {
@@ -272,6 +275,14 @@ public class InstSelector implements IRVisitor, BuiltinElements {
   }
 
   public void visit(IRPhiInst node) {
-    
+    VirtualReg tmp = new VirtualReg(node.dest.type.size);
+    curBlock.addInst(new ASMMvInst(getReg(node.dest), tmp));
+    for (int i = 0; i < node.values.size(); ++i) {
+      IREntity val = node.values.get(i);
+      if (val instanceof IRConst constVal)
+        blockMap.get(node.blocks.get(i)).phiConvert.add(new ASMLiInst(tmp, new VirtualImm(constVal)));
+      else
+        blockMap.get(node.blocks.get(i)).phiConvert.add(new ASMMvInst(tmp, getReg(node.values.get(i))));
+    }
   }
 }

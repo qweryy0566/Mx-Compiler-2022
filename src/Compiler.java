@@ -18,8 +18,8 @@ import backend.*;
 
 public class Compiler {
   public static void main(String[] args) throws Exception {
-    CharStream input = CharStreams.fromStream(new FileInputStream("input.mx"));
-    // CharStream input = CharStreams.fromStream(System.in);
+    // CharStream input = CharStreams.fromStream(new FileInputStream("input.mx"));
+    CharStream input = CharStreams.fromStream(System.in);
     MxLexer lexer = new MxLexer(input);
     lexer.removeErrorListeners();
     lexer.addErrorListener(new MxErrorListener());
@@ -41,19 +41,22 @@ public class Compiler {
     irOut.write(irProgram.toString().getBytes());
     irOut.close();
     // LLVM IR -> ASM
-    // ASMModule asmModule = new ASMModule();
-    // new InstSelector(asmModule).visit(irProgram);
-    // // new RegAllocator(asmModule).work();
-    // new PremAllocator(asmModule).work();
-    // new CalleeManager(asmModule).work();
+    ASMModule asmModule = new ASMModule();
+    new InstSelector(asmModule).visit(irProgram);
+    FileOutputStream asmOut = new FileOutputStream("temp.s");
+    asmOut.write(asmModule.toString().getBytes());
+    asmOut.close();
+    // new RegAllocator(asmModule).work();
+    new PremAllocator(asmModule).work();
+    new CalleeManager(asmModule).work();
 
     // Local Judge
     // System.out.print(asmModule.toString());
 
     // Online Judge
-    // new BuiltinAsmPrinter("builtin.s");
-    // FileOutputStream out = new FileOutputStream("output.s");
-    // out.write(asmModule.toString().getBytes());
-    // out.close();
+    new BuiltinAsmPrinter("builtin.s");
+    FileOutputStream out = new FileOutputStream("output.s");
+    out.write(asmModule.toString().getBytes());
+    out.close();
   }
 }

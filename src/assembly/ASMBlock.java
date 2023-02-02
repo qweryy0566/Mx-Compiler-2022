@@ -10,6 +10,8 @@ public class ASMBlock {
   public String name; // do not print when null
   public int loopDepth = 0;
   public LinkedList<ASMInst> insts = new LinkedList<ASMInst>();
+  public LinkedList<ASMInst> phiConvert = new LinkedList<ASMInst>();
+  public LinkedList<ASMInst> jumpOrBr = new LinkedList<ASMInst>();
   public LinkedList<ASMBlock> succ = new LinkedList<ASMBlock>(), pred = new LinkedList<ASMBlock>();
   public HashSet<Reg> liveIn = new HashSet<Reg>(), liveOut = new HashSet<Reg>();
   public HashSet<Reg> use = new HashSet<Reg>(), def = new HashSet<Reg>();
@@ -20,7 +22,10 @@ public class ASMBlock {
   }
 
   public void addInst(ASMInst inst) {
-    insts.add(inst);
+    if (inst instanceof ASMJumpInst || inst instanceof ASMBeqzInst)
+      jumpOrBr.add(inst);
+    else
+      insts.add(inst);
   }
 
   public String toString() {
