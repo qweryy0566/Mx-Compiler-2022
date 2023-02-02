@@ -102,11 +102,8 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     }
     curFunc.paramUsed = (maxArgCnt > 8 ? maxArgCnt - 8 : 0) << 2;
     // set params
-    for (int i = 0; i < node.params.size(); ++i)
-      if (i < 8)
-        node.params.get(i).asmReg = PhysicsReg.get("a" + i);
-      else
-        node.params.get(i).asmReg = new VirtualReg(4, i);
+    for (int i = 0; i < node.params.size() && i < 8; ++i)
+      node.params.get(i).asmReg = new VirtualReg(node.params.get(i).type.size);
 
     for (int i = 0; i < node.blocks.size(); ++i) {
       curBlock = blockMap.get(node.blocks.get(i));
@@ -117,10 +114,11 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     }
     curFunc.entryBlock = curFunc.blocks.get(0);
     curFunc.exitBlock = curFunc.blocks.get(curFunc.blocks.size() - 1);
+    for (int i = 0; i < node.params.size() && i < 8; ++i)
+      curFunc.entryBlock.insts.addFirst(new ASMMvInst(node.params.get(i).asmReg, PhysicsReg.get("a" + i)));
 
     curFunc.virtualRegCnt = VirtualReg.cnt;
     // setting stack frame was moved to the CalleeManager
-
     for (var block : curFunc.blocks) {
       block.insts.addAll(block.phiConvert);
       block.insts.addAll(block.jumpOrBr);
