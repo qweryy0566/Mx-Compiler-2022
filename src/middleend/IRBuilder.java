@@ -158,18 +158,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
         currentFunction.exitBlock.terminalInst = new IRRetInst(currentFunction.exitBlock, retVal);
       }
     }
-    if (funcName.equals("main")) {
+    if (funcName.equals("main"))
       root.mainFunc = currentFunction;
-      // currentBlock.addInst(new IRStoreInst(currentBlock, irIntConst0, currentFunction.retAddr));
-    }
 
     node.stmts.forEach(stmt -> stmt.accept(this));
-    if (currentBlock.terminalInst == null) {
-      if (node.returnType.type.equals(VoidType))
-        currentBlock.addInst(new IRRetInst(currentBlock, irVoidConst));
-      else
-        currentBlock.addInst(new IRRetInst(currentBlock, irIntConst0));
-    }
     node.irFunc = currentFunction;  // store the ir function
     currentScope = currentScope.parentScope;
     if (!funcName.equals("main")) currentFunction.finish();
@@ -810,14 +802,19 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       currentBlock = currentFunction.appendBlock(loopBlock);
       IREntity iPtrVal = newArray(((IRPtrType) type).pointToType(), at + 1, sizeList);
       IRRegister iPtr = new IRRegister("", type);
-      currentBlock.addInst(new IRGetElementPtrInst(currentBlock, ptr, iPtr, iVal));
+      // should load in every block!
+      IRRegister iVal2 = new IRRegister("", irIntType);
+      currentBlock.addInst(new IRLoadInst(currentBlock, iVal2, idx));
+      currentBlock.addInst(new IRGetElementPtrInst(currentBlock, ptr, iPtr, iVal2));
       currentBlock.addInst(new IRStoreInst(currentBlock, iPtrVal, iPtr));
       currentBlock.terminalInst = new IRJumpInst(currentBlock, stepBlock);
       currentBlock.isFinished = true;
 
       currentBlock = currentFunction.appendBlock(stepBlock);
       IRRegister iRes = new IRRegister("", irIntType);
-      currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, iRes, iVal, irIntConst1, "add"));
+      IRRegister iVal3 = new IRRegister("", irIntType);
+      currentBlock.addInst(new IRLoadInst(currentBlock, iVal3, idx));
+      currentBlock.addInst(new IRCalcInst(currentBlock, irIntType, iRes, iVal3, irIntConst1, "add"));
       currentBlock.addInst(new IRStoreInst(currentBlock, iRes, idx));
       currentBlock.terminalInst = new IRJumpInst(currentBlock, condBlock);
       currentBlock.isFinished = true;

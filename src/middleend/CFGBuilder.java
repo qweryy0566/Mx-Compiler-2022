@@ -3,6 +3,8 @@ package middleend;
 import IR.*;
 import IR.inst.*;
 
+import java.util.LinkedList;
+
 public class CFGBuilder {
   IRProgram program;
 
@@ -28,5 +30,14 @@ public class CFGBuilder {
         branchInst.elseBlock.preds.add(block);
       }
     });
+    
+    LinkedList<IRBasicBlock> newBlocks = new LinkedList<>();
+    for (var block : func.blocks)
+      if (!block.preds.isEmpty() || block == func.entryBlock)
+        newBlocks.add(block);
+      else
+        for (var succ : block.succs)
+          succ.preds.remove(block);
+    func.blocks = newBlocks;
   }
 }

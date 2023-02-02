@@ -1,6 +1,9 @@
 package IR.inst;
 
 import IR.*;
+import IR.entity.*;
+
+import java.util.HashSet;
 
 public class IRJumpInst extends IRTerminalInst {
   public IRBasicBlock toBlock;
@@ -18,5 +21,14 @@ public class IRJumpInst extends IRTerminalInst {
   @Override
   public void accept(IRVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public HashSet<IREntity> getUse() {
+    return new HashSet<>();
+  }
+
+  @Override
+  public void replaceUse(IREntity old, IREntity newOne) {
   }
 }

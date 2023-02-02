@@ -13,7 +13,10 @@ public class IRBasicBlock {
 
   public LinkedList<IRBasicBlock> preds = new LinkedList<>(), succs = new LinkedList<>();
   public IRBasicBlock idom = null;
+  public LinkedList<IRBasicBlock> domChildren = new LinkedList<>();
   public LinkedList<IRBasicBlock> domFrontier = new LinkedList<>();
+
+  public LinkedList<IRPhiInst> phiInsts = new LinkedList<>();
 
   public static int blockCnt = 0;
 
@@ -28,13 +31,20 @@ public class IRBasicBlock {
   }
   
   public void addInst(IRInst inst) {
-    if (isFinished) return;
-    if (inst instanceof IRAllocaInst)
-      parentFunction.allocaInsts.add((IRAllocaInst) inst);
-    else if (inst instanceof IRTerminalInst)
-      terminalInst = (IRTerminalInst) inst;
-    else
-      insts.add(inst);
+    if (inst instanceof IRPhiInst phiInst) {
+      for (IRPhiInst enumInst : phiInsts)
+        if (phiInst.src == enumInst.src)
+          return;
+      phiInsts.add((IRPhiInst) inst);
+    } else {
+      if (isFinished) return;
+      if (inst instanceof IRAllocaInst)
+        parentFunction.allocaInsts.add((IRAllocaInst) inst);
+      else if (inst instanceof IRTerminalInst)
+        terminalInst = (IRTerminalInst) inst;
+      else
+        insts.add(inst);
+    }
   }
 
   public void mergeBlock(IRBasicBlock block) {

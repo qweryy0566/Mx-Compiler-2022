@@ -3,18 +3,21 @@ package IR.inst;
 import IR.entity.*;
 import IR.*;
 
+import java.util.HashSet;
+
 public class IRStoreInst extends IRInst {
-  public IREntity val, destAddr;
+  public IREntity val;
+  public IRRegister destAddr;
   public int param_idx = -1;
   // if param_idx != -1, then it stores a parameter
 
-  public IRStoreInst(IRBasicBlock block, IREntity val, IREntity destAddr) {
+  public IRStoreInst(IRBasicBlock block, IREntity val, IRRegister destAddr) {
     super(block);
     this.val = val;
     this.destAddr = destAddr;
   }
 
-  public IRStoreInst(IRBasicBlock block, IREntity val, IREntity destAddr, int param_idx) {
+  public IRStoreInst(IRBasicBlock block, IREntity val, IRRegister destAddr, int param_idx) {
     super(block);
     this.val = val;
     this.destAddr = destAddr;
@@ -30,5 +33,22 @@ public class IRStoreInst extends IRInst {
   public void accept(IRVisitor visitor) {
     visitor.visit(this);
   }
-}
 
+  @Override
+  public HashSet<IREntity> getUse() {
+    HashSet<IREntity> ret = new HashSet<>();
+    ret.add(val);
+    ret.add(destAddr);
+    return ret;
+  }
+
+  @Override
+  public void replaceUse(IREntity old, IREntity newOne) {
+    if (val == old) {
+      // System.out.println("replace " + old.toStringWithType() + " with " + newOne.toStringWithType() + " in " + this.toString() + " in " + parentBlock.name);
+      val = newOne;
+    }
+    if (destAddr == old)
+      destAddr = (IRRegister) newOne;
+  }
+}

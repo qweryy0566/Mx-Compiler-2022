@@ -3,6 +3,7 @@ package IR.inst;
 import IR.entity.*;
 import IR.type.*;
 import IR.*;
+import java.util.HashSet;
 
 public abstract class IRCastInst extends IRInst {
   public IREntity val;
@@ -19,5 +20,17 @@ public abstract class IRCastInst extends IRInst {
   @Override
   public final void accept(IRVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public final HashSet<IREntity> getUse() {
+    HashSet<IREntity> ret = new HashSet<>();
+    ret.add(val);
+    return ret;
+  }
+
+  @Override
+  public final void replaceUse(IREntity old, IREntity newOne) {
+    val = val == old ? newOne : val;
   }
 }

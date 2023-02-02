@@ -4,6 +4,7 @@ import IR.entity.*;
 import IR.type.*;
 import IR.*;
 
+import java.util.HashSet;
 import java.util.ArrayList;
 
 public class IRGetElementPtrInst extends IRInst {
@@ -32,5 +33,22 @@ public class IRGetElementPtrInst extends IRInst {
   @Override
   public void accept(IRVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public HashSet<IREntity> getUse() {
+    HashSet<IREntity> ret = new HashSet<>();
+    ret.add(ptr);
+    for (IREntity index : indexList)
+      ret.add(index);
+    return ret;
+  }
+
+  @Override
+  public void replaceUse(IREntity old, IREntity newOne) {
+    ptr = ptr == old ? newOne : ptr;
+    for (int i = 0; i < indexList.size(); ++i)
+      if (indexList.get(i) == old)
+        indexList.set(i, newOne);
   }
 }

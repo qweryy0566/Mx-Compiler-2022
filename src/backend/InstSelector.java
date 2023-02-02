@@ -270,4 +270,8 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     if (node.param_idx < 8)
       storeReg(node.val.type.size, getReg(node.val), getReg(node.destAddr), 0);
   }
+
+  public void visit(IRPhiInst node) {
+    
+  }
 }

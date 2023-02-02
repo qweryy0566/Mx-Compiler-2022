@@ -3,6 +3,7 @@ package IR.inst;
 import IR.*;
 import IR.entity.*;
 import IR.type.*;
+import java.util.HashSet;
 
 import java.util.ArrayList;
 
@@ -40,5 +41,19 @@ public class IRCallInst extends IRInst {
   @Override
   public void accept(IRVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public HashSet<IREntity> getUse() {
+    HashSet<IREntity> ret = new HashSet<>();
+    for (IREntity arg : args)
+      ret.add(arg);
+    return ret;
+  }
+
+  @Override
+  public void replaceUse(IREntity old, IREntity newOne) {
+    for (int i = 0; i < args.size(); ++i)
+      args.set(i, args.get(i) == old ? newOne : args.get(i));
   }
 }

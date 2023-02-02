@@ -16,7 +16,7 @@ public class IRRegister extends IREntity {
   public String toString() {
     if (index == -1 && (name == null || !name.equals("retval")))
       index = regCnt++;
-    return "%" + (name != null && name.equals("retval") ? name : String.valueOf(index));
+    return "%" + (name != null && name.equals("retval") ? name : "." + String.valueOf(index));
   }
 
   @Override

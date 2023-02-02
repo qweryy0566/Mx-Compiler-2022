@@ -65,8 +65,6 @@ public class IRProgram implements BuiltinElements {
       ret += globalVar + " = dso_local global " + ((IRPtrType) globalVar.type).pointToType() + " " + globalVar.initVal + "\n";
     
     ret += "\ndeclare dso_local i8* @malloc(i32)\n";
-    ret += "declare dso_local i8* @strcpy(i8*, i8*)\n";
-    ret += "declare dso_local i8* @strcat(i8*, i8*)\n";
     ret += "declare dso_local i32 @strlen(i8*)\n";
     ret += "declare void @print(i8*)\n";
     ret += "declare void @println(i8*)\n";
@@ -78,6 +76,7 @@ public class IRProgram implements BuiltinElements {
     ret += "declare i8* @__mx_substring(i8*, i32, i32)\n";
     ret += "declare i32 @__mx_parseInt(i8*)\n";
     ret += "declare i32 @__mx_ord(i8*, i32)\n";
+    ret += "declare i8* @__mx_stradd(i8*, i8*)\n";
     ret += "declare i8 @__mx_strlt(i8*, i8*)\n";
     ret += "declare i8 @__mx_strle(i8*, i8*)\n";
     ret += "declare i8 @__mx_strgt(i8*, i8*)\n";

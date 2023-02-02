@@ -4,6 +4,8 @@ import IR.entity.*;
 import IR.type.*;
 import IR.*;
 
+import java.util.HashSet;
+
 public class IRLoadInst extends IRInst {
   public IRRegister destReg;
   public IREntity srcAddr;
@@ -24,5 +26,17 @@ public class IRLoadInst extends IRInst {
   @Override
   public void accept(IRVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public HashSet<IREntity> getUse() {
+    HashSet<IREntity> ret = new HashSet<>();
+    ret.add(srcAddr);
+    return ret;
+  }
+
+  @Override
+  public void replaceUse(IREntity old, IREntity newOne) {
+    srcAddr = srcAddr == old ? newOne : srcAddr;
   }
 }

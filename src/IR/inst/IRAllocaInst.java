@@ -3,6 +3,7 @@ package IR.inst;
 import IR.entity.*;
 import IR.type.*;
 import IR.*;
+import java.util.HashSet;
 
 public class IRAllocaInst extends IRInst {
   public IRType type;
@@ -29,6 +30,16 @@ public class IRAllocaInst extends IRInst {
   @Override
   public void accept(IRVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public HashSet<IREntity> getUse() {
+    return new HashSet<>();
+  }
+
+  @Override
+  public void replaceUse(IREntity old, IREntity newOne) {
+    // do nothing
   }
 }
 

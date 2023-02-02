@@ -2,6 +2,7 @@ package IR.inst;
 
 import IR.*;
 import IR.entity.*;
+import java.util.HashSet;
 
 public class IRBranchInst extends IRTerminalInst {
   public IREntity cond;
@@ -22,5 +23,17 @@ public class IRBranchInst extends IRTerminalInst {
   @Override
   public void accept(IRVisitor visitor) {
     visitor.visit(this);
+  }
+
+  @Override
+  public HashSet<IREntity> getUse() {
+    HashSet<IREntity> ret = new HashSet<>();
+    ret.add(cond);
+    return ret;
+  }
+
+  @Override
+  public void replaceUse(IREntity old, IREntity newOne) {
+    cond = cond == old ? newOne : cond;
   }
 }

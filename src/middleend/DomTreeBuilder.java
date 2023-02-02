@@ -34,11 +34,13 @@ public class DomTreeBuilder {
       if (!visited.contains(succ))
         calcReversePostOrder(succ);
     });
-    order.put(block, -blockSeq.size()); // negative for reverse order
+    order.put(block, blockSeq.size()); // negative for reverse order
     blockSeq.addFirst(block);
   }
 
   void workOnFunc(IRFunction func) {
+    blockSeq.clear();
+    order.clear();
     visited.clear();
     calcReversePostOrder(func.entryBlock);
     func.entryBlock.idom = func.entryBlock;
@@ -60,6 +62,9 @@ public class DomTreeBuilder {
       }
     }
 
+    // calculate dominance tree
+    blockSeq.forEach(block -> block.idom.domChildren.add(block));
+
     // calculate dominance frontiers
     blockSeq.addFirst(func.entryBlock);
     for (IRBasicBlock block : blockSeq) {
@@ -74,7 +79,6 @@ public class DomTreeBuilder {
         }
       }
     }
-
   }
   IRBasicBlock intersect(IRBasicBlock x, IRBasicBlock y) {
     while (x != y) {
