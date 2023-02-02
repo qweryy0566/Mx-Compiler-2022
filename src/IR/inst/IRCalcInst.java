@@ -3,7 +3,7 @@ package IR.inst;
 import IR.entity.*;
 import IR.type.*;
 import IR.*;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 // add, sub, mul, udiv, sdiv, urem, srem, shl, lshr, ashr, and, or, xor
 
@@ -33,11 +33,16 @@ public class IRCalcInst extends IRInst {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    HashSet<IREntity> ret = new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    LinkedHashSet<IREntity> ret = new LinkedHashSet<>();
     ret.add(lhs);
     ret.add(rhs);
     return ret;
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return res;
   }
 
   @Override

@@ -4,7 +4,7 @@ import IR.entity.*;
 import IR.type.*;
 import IR.*;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.ArrayList;
 
 public class IRGetElementPtrInst extends IRInst {
@@ -36,12 +36,17 @@ public class IRGetElementPtrInst extends IRInst {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    HashSet<IREntity> ret = new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    LinkedHashSet<IREntity> ret = new LinkedHashSet<>();
     ret.add(ptr);
     for (IREntity index : indexList)
       ret.add(index);
     return ret;
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return res;
   }
 
   @Override

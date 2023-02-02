@@ -32,7 +32,6 @@ public class IRFunction {
     for (int i = allocaInsts.size() - 1; i >= 0; --i)
       entryBlock.insts.addFirst(allocaInsts.get(i));
     blocks.add(exitBlock);
-    // TODO : dead block elimination
   }
 
   public String toString() {

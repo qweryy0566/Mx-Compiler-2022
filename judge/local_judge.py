@@ -7,9 +7,9 @@ import os, time
     Modify following configurations to adapt to your environment.
 """
 # test_cases_dir = '../testcases/semantic/'
-test_cases_dir = '../data/codegen/'
+# test_cases_dir = '../data/codegen/'
 # test_cases_dir = '../data/optim-new/'
-# test_cases_dir = '../data/need/'
+test_cases_dir = '../data/need/'
 # compile_cmd = "bash ./build.bash"
 execute_cmd = "bash ./codegen.bash"
 excluded_test_cases = ["foo.mx"]

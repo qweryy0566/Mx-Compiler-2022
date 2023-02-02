@@ -2,10 +2,10 @@ package IR.inst;
 
 import IR.*;
 import IR.entity.*;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public abstract class IRInst {
-  
+  public boolean isDeleted = false;
   public IRBasicBlock parentBlock = null;
   public abstract String toString();
 
@@ -15,7 +15,8 @@ public abstract class IRInst {
 
   public abstract void accept(IRVisitor visitor);
 
-  public abstract HashSet<IREntity> getUse();
+  public abstract LinkedHashSet<IREntity> getUse();
+  public abstract IRRegister getDef();
 
   public abstract void replaceUse(IREntity old, IREntity newOne);
 }

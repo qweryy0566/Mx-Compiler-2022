@@ -43,9 +43,6 @@ public class Compiler {
     // LLVM IR -> ASM
     ASMModule asmModule = new ASMModule();
     new InstSelector(asmModule).visit(irProgram);
-    FileOutputStream asmOut = new FileOutputStream("temp.s");
-    asmOut.write(asmModule.toString().getBytes());
-    asmOut.close();
     // new RegAllocator(asmModule).work();
     new PremAllocator(asmModule).work();
     new CalleeManager(asmModule).work();

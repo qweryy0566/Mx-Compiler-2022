@@ -3,7 +3,7 @@ package IR.inst;
 import IR.*;
 import IR.entity.*;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class IRJumpInst extends IRTerminalInst {
   public IRBasicBlock toBlock;
@@ -24,8 +24,13 @@ public class IRJumpInst extends IRTerminalInst {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    return new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    return new LinkedHashSet<>();
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return null;
   }
 
   @Override

@@ -3,7 +3,7 @@ package IR.inst;
 import IR.*;
 import IR.entity.*;
 import IR.type.*;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import java.util.ArrayList;
 
@@ -44,11 +44,16 @@ public class IRCallInst extends IRInst {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    HashSet<IREntity> ret = new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    LinkedHashSet<IREntity> ret = new LinkedHashSet<>();
     for (IREntity arg : args)
       ret.add(arg);
     return ret;
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return callReg;
   }
 
   @Override

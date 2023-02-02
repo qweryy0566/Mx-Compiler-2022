@@ -3,7 +3,7 @@ package IR.inst;
 import IR.entity.*;
 import IR.type.*;
 import IR.*;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public abstract class IRCastInst extends IRInst {
   public IREntity val;
@@ -23,10 +23,15 @@ public abstract class IRCastInst extends IRInst {
   }
 
   @Override
-  public final HashSet<IREntity> getUse() {
-    HashSet<IREntity> ret = new HashSet<>();
+  public final LinkedHashSet<IREntity> getUse() {
+    LinkedHashSet<IREntity> ret = new LinkedHashSet<>();
     ret.add(val);
     return ret;
+  }
+
+  @Override
+  public final IRRegister getDef() {
+    return dest;
   }
 
   @Override

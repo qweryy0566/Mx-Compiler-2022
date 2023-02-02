@@ -4,7 +4,7 @@ import utils.*;
 import IR.entity.*;
 import IR.*;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class IRRetInst extends IRTerminalInst implements BuiltinElements {
   public IREntity val;
@@ -25,10 +25,15 @@ public class IRRetInst extends IRTerminalInst implements BuiltinElements {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    HashSet<IREntity> ret = new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    LinkedHashSet<IREntity> ret = new LinkedHashSet<>();
     ret.add(val);
     return ret;
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return null;
   }
 
   @Override

@@ -48,7 +48,7 @@ public class LivenessAnalyzer {
       HashSet<Reg> newLiveIn = new HashSet<>(block.use);
       newLiveIn.addAll(newLiveOut);
       newLiveIn.removeAll(block.def);
-      if (!newLiveIn.equals(block.liveIn) || !newLiveOut.equals(block.liveOut)) { // TODO: simplify
+      if (!newLiveIn.equals(block.liveIn) || !newLiveOut.equals(block.liveOut)) {
         block.liveIn = newLiveIn;
         block.liveOut = newLiveOut;
         for (var pred : block.pred)

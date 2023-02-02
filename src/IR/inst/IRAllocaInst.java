@@ -3,7 +3,7 @@ package IR.inst;
 import IR.entity.*;
 import IR.type.*;
 import IR.*;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class IRAllocaInst extends IRInst {
   public IRType type;
@@ -33,8 +33,13 @@ public class IRAllocaInst extends IRInst {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    return new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    return new LinkedHashSet<>();
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return allocaReg;
   }
 
   @Override

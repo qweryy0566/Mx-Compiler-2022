@@ -2,7 +2,7 @@
 package IR.inst;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import IR.*;
 import IR.entity.*;
@@ -11,7 +11,6 @@ public class IRPhiInst extends IRInst {
   public IRRegister dest, src;
   public ArrayList<IREntity> values = new ArrayList<>();
   public ArrayList<IRBasicBlock> blocks = new ArrayList<>();
-  public boolean isDeleted = false;
 
   public IRPhiInst(IRBasicBlock block, IRRegister src, IRRegister dest) {
     super(block);
@@ -41,11 +40,16 @@ public class IRPhiInst extends IRInst {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    HashSet<IREntity> ret = new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    LinkedHashSet<IREntity> ret = new LinkedHashSet<>();
     for (IREntity value : values)
       ret.add(value);
     return ret;
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return dest;
   }
 
   @Override

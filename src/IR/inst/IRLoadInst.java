@@ -4,7 +4,7 @@ import IR.entity.*;
 import IR.type.*;
 import IR.*;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class IRLoadInst extends IRInst {
   public IRRegister destReg;
@@ -29,10 +29,15 @@ public class IRLoadInst extends IRInst {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    HashSet<IREntity> ret = new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    LinkedHashSet<IREntity> ret = new LinkedHashSet<>();
     ret.add(srcAddr);
     return ret;
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return destReg;
   }
 
   @Override

@@ -2,7 +2,7 @@ package IR.inst;
 
 import IR.*;
 import IR.entity.*;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class IRBranchInst extends IRTerminalInst {
   public IREntity cond;
@@ -26,10 +26,15 @@ public class IRBranchInst extends IRTerminalInst {
   }
 
   @Override
-  public HashSet<IREntity> getUse() {
-    HashSet<IREntity> ret = new HashSet<>();
+  public LinkedHashSet<IREntity> getUse() {
+    LinkedHashSet<IREntity> ret = new LinkedHashSet<>();
     ret.add(cond);
     return ret;
+  }
+
+  @Override
+  public IRRegister getDef() {
+    return null;
   }
 
   @Override
