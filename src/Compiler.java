@@ -46,6 +46,7 @@ public class Compiler {
     // new RegAllocator(asmModule).work();
     new PremAllocator(asmModule).work();
     new CalleeManager(asmModule).work();
+    new MergeBlock(asmModule).work();
 
     // Local Judge
     // System.out.print(asmModule.toString());

@@ -47,15 +47,6 @@ public class IRBasicBlock {
     }
   }
 
-  public void mergeBlock(IRBasicBlock block) {
-    if (block == this) return;
-    isFinished = false;
-    for (IRInst inst : block.insts)
-      addInst(inst);
-    terminalInst = block.terminalInst;
-    isFinished = true;
-  }
-
   public String toString() {
     String ret = name + ":\n";
     for (IRInst inst : insts)
