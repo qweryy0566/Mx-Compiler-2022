@@ -7,12 +7,13 @@ import IR.entity.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 public class Mem2Reg {
   IRProgram program;
   IRFunction curFunc;
-  HashSet<IRRegister> promoteAllocas = new HashSet<>();
+  LinkedHashSet<IRRegister> promoteAllocas = new LinkedHashSet<>();
   HashMap<IRRegister, HashSet<IRBasicBlock>> allocaDefs = new HashMap<>();
   HashMap<IRRegister, IREntity> reachingDef = new HashMap<>();
 
@@ -28,7 +29,8 @@ public class Mem2Reg {
   void workOnFunc(IRFunction func) {
     curFunc = func;
     promoteCollect();
-    promoteAllocas.forEach(alloca -> promoteMem2Reg(alloca));
+    for (var alloca : promoteAllocas)
+      promoteMem2Reg(alloca);
     reachingDef.clear();
     renameVar(func.entryBlock);
     simplifyPhi(func.entryBlock);
