@@ -47,7 +47,7 @@ public class DeadCodeEliminator {
       inWorkList.remove(reg);
       if (useList.get(reg) == null || useList.get(reg).isEmpty()) {
         IRInst inst = defList.get(reg);
-        if (inst instanceof IRCallInst)
+        if (inst instanceof IRCallInst || inst == null)
           continue; // call inst has side effect
         inst.isDeleted = true;
         for (var use : inst.getUse())
