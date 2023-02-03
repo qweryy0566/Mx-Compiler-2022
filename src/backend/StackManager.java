@@ -4,27 +4,17 @@ import assembly.*;
 import assembly.inst.*;
 import assembly.operand.*;
 
-import java.util.HashSet;
-
-public class CalleeManager {
+public class StackManager {
   ASMModule module;
 
-  public CalleeManager(ASMModule module) {
+  public StackManager(ASMModule module) {
     this.module = module;
   }
 
   public void work() {
     for (var curFunc : module.functions) {
       int totalStack = curFunc.paramUsed + curFunc.allocaUsed + curFunc.spillUsed;
-      HashSet<Reg> unused = new HashSet<>(PhysicsReg.calleeSave);
-      for (var block : curFunc.blocks)
-        for (var inst : block.insts)
-          unused.removeAll(inst.getDef());
-      if (!curFunc.name.equals("main"))
-        for (int i = 11; i >= 0; --i) // 应该不至于一个函数有 499 个参数吧
-          if (!unused.contains(PhysicsReg.get("s" + i)))
-            curFunc.entryBlock.insts.addFirst(new ASMStoreInst(4, PhysicsReg.get("sp"), PhysicsReg.get("s" + i),
-                new Imm(curFunc.paramUsed + (i + 1 << 2))));
+     
       if (totalStack < 1 << 11)
         curFunc.entryBlock.insts.addFirst(new ASMUnaryInst("addi", PhysicsReg.get("sp"), PhysicsReg.get("sp"),
             new Imm(-totalStack)));
@@ -34,11 +24,6 @@ public class CalleeManager {
         curFunc.entryBlock.insts.addFirst(new ASMLiInst(PhysicsReg.get("t0"), new VirtualImm(-totalStack)));
       }
 
-      if (!curFunc.name.equals("main"))
-        for (int i = 0; i <= 11; ++i)
-          if (!unused.contains(PhysicsReg.get("s" + i)))
-            curFunc.exitBlock.insts.add(new ASMLoadInst(4, PhysicsReg.get("s" + i), PhysicsReg.get("sp"),
-                new Imm(curFunc.paramUsed + (i + 1 << 2))));
       if (totalStack < 1 << 11)
         curFunc.exitBlock.insts.add(new ASMUnaryInst("addi", PhysicsReg.get("sp"), PhysicsReg.get("sp"),
             new Imm(totalStack)));

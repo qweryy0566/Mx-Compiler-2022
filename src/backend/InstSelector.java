@@ -116,9 +116,14 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     curFunc.exitBlock = curFunc.blocks.get(curFunc.blocks.size() - 1);
     for (int i = 0; i < node.params.size() && i < 8; ++i)
       curFunc.entryBlock.insts.addFirst(new ASMMvInst(node.params.get(i).asmReg, PhysicsReg.get("a" + i)));
-
+    // add callee save
+    if (!node.name.equals("main"))
+      for (var reg : PhysicsReg.calleeSave) {
+        VirtualReg storeReg = new VirtualReg(4);
+        curFunc.entryBlock.insts.addFirst(new ASMMvInst(storeReg, reg));
+        curFunc.exitBlock.insts.addLast(new ASMMvInst(reg, storeReg));
+      }
     curFunc.virtualRegCnt = VirtualReg.cnt;
-    // setting stack frame was moved to the CalleeManager
     for (var block : curFunc.blocks) {
       block.insts.addAll(block.phiConvert);
       block.insts.addAll(block.jumpOrBr);

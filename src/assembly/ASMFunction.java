@@ -11,7 +11,7 @@ public class ASMFunction {
 
   // for stack frame
   public int virtualRegCnt = 0, spillUsed = 0;
-  public int allocaUsed = 1 + 12 << 2; // 1 for return address and 12 for callee-save registers
+  public int allocaUsed = 4; // 1 for return address
   public int paramUsed = 0;
 
   public ASMFunction(String name) {
