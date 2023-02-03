@@ -3,7 +3,6 @@ package assembly.operand;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 
 public class PhysicsReg extends Reg {
   public String name;
@@ -71,12 +70,6 @@ public class PhysicsReg extends Reg {
       for (int i = 0; i < 8; i++) add(regMap.get("a" + i));
       for (int i = 2; i < 12; i++) add(regMap.get("s" + i));
       for (int i = 3; i < 7; i++) add(regMap.get("t" + i));
-    }
-  };
-
-  public static LinkedHashSet<Integer> okInit = new LinkedHashSet<>() {
-    {
-      for (int i = 5; i < 32; ++i) add(i);
     }
   };
 

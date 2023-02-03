@@ -223,23 +223,23 @@ public class InstSelector implements IRVisitor, BuiltinElements {
         else
           curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
         break;
-      // case "mul":
-      //   if (node.lhs instanceof IRIntConst) {
-      //     IREntity tmp = node.lhs;
-      //     node.lhs = node.rhs;
-      //     node.rhs = tmp;
-      //   }
-      //   if (node.rhs instanceof IRIntConst intConst && log2.containsKey(intConst.val))
-      //     curBlock.addInst(new ASMUnaryInst("slli", getReg(node.res), getReg(node.lhs), new Imm(log2.get(intConst.val))));
-      //   else
-      //     curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
-      //   break;
-      // case "sdiv":
-      //   if (node.rhs instanceof IRIntConst intConst && log2.containsKey(intConst.val))
-      //     curBlock.addInst(new ASMUnaryInst("srai", getReg(node.res), getReg(node.lhs), new Imm(log2.get(intConst.val))));
-      //   else
-      //     curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
-      //   break;
+      case "mul":
+        if (node.lhs instanceof IRIntConst intConst && log2.containsKey(intConst.val)) {
+          IREntity tmp = node.lhs;
+          node.lhs = node.rhs;
+          node.rhs = tmp;
+        }
+        if (node.rhs instanceof IRIntConst intConst && log2.containsKey(intConst.val))
+          curBlock.addInst(new ASMUnaryInst("slli", getReg(node.res), getReg(node.lhs), new Imm(log2.get(intConst.val))));
+        else
+          curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
+        break;
+      case "sdiv":
+        if (node.rhs instanceof IRIntConst intConst && log2.containsKey(intConst.val))
+          curBlock.addInst(new ASMUnaryInst("srai", getReg(node.res), getReg(node.lhs), new Imm(log2.get(intConst.val))));
+        else
+          curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
+        break;
       default:
         curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
     }

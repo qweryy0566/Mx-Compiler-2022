@@ -417,7 +417,9 @@ public class PremAllocator {
   void assignColors() {
     while (!selectStack.isEmpty()) {
       Reg reg = selectStack.pop();
-      LinkedHashSet<Integer> okColors = new LinkedHashSet<>(PhysicsReg.okInit);
+      LinkedHashSet<Integer> okColors = new LinkedHashSet<>();
+      for (int i = 5; i < 32; i++)
+        okColors.add(i);
       for (var adj : adjList.get(reg)) {
         Reg adjAlias = getAlias(adj);
         if (coloredNodes.contains(adjAlias) || preColored.contains(adjAlias))
