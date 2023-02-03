@@ -13,7 +13,11 @@ public class ASMUnaryInst extends ASMInst {
   }
 
   public ASMUnaryInst(String op, Reg rd, Reg rs1, Imm imm) {
-    this.op = op;
+    switch (op) {
+      case "shli": this.op = "slli"; break;
+      case "ashri": this.op = "srai"; break;
+      default: this.op = op;
+    }
     this.rd = rd;
     this.rs1 = rs1;
     this.imm = imm;

@@ -127,8 +127,34 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   public void visit(IRBasicBlock node) {
     for (var inst : node.insts)
-      inst.accept(this);
-    node.terminalInst.accept(this);
+      if (inst != node.insts.getLast())
+        inst.accept(this);
+    if (node.terminalInst instanceof IRBranchInst brInst && node.insts.getLast() instanceof IRIcmpInst cmpInst
+        && brInst.getUse().contains(cmpInst.cmpReg)) {
+      combineCmpAndBranch(cmpInst, brInst);
+    } else {
+      if (!node.insts.isEmpty())
+        node.insts.getLast().accept(this);
+      node.terminalInst.accept(this);
+    }
+  }
+
+  void combineCmpAndBranch(IRIcmpInst cmpInst, IRBranchInst brInst) {
+    String op = "";
+    switch (cmpInst.op) {
+      case "eq": op = "bne"; break;
+      case "ne": op = "beq"; break;
+      case "sgt": op = "ble"; break;
+      case "sge": op = "blt"; break;
+      case "slt": op = "bge"; break;
+      case "sle": op = "bgt"; break;
+    }
+    curBlock.addInst(new ASMBrCmpInst(op, getReg(cmpInst.lhs), getReg(cmpInst.rhs), blockMap.get(brInst.elseBlock)));
+    curBlock.succ.add(blockMap.get(brInst.elseBlock));
+    blockMap.get(brInst.elseBlock).pred.add(curBlock);
+    curBlock.addInst(new ASMJumpInst(blockMap.get(brInst.thenBlock)));
+    curBlock.succ.add(blockMap.get(brInst.thenBlock));
+    blockMap.get(brInst.thenBlock).pred.add(curBlock);
   }
 
   /*
@@ -173,10 +199,15 @@ public class InstSelector implements IRVisitor, BuiltinElements {
           node.lhs = node.rhs;
           node.rhs = tmp;
         }
-        if (node.rhs instanceof IRIntConst && ((IRIntConst) node.rhs).val < 1 << 11
-            && ((IRIntConst) node.rhs).val >= -(1 << 11)) {
-          curBlock.addInst(new ASMUnaryInst(node.op + "i", getReg(node.res), getReg(node.lhs),
-              new Imm(((IRIntConst) node.rhs).val)));
+      case "shl":
+      case "ashr":
+        if (node.rhs instanceof IRIntConst intConst && intConst.val < 1 << 11 && intConst.val >= -(1 << 11)) {
+          curBlock.addInst(new ASMUnaryInst(node.op + "i", getReg(node.res), getReg(node.lhs), new Imm(intConst.val)));
+          break;
+        }
+      case "sub":
+        if (node.rhs instanceof IRIntConst intConst && intConst.val <= 1 << 11 && intConst.val > -(1 << 11)) {
+          curBlock.addInst(new ASMUnaryInst("addi", getReg(node.res), getReg(node.lhs), new Imm(-intConst.val)));
           break;
         }
       default:
