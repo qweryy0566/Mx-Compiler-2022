@@ -45,7 +45,7 @@ public class Compiler {
     new InstSelector(asmModule).visit(irProgram);
     // new RegAllocator(asmModule).work();
     new PremAllocator(asmModule).work();
-    new CalleeManager(asmModule).work();
+    new StackManager(asmModule).work();
     new MergeBlock(asmModule).work();
 
     // Local Judge
