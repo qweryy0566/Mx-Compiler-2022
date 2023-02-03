@@ -11,7 +11,7 @@ import IR.entity.*;
 public class DeadCodeEliminator {
   IRProgram program;
 
-  HashMap<IRRegister, HashSet<IRInst>> useList = new HashMap<>();
+  HashMap<IRRegister, HashSet<IRInst>> useList;
   HashMap<IRRegister, IRInst> defList = new HashMap<>();
   LinkedList<IRRegister> workList = new LinkedList<>();
   HashSet<IRRegister> inWorkList = new HashSet<>();
@@ -25,7 +25,7 @@ public class DeadCodeEliminator {
   }
 
   void workOnFunc(IRFunction func) {
-    useList.clear();
+    useList = new HashMap<>();
     for (var block : func.blocks) {
       for (var inst : block.insts) {
         if (inst.getDef() != null) {
@@ -59,6 +59,7 @@ public class DeadCodeEliminator {
             }
           }
       }
+      func.useList = useList;
     }
 
     for (var block : func.blocks)

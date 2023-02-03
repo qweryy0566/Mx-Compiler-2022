@@ -102,7 +102,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     }
     curFunc.paramUsed = (maxArgCnt > 8 ? maxArgCnt - 8 : 0) << 2;
     // set params
-    for (int i = 0; i < node.params.size() && i < 8; ++i)
+    for (int i = 0; i < node.params.size(); ++i)
       node.params.get(i).asmReg = new VirtualReg(node.params.get(i).type.size);
 
     for (int i = 0; i < node.blocks.size(); ++i) {
@@ -114,6 +114,14 @@ public class InstSelector implements IRVisitor, BuiltinElements {
     }
     curFunc.entryBlock = curFunc.blocks.get(0);
     curFunc.exitBlock = curFunc.blocks.get(curFunc.blocks.size() - 1);
+    for (int i = 8; i < node.params.size(); ++i) {
+      Reg reg = node.params.get(i).asmReg;
+      int size = node.params.get(i).type.size;
+      VirtualReg tmp = new VirtualReg(4);
+      curFunc.entryBlock.insts.addFirst(new ASMLoadInst(size, reg, tmp));
+      curFunc.entryBlock.insts.addFirst(new ASMLiInst(tmp, new StackImm(curFunc, i - 8 << 2)));
+    }
+
     for (int i = 0; i < node.params.size() && i < 8; ++i)
       curFunc.entryBlock.insts.addFirst(new ASMMvInst(node.params.get(i).asmReg, PhysicsReg.get("a" + i)));
 

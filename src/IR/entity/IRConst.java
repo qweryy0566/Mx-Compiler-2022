@@ -8,4 +8,6 @@ public abstract class IRConst extends IREntity {
   }
 
   public abstract boolean isZero();
+
+  public abstract boolean equals(IRConst other);
 }

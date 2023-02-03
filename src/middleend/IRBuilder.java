@@ -42,6 +42,8 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   private IREntity getCond(ExprNode node) {
     IREntity cond = getVal(node);
     if (cond.type == irBoolType) {
+      if (cond instanceof IRBoolConst boolConst)
+        return boolConst.val ? irTrueConst : irFalseConst;
       IRRegister tmp = new IRRegister("", irCondType);
       currentBlock.addInst(new IRTruncInst(currentBlock, tmp, cond, irCondType));
       return tmp;
@@ -70,9 +72,13 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   private void addStore(IRRegister ptr, ExprNode rhs) {
     if (getVal(rhs).type == irCondType) {
-      IRRegister tmp = new IRRegister("", irBoolType);
-      currentBlock.addInst(new IRZextInst(currentBlock, tmp, rhs.value, irBoolType));
-      currentBlock.addInst(new IRStoreInst(currentBlock, tmp, ptr));
+      if (rhs.value instanceof IRCondConst condConst)
+        currentBlock.addInst(new IRStoreInst(currentBlock, condConst.val ? irBoolTrueConst : irBoolFalseConst, ptr));
+      else {
+        IRRegister tmp = new IRRegister("", irBoolType);
+        currentBlock.addInst(new IRZextInst(currentBlock, tmp, rhs.value, irBoolType));
+        currentBlock.addInst(new IRStoreInst(currentBlock, tmp, ptr));
+      }
     } else {
       if (rhs.value instanceof IRNullConst)
         rhs.value = new IRNullConst(((IRPtrType) ptr.type).pointToType());

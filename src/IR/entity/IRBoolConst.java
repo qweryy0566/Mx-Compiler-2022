@@ -22,4 +22,9 @@ public class IRBoolConst extends IRConst {
   public boolean isZero() {
     return !val;
   }
+
+  @Override
+  public boolean equals(IRConst other) {
+    return other instanceof IRBoolConst && ((IRBoolConst) other).val == val;
+  }
 }

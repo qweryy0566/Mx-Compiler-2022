@@ -7,6 +7,6 @@ public class IROptimizer {
     new CFGBuilder(program).work();
     new Mem2Reg(program).work();
     new DeadCodeEliminator(program).work();
-    new FakeBranchEliminator(program).work();
+    new ConstPropagation(program).work();
   }
 }

@@ -49,8 +49,6 @@ public class Mem2Reg {
   }
 
   boolean isAllocaPromoteable(IRAllocaInst inst) {
-    if (inst.param_idx >= 8)
-      return false;
     IRRegister reg = inst.allocaReg;
     for (var block : curFunc.blocks)
       for (var user : block.insts) {

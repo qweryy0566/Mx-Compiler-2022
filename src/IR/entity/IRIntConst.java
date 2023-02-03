@@ -22,4 +22,9 @@ public class IRIntConst extends IRConst {
   public boolean isZero() {
     return val == 0;
   }
+
+  @Override
+  public boolean equals(IRConst other) {
+    return other instanceof IRIntConst && ((IRIntConst) other).val == val;
+  }
 }

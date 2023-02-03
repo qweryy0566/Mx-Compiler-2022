@@ -54,7 +54,7 @@ public class IRPhiInst extends IRInst {
 
   @Override
   public void replaceUse(IREntity old, IREntity newOne) {
-    // for (int i = 0; i < values.size(); ++i)
-    //   values.set(i, values.get(i) == old ? newOne : values.get(i));
+    for (int i = 0; i < values.size(); ++i)
+      values.set(i, values.get(i) == old ? newOne : values.get(i));
   }
 }

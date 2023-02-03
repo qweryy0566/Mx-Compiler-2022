@@ -25,4 +25,9 @@ public class IRNullConst extends IRConst {
   public boolean isZero() {
     return true;
   }
+
+  @Override
+  public boolean equals(IRConst other) {
+    return other instanceof IRNullConst;
+  }
 }

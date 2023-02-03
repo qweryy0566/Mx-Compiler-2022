@@ -6,6 +6,8 @@ import IR.inst.*;
 
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class IRFunction {
   public String name;
@@ -16,6 +18,8 @@ public class IRFunction {
 
   public IRBasicBlock entryBlock, exitBlock;
   public IRRegister retAddr;
+
+  public HashMap<IRRegister, HashSet<IRInst>> useList = new HashMap<>();
 
   public IRFunction(String name, IRType returnType) {
     this.name = name;

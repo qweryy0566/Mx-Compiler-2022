@@ -42,4 +42,9 @@ public class IRStringConst extends IRConst {
   public boolean isZero() {
     return false;
   }
+
+  @Override
+  public boolean equals(IRConst other) {
+    return other instanceof IRStringConst && ((IRStringConst) other).val.equals(val);
+  }
 }

@@ -50,4 +50,47 @@ public class IRCalcInst extends IRInst {
     lhs = lhs == old ? newOne : lhs;
     rhs = rhs == old ? newOne : rhs;
   }
+
+  public IRIntConst calcConst() {
+    if (lhs instanceof IRIntConst && rhs instanceof IRIntConst) {
+      int lhsVal = ((IRIntConst) lhs).val;
+      int rhsVal = ((IRIntConst) rhs).val;
+      int resVal = 0;
+      switch (op) {
+        case "add":
+          resVal = lhsVal + rhsVal;
+          break;
+        case "sub":
+          resVal = lhsVal - rhsVal;
+          break;
+        case "mul":
+          resVal = lhsVal * rhsVal;
+          break;
+        case "sdiv":
+          if (rhsVal == 0) return null;
+          resVal = lhsVal / rhsVal;
+          break;
+        case "srem":
+          resVal = lhsVal % rhsVal;
+          break;
+        case "shl":
+          resVal = lhsVal << rhsVal;
+          break;
+        case "ashr":
+          resVal = lhsVal >> rhsVal;
+          break;
+        case "and":
+          resVal = lhsVal & rhsVal;
+          break;
+        case "or":
+          resVal = lhsVal | rhsVal;
+          break;
+        case "xor":
+          resVal = lhsVal ^ rhsVal;
+          break;
+      }
+      return new IRIntConst(resVal);
+    }
+    return null;
+  }
 }

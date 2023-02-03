@@ -50,4 +50,34 @@ public class IRIcmpInst extends IRInst {
     lhs = lhs == old ? newOne : lhs;
     rhs = rhs == old ? newOne : rhs;
   }
+
+  public IRCondConst calcConst() {
+    if (lhs instanceof IRIntConst && rhs instanceof IRIntConst) {
+      int lhsVal = ((IRIntConst) lhs).val;
+      int rhsVal = ((IRIntConst) rhs).val;
+      boolean resVal = false;
+      switch (op) {
+        case "eq":
+          resVal = lhsVal == rhsVal;
+          break;
+        case "ne":
+          resVal = lhsVal != rhsVal;
+          break;
+        case "sgt":
+          resVal = lhsVal > rhsVal;
+          break;
+        case "sge":
+          resVal = lhsVal >= rhsVal;
+          break;
+        case "slt":
+          resVal = lhsVal < rhsVal;
+          break;
+        case "sle":
+          resVal = lhsVal <= rhsVal;
+          break;
+      }
+      return new IRCondConst(resVal);
+    }
+    return null;
+  }
 }

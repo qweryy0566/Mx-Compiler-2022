@@ -19,4 +19,9 @@ public class IRVoidConst extends IRConst {
   public boolean isZero() {
     return false;
   }
+
+  @Override
+  public boolean equals(IRConst other) {
+    return other instanceof IRVoidConst;
+  }
 }
