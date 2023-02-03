@@ -21,7 +21,7 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   static HashMap<Integer, Integer> log2 = new HashMap<>() {
     {
-      for (int i = 0; i < 32; ++i) put(1 << i, i);
+      for (int i = 0; i < 31; ++i) put(1 << i, i);
     }
   };
 
@@ -316,7 +316,13 @@ public class InstSelector implements IRVisitor, BuiltinElements {
   }
 
   public void visit(IRLoadInst node) {
-    loadReg(node.type.size, getReg(node.destReg), getReg(node.srcAddr), 0);
+    if (node.srcAddr.asmReg instanceof Global global) {
+      String name = global.name;
+      Reg reg = getReg(node.destReg);
+      curBlock.addInst(new ASMLuiInst(reg, new RelocationFunc(RelocationFunc.Type.hi, name)));
+      curBlock.addInst(new ASMLoadInst(node.type.size, reg, reg, new RelocationFunc(RelocationFunc.Type.lo, name)));
+    } else
+      loadReg(node.type.size, getReg(node.destReg), getReg(node.srcAddr), 0);
   }
 
   public void visit(IRRetInst node) {
@@ -330,7 +336,15 @@ public class InstSelector implements IRVisitor, BuiltinElements {
   // 忽略 param_idx 且 >= 8 的 storeInst
   public void visit(IRStoreInst node) {
     // store : rs2 -> (rs1) address
-    if (node.param_idx < 8)
+    if (node.param_idx >= 8)
+      return;
+    if (node.destAddr.asmReg instanceof Global global) {
+      String name = global.name;
+      VirtualReg reg = new VirtualReg(4);
+      curBlock.addInst(new ASMLuiInst(reg, new RelocationFunc(RelocationFunc.Type.hi, name)));
+      curBlock.addInst(new ASMStoreInst(node.val.type.size, reg, getReg(node.val),
+          new RelocationFunc(RelocationFunc.Type.lo, name)));
+    } else
       storeReg(node.val.type.size, getReg(node.val), getReg(node.destAddr), 0);
   }
 
