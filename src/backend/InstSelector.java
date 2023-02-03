@@ -19,6 +19,12 @@ public class InstSelector implements IRVisitor, BuiltinElements {
 
   HashMap<IRBasicBlock, ASMBlock> blockMap = new HashMap<>();
 
+  static HashMap<Integer, Integer> log2 = new HashMap<>() {
+    {
+      for (int i = 0; i < 32; ++i) put(1 << i, i);
+    }
+  };
+
   public InstSelector(ASMModule module) {
     this.module = module;
   }
@@ -206,15 +212,34 @@ public class InstSelector implements IRVisitor, BuiltinElements {
         }
       case "shl":
       case "ashr":
-        if (node.rhs instanceof IRIntConst intConst && intConst.val < 1 << 11 && intConst.val >= -(1 << 11)) {
+        if (node.rhs instanceof IRIntConst intConst && intConst.val < 1 << 11 && intConst.val >= -(1 << 11))
           curBlock.addInst(new ASMUnaryInst(node.op + "i", getReg(node.res), getReg(node.lhs), new Imm(intConst.val)));
-          break;
-        }
+        else
+          curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
+        break;
       case "sub":
-        if (node.rhs instanceof IRIntConst intConst && intConst.val <= 1 << 11 && intConst.val > -(1 << 11)) {
+        if (node.rhs instanceof IRIntConst intConst && intConst.val <= 1 << 11 && intConst.val > -(1 << 11))
           curBlock.addInst(new ASMUnaryInst("addi", getReg(node.res), getReg(node.lhs), new Imm(-intConst.val)));
-          break;
+        else
+          curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
+        break;
+      case "mul":
+        if (node.lhs instanceof IRIntConst) {
+          IREntity tmp = node.lhs;
+          node.lhs = node.rhs;
+          node.rhs = tmp;
         }
+        if (node.rhs instanceof IRIntConst intConst && log2.containsKey(intConst.val))
+          curBlock.addInst(new ASMUnaryInst("slli", getReg(node.res), getReg(node.lhs), new Imm(log2.get(intConst.val))));
+        else
+          curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
+        break;
+      case "sdiv":
+        if (node.rhs instanceof IRIntConst intConst && log2.containsKey(intConst.val))
+          curBlock.addInst(new ASMUnaryInst("srai", getReg(node.res), getReg(node.lhs), new Imm(log2.get(intConst.val))));
+        else
+          curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
+        break;
       default:
         curBlock.addInst(new ASMBinaryInst(node.op, getReg(node.res), getReg(node.lhs), getReg(node.rhs)));
     }

@@ -230,7 +230,9 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
 
   @Override
   public Node visitArrayExpr(MxParser.ArrayExprContext ctx) {
-    return new ArrayExprNode(new Position(ctx), (ExprNode) visit(ctx.expr(0)), (ExprNode) visit(ctx.expr(1)));
+    var expr = new ArrayExprNode(new Position(ctx), (ExprNode) visit(ctx.expr(0)), (ExprNode) visit(ctx.expr(1)));
+    expr.str = ctx.getText();
+    return expr;
   }
 
   @Override
@@ -247,12 +249,16 @@ public class ASTBuilder extends MxParserBaseVisitor<Node> {
 
   @Override
   public Node visitMemberExpr(MxParser.MemberExprContext ctx) {
-    return new MemberExprNode(new Position(ctx), (ExprNode) visit(ctx.expr()), ctx.Identifier().getText());
+    var expr = new MemberExprNode(new Position(ctx), (ExprNode) visit(ctx.expr()), ctx.Identifier().getText());
+    expr.str = ctx.getText();
+    return expr;
   }
 
   @Override
   public Node visitAtomExpr(MxParser.AtomExprContext ctx) {
-    return visitChildren(ctx); // no need to change
+    var expr = (ExprNode) visitChildren(ctx); // no need to change
+    expr.str = ctx.getText();
+    return expr;
   }
 
   @Override

@@ -676,6 +676,8 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
 
   @Override
   public void visit(AssignExprNode node) {
+    if (node.lhs.str != null && node.lhs.str.equals(node.rhs.str))
+      return;
     node.rhs.accept(this);
     node.lhs.accept(this);
     node.storePtr = node.lhs.storePtr;
