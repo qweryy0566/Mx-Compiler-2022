@@ -7,9 +7,9 @@ import os, time
     Modify following configurations to adapt to your environment.
 """
 # test_cases_dir = '../testcases/semantic/'
-# test_cases_dir = '../data/codegen/'
+test_cases_dir = '../data/codegen/'
 # test_cases_dir = '../data/optim-new/'
-test_cases_dir = '../data/need/'
+# test_cases_dir = '../data/need/'
 # compile_cmd = "bash ./build.bash"
 execute_cmd = "bash ./codegen.bash"
 excluded_test_cases = ["foo.mx"]
@@ -99,7 +99,7 @@ def main():
                 os.system('mv ./test.s ./test.ll')
                 os.system(llc_cmd + ' --march=riscv32 -mattr=+m -o test.s test.ll')
 
-            if os.system('%s --oj-mode < test.in 1>ravel.out 2>/dev/null'
+            if os.system('%s --oj-mode --enable-cache < test.in 1>ravel.out 2>/dev/null'
                          % ravel_path):
                 print(color_red + "Runtime error" + color_none)
                 continue
