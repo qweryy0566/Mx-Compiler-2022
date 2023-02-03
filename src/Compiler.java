@@ -49,12 +49,12 @@ public class Compiler {
     new MergeBlock(asmModule).work();
 
     // Local Judge
-    // System.out.print(asmModule.toString());
+    System.out.print(asmModule.toString());
 
     // Online Judge
-    new BuiltinAsmPrinter("builtin.s");
-    FileOutputStream out = new FileOutputStream("output.s");
-    out.write(asmModule.toString().getBytes());
-    out.close();
+    // new BuiltinAsmPrinter("builtin.s");
+    // FileOutputStream out = new FileOutputStream("output.s");
+    // out.write(asmModule.toString().getBytes());
+    // out.close();
   }
 }
