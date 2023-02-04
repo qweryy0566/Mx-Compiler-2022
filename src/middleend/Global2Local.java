@@ -16,8 +16,6 @@ public class Global2Local {
 
   public void work() {
     var newList = new ArrayList<IRGlobalVar>();
-    if (program.initFunc != null)
-      program.funcList.addFirst(program.initFunc);
     for (var global : program.globalVarList) {
       if (global.isCallInit) {
         newList.add(global);

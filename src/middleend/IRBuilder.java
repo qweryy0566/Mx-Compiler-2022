@@ -116,6 +116,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       root.initFunc = null;
     } else {
       root.initFunc.finish();
+      root.funcList.addFirst(root.initFunc);
       IRBasicBlock mainEntry = root.mainFunc.blocks.get(0);
       mainEntry.insts.addFirst(new IRCallInst(mainEntry, irVoidType, "__mx_global_var_init"));
     }
