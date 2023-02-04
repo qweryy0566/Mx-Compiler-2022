@@ -17,7 +17,7 @@ public class Global2Local {
   public void work() {
     var newList = new ArrayList<IRGlobalVar>();
     for (var global : program.globalVarList) {
-      if (global.isCallInit || global.type instanceof IRPtrType) {
+      if (global.isCallInit) {
         newList.add(global);
         continue;
       }
@@ -34,14 +34,14 @@ public class Global2Local {
                 break;
               }
             }
-      if (inOneFunc && inFunc != null) {
+      if (inOneFunc && inFunc == program.mainFunc) {
         IRRegister reg = new IRRegister("global", global.type);
-        inFunc.allocaInsts.add(new IRAllocaInst(inFunc.entryBlock, global.type, reg));
+        inFunc.allocaInsts.add(new IRAllocaInst(inFunc.entryBlock, ((IRPtrType) global.type).pointToType(), reg));
         inFunc.entryBlock.insts.addFirst(new IRStoreInst(inFunc.entryBlock, global.initVal, reg));
         for (var block : inFunc.blocks)
           for (var inst : block.insts)
             inst.replaceUse(global, reg);
-      } else if (!inOneFunc) {
+      } else if (inFunc != null) {
         newList.add(global);
       }
     }

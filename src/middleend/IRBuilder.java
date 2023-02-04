@@ -225,10 +225,10 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
             : node.initVal.value;
         globalScope.addIRVar(node.varName, gVar);
       } else {
-        gVar.isCallInit = true;
         gVar.initVal = node.type.irType.defaultValue();
         globalScope.addIRVar(node.varName, gVar);
         if (node.initVal != null) {
+          gVar.isCallInit = true;
           IRFunction tmpFunc = currentFunction;
           IRBasicBlock tmpBlock = currentBlock;
           currentFunction = root.initFunc;
