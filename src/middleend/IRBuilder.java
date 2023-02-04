@@ -119,7 +119,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
       IRBasicBlock mainEntry = root.mainFunc.blocks.get(0);
       mainEntry.insts.addFirst(new IRCallInst(mainEntry, irVoidType, "__mx_global_var_init"));
     }
-    root.mainFunc.finish();
+    // root.mainFunc.finish();
   }
 
   @Override
@@ -132,6 +132,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
   
     currentScope = new Scope(currentScope, node.returnType.type);
     currentBlock = currentFunction.appendBlock(new IRBasicBlock(currentFunction, "entry_", 0));
+    currentFunction.entryBlock = currentBlock;
     if (currentClass != null) {  // is a method
       IRPtrType classPtrType = new IRPtrType(currentClass);
       IRRegister thisVal = new IRRegister("this", classPtrType);
@@ -170,7 +171,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
     node.stmts.forEach(stmt -> stmt.accept(this));
     node.irFunc = currentFunction;  // store the ir function
     currentScope = currentScope.parentScope;
-    if (!funcName.equals("main")) currentFunction.finish();
+    // if (!funcName.equals("main")) currentFunction.finish();
     currentFunction = null;
     currentBlock = null;
   }
@@ -224,6 +225,7 @@ public class IRBuilder implements ASTVisitor, BuiltinElements {
             : node.initVal.value;
         globalScope.addIRVar(node.varName, gVar);
       } else {
+        gVar.isCallInit = true;
         gVar.initVal = node.type.irType.defaultValue();
         globalScope.addIRVar(node.varName, gVar);
         if (node.initVal != null) {

@@ -1,0 +1,52 @@
+package middleend;
+
+import IR.*;
+import IR.inst.*;
+import IR.type.IRPtrType;
+import IR.entity.*;
+
+import java.util.ArrayList;
+
+public class Global2Local {
+  IRProgram program;
+
+  public Global2Local(IRProgram program) {
+    this.program = program;
+  }
+
+  public void work() {
+    var newList = new ArrayList<IRGlobalVar>();
+    for (var global : program.globalVarList) {
+      if (global.isCallInit || global.type instanceof IRPtrType) {
+        newList.add(global);
+        continue;
+      }
+      IRFunction inFunc = null;
+      boolean inOneFunc = true;
+      for (var func : program.funcList)
+        for (var block : func.blocks)
+          for (var inst : block.insts)
+            if (inst.getUse().contains(global)) {
+              if (inFunc == null)
+                inFunc = func;
+              else if (inFunc != func) {
+                inOneFunc = false;
+                break;
+              }
+            }
+      if (inOneFunc && inFunc != null) {
+        IRRegister reg = new IRRegister("global", global.type);
+        inFunc.allocaInsts.add(new IRAllocaInst(inFunc.entryBlock, global.type, reg));
+        inFunc.entryBlock.insts.addFirst(new IRStoreInst(inFunc.entryBlock, global.initVal, reg));
+        for (var block : inFunc.blocks)
+          for (var inst : block.insts)
+            inst.replaceUse(global, reg);
+      } else if (!inOneFunc) {
+        newList.add(global);
+      }
+    }
+    program.globalVarList = newList;
+    for (var func : program.funcList)
+      func.finish();
+  }
+}
