@@ -6,10 +6,11 @@ import IR.inst.*;
 import utils.BuiltinElements;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.HashMap;
 
 public class IRProgram implements BuiltinElements {
-  public ArrayList<IRFunction> funcList = new ArrayList<IRFunction>();
+  public LinkedList<IRFunction> funcList = new LinkedList<IRFunction>();
   public ArrayList<IRGlobalVar> globalVarList = new ArrayList<IRGlobalVar>();
   public ArrayList<IRStructType> structTypeList = new ArrayList<IRStructType>();
 
@@ -84,8 +85,6 @@ public class IRProgram implements BuiltinElements {
     ret += "declare i8 @__mx_streq(i8*, i8*)\n";
     ret += "declare i8 @__mx_strneq(i8*, i8*)\n\n";
 
-    if (initFunc != null)
-      ret += initFunc + "\n";
     for (IRFunction func : funcList)
       ret += func + "\n";
     return ret;

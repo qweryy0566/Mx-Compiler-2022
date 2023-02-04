@@ -83,11 +83,6 @@ public class InstSelector implements IRVisitor, BuiltinElements {
       module.globalStrings.add(globalStr);
       str.asmReg = globalStr;
     }
-    if (node.initFunc != null) {
-      curFunc = new ASMFunction(node.initFunc.name);
-      module.functions.add(curFunc);
-      node.initFunc.accept(this);
-    }
     for (var func : node.funcList) {
       curFunc = new ASMFunction(func.name);
       module.functions.add(curFunc);

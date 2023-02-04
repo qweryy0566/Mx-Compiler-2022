@@ -16,6 +16,8 @@ public class Global2Local {
 
   public void work() {
     var newList = new ArrayList<IRGlobalVar>();
+    if (program.initFunc != null)
+      program.funcList.addFirst(program.initFunc);
     for (var global : program.globalVarList) {
       if (global.isCallInit) {
         newList.add(global);
@@ -34,7 +36,7 @@ public class Global2Local {
                 break;
               }
             }
-      if (inOneFunc && inFunc == program.mainFunc) {
+      if (inOneFunc && inFunc != null && (inFunc == program.mainFunc || inFunc == program.initFunc)) {
         IRRegister reg = new IRRegister("global", global.type);
         inFunc.allocaInsts.add(new IRAllocaInst(inFunc.entryBlock, ((IRPtrType) global.type).pointToType(), reg));
         inFunc.entryBlock.insts.addFirst(new IRStoreInst(inFunc.entryBlock, global.initVal, reg));
